@@ -2,8 +2,8 @@ name: StorageMechanic
 version: '${version}'
 main: dev.wuason.storagemechanic.StorageMechanic
 api-version: 1.18
-load: STARTUP
+load: POSTWORLD
 depend: [ Mechanics ]
 authors: [ Wuason ]
-description: wuason.mechanic
+description: wuason.mechanic.storagemechanic
 website: techmc.es

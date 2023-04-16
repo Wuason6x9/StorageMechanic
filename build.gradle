@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group = 'dev.wuason'
@@ -15,12 +16,32 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
+    maven { url 'https://jitpack.io' }
+
+    maven { url = "https://repo.codemc.org/repository/maven-public/" }
+
+    maven {
+        name = "sonatype-oss-snapshots1"
+        url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+    }
+    // for releases
+    mavenCentral()
 }
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
-    comp
+    compileOnly 'com.github.Wuason6x9:mechanics:0.1.3'
+    implementation 'dev.jorel:commandapi-shade:8.8.0'
+    compileOnly 'com.github.oraxen:oraxen:1.155.0'
+    compileOnly 'com.github.LoneDev6:API-ItemsAdder:3.4.1-r4'
 }
+
+shadowJar {
+
+    relocate("dev.jorel.commandapi", "dev.wuason.storagemechanic.commandapi")
+    archiveFileName.set("StorageMechanic-${version}.jar")
+}
+
 
 def targetJavaVersion = 17
 java {
@@ -35,6 +56,15 @@ java {
 tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release = targetJavaVersion
+    }
+}
+
+allprojects {
+    repositories {
+        maven {
+            url "https://jitpack.io"
+            credentials { username authToken }
+        }
     }
 }
 
