@@ -10,15 +10,13 @@ public final class StorageMechanic extends JavaPlugin {
     public void onEnable() {
 
         if(!MechanicsUtils.isMechanicLoaded(this)){
-
             getLogger().severe("ERROR LOADING STORAGE MECHANIC! ");
             getLogger().severe("You must not put the plugin in the following folder!");
-            getLogger().severe(Mechanics.getInstance().getDataFolder().getPath() + "/mechanics");
-
             getPluginLoader().disablePlugin(this);
-
-
         }
+
+
+
 
     }
 

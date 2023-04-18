@@ -7,3 +7,9 @@ depend: [ Mechanics ]
 authors: [ Wuason ]
 description: wuason.mechanic.storagemechanic
 website: techmc.es
+softdepend:
+  - ItemsAdder
+  - Oraxen
+  - ChestSort
+  - MythicMobs
+  - PlaceholderAPI

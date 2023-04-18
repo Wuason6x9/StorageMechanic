@@ -30,10 +30,11 @@ repositories {
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
-    compileOnly 'com.github.Wuason6x9:mechanics:0.1.3'
+    compileOnly 'com.github.Wuason6x9:mechanics:ALPHA-0.0.1'
     implementation 'dev.jorel:commandapi-shade:8.8.0'
     compileOnly 'com.github.oraxen:oraxen:1.155.0'
     compileOnly 'com.github.LoneDev6:API-ItemsAdder:3.4.1-r4'
+    compileOnly 'me.clip:placeholderapi:2.11.3'
 }
 
 shadowJar {
