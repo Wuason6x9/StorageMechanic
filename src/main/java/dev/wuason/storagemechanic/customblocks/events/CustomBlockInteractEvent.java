@@ -1,8 +1,7 @@
-package dev.wuason.storagemechanic.blocks.events;
+package dev.wuason.storagemechanic.customblocks.events;
 
 
-import dev.wuason.storagemechanic.blocks.CustomBlock;
-import org.bukkit.entity.Player;
+import dev.wuason.storagemechanic.customblocks.CustomBlock;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerInteractEvent;

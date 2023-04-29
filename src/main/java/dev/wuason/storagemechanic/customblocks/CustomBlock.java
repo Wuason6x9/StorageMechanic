@@ -1,4 +1,4 @@
-package dev.wuason.storagemechanic.blocks;
+package dev.wuason.storagemechanic.customblocks;
 
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
@@ -34,10 +34,6 @@ public class CustomBlock {
 
     public String getId() {
         return id;
-    }
-
-    public Material getMaterial() {
-        return material;
     }
 
 

@@ -12,6 +12,7 @@ public class ConfigManager {
     public void loadConfig(){
 
         core.getManagers().getCustomBlockManager().loadCustomBlocks();
+        core.getManagers().getItemInterfaceManager().loadItemsInterface();
 
     }
 

@@ -1,11 +1,11 @@
-package dev.wuason.storagemechanic.blocks;
+package dev.wuason.storagemechanic.customblocks;
 
 import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.blocks.events.CustomBlockDestroyEvent;
-import dev.wuason.storagemechanic.blocks.events.CustomBlockInteractEvent;
-import dev.wuason.storagemechanic.blocks.events.CustomBlockPlaceEvent;
+import dev.wuason.storagemechanic.customblocks.events.CustomBlockDestroyEvent;
+import dev.wuason.storagemechanic.customblocks.events.CustomBlockInteractEvent;
+import dev.wuason.storagemechanic.customblocks.events.CustomBlockPlaceEvent;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
