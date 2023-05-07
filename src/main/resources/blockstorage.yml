@@ -1,0 +1,17 @@
+storage:
+  block:
+    blockstorage1:
+      storage_id: storage1
+      isBreakable: true
+      block: 'sm:block1'
+      open: RIGHT
+      mechanics:
+        hopper: enabled
+      hologram:
+        enabled: false
+        title: 'test: %sm_storage1_pages%'
+        update_rate: 20 #sec
+        pos:
+          x: 0
+          y: 1
+          z: 0

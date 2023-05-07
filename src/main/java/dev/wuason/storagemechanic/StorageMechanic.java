@@ -1,5 +1,7 @@
 package dev.wuason.storagemechanic;
 
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIConfig;
 import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MechanicsUtils;
@@ -17,6 +19,12 @@ public final class StorageMechanic extends JavaPlugin {
     }
 
     @Override
+    public void onLoad() {
+        AdventureUtils.sendMessagePluginConsole(this, "<green>Loading StorageMechanic...");
+        CommandAPI.onLoad(new CommandAPIConfig().silentLogs(true));
+    }
+
+    @Override
     public void onEnable() {
 
         if(!MechanicsUtils.isMechanicLoaded(this)){
@@ -24,8 +32,12 @@ public final class StorageMechanic extends JavaPlugin {
             getLogger().severe("You must not put the plugin in the following folder!");
             getPluginLoader().disablePlugin(this);
         }
-        AdventureUtils.sendMessagePluginConsole(this, "<green>Loading StorageMechanic...");
+        CommandAPI.onEnable(this);
+
+
+        AdventureUtils.sendMessagePluginConsole(this, "<green>Loading Managers...");
         managers = new Managers(this);
+        managers.loadManagers();
         AdventureUtils.sendMessagePluginConsole(this, "<green>StorageMechanic is loaded!");
 
 

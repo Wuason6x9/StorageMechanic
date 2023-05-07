@@ -29,7 +29,7 @@ public class ItemInterface {
     }
 
     public ItemStack getItemStack() {
-        return itemStack;
+        return itemStack.clone();
     }
 
     public ItemInterfaceType getItemInterfaceType() {

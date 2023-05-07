@@ -24,13 +24,16 @@ repositories {
         name = "sonatype-oss-snapshots1"
         url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
     }
+    maven {
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
     // for releases
     mavenCentral()
 }
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
-    compileOnly 'com.github.Wuason6x9:mechanics:0.1.4-alpha'
+    compileOnly 'com.github.Wuason6x9:mechanics:0.1.9-alpha'
     implementation 'dev.jorel:commandapi-shade:8.8.0'
     compileOnly 'com.github.oraxen:oraxen:1.155.0'
     compileOnly 'com.github.LoneDev6:API-ItemsAdder:3.4.1-r4'
@@ -60,14 +63,6 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
-allprojects {
-    repositories {
-        maven {
-            url "https://jitpack.io"
-            credentials { username authToken }
-        }
-    }
-}
 
 processResources {
     def props = [version: version]

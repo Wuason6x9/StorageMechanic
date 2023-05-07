@@ -29,7 +29,7 @@ public class CustomBlock {
     }
 
     public ItemStack getItemStack() {
-        return itemStack;
+        return itemStack.clone();
     }
 
     public String getId() {

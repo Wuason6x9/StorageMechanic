@@ -67,7 +67,7 @@ public class CustomBlockManager implements Listener {
                 ConfigurationSection customBlockSection = sectionCustomBlocks.getConfigurationSection((String)key);
                 Material material = null;
                 try {
-                    material = Material.valueOf(customBlockSection.getString("material"));
+                    material = Material.valueOf(customBlockSection.getString("material").toUpperCase());
                 } catch (IllegalArgumentException e) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material is null");
@@ -96,6 +96,8 @@ public class CustomBlockManager implements Listener {
             }
 
         }
+
+        AdventureUtils.sendMessagePluginConsole(core, "<aqua> CustomBlocks loaded: <yellow>" + customBlocks.size());
 
     }
 

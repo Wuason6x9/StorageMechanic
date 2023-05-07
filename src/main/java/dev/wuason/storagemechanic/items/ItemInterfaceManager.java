@@ -50,14 +50,14 @@ public class ItemInterfaceManager {
 
             YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-            ConfigurationSection sectionItemsInterfaces = config.getConfigurationSection("blocks");
+            ConfigurationSection sectionItemsInterfaces = config.getConfigurationSection("Items");
 
             for(Object key : sectionItemsInterfaces.getKeys(false).toArray()){
 
                 ConfigurationSection sectionItemInterface = sectionItemsInterfaces.getConfigurationSection((String)key);
                 ItemInterfaceType itemInterfaceType = null;
                 try {
-                    itemInterfaceType = itemInterfaceType.valueOf(sectionItemInterface.getString("itemType"));
+                    itemInterfaceType = itemInterfaceType.valueOf(sectionItemInterface.getString("itemType").toUpperCase());
                 } catch (IllegalArgumentException e) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is null");
@@ -94,6 +94,8 @@ public class ItemInterfaceManager {
             }
 
         }
+
+        AdventureUtils.sendMessagePluginConsole(core, "<aqua> Items Interface loaded: <yellow>" + itemsInterface.size());
 
     }
 
