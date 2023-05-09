@@ -120,6 +120,7 @@ public class StorageConfigManager {
                         ConfigurationSection sectionInterface = sectionInterfaces.getConfigurationSection((String)interfaceItemKey);
                         ArrayList<Integer> interfaceItemPages = StorageUtils.configFill(sectionInterface.getStringList("pages"));
                         ArrayList<Integer> interfaceItemSlots = StorageUtils.configFill(sectionInterface.getStringList("slots"));
+                        if(!checkSlots(interfaceItemSlots)){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + "interfaceItem" + " item Config! storage_id: " + key + " " + "interfaceItem" + "Item_id: " + interfaceItemKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + "interfaceItem" + " Some slot is wrong the range of slots is: 0 - 63");continue;}
                         String interfaceItem = sectionInterface.getString("item",".");
                         if(interfaceItem.equals(".")){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage interfaceItem Config! storage_id: " + key + " interfaceItem_id: " + interfaceItemKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: interfaceItem is null or invalid");continue;}
                         if(!core.getManagers().getItemInterfaceManager().existsItemInterface(interfaceItem)){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage interfaceItem Config! storage_id: " + key + " interfaceItem_id: " + interfaceItemKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: interfaceItem is null or invalid");continue;}
@@ -138,6 +139,12 @@ public class StorageConfigManager {
 
     }
 
+    public boolean checkSlots(ArrayList<Integer> slots){
+        for(int s : slots){
+            if(s>63) return false;
+        }
+        return true;
+    }
 
 
     public void processItems(ConfigurationSection sectionItemsConfigs, ArrayList<StorageItemConfig> storageItemsConfigs, String itemType,Object key,File file) {
@@ -150,6 +157,11 @@ public class StorageConfigManager {
                 List<String> items = sectionItemsConfig.getStringList("items");
 
                 int amount = sectionItemsConfig.getInt("amount", 1);
+                if(!checkSlots(itemsSlots)){
+                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
+                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Some slot is wrong the range of slots is: 0 - 63");
+                    continue;
+                }
                 if (amount > 64 || amount == 0) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);

@@ -18,10 +18,10 @@ public class StorageInventory implements InventoryHolder {
 
     public StorageInventory(StorageConfig storageConfig) {
         this.id = UUID.randomUUID().toString();
+        inventory = Bukkit.createInventory(this, InventoryType.valueOf(storageConfig.getInventoryType().toString()),storageConfig.getTitle());
         if(storageConfig.getInventoryType().equals(StorageInventoryTypeConfig.CHEST)){
             inventory = Bukkit.createInventory(this,(storageConfig.getRows() * 9),storageConfig.getTitle());
         }
-        inventory = Bukkit.createInventory(this, InventoryType.valueOf(storageConfig.getInventoryType().toString()),storageConfig.getTitle());
     }
     public StorageInventory(InventoryType inventoryType, String title) {
         this.id = UUID.randomUUID().toString();

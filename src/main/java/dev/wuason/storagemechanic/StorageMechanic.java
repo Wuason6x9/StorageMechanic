@@ -21,7 +21,7 @@ public final class StorageMechanic extends JavaPlugin {
     @Override
     public void onLoad() {
         AdventureUtils.sendMessagePluginConsole(this, "<green>Loading StorageMechanic...");
-        CommandAPI.onLoad(new CommandAPIConfig().silentLogs(true));
+
     }
 
     @Override
@@ -32,6 +32,7 @@ public final class StorageMechanic extends JavaPlugin {
             getLogger().severe("You must not put the plugin in the following folder!");
             getPluginLoader().disablePlugin(this);
         }
+        CommandAPI.onLoad(new CommandAPIConfig().silentLogs(true));
         CommandAPI.onEnable(this);
 
 

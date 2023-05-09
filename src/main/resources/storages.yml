@@ -32,6 +32,7 @@ storages:
             amount: 64
       whitelist:
         enabled: true
+        message: "No se encuentra en la lista blanca!!!!"
         list:
           items_1:
             pages: [0,1]
@@ -42,6 +43,7 @@ storages:
               - 'mc:emerald'
       blacklist:
         enabled: false
+        message: "Se encuentra en la lista negra!!!!"
         list:
           items_test:
             amount: 64
