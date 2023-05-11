@@ -1,5 +1,6 @@
 package dev.wuason.storagemechanic.storages.inventory;
 
+import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -17,20 +18,20 @@ public class StorageInventoryManager {
         storageInventories = new HashMap<>();
     }
 
-    public StorageInventory createStorageInventory(StorageConfig storageConfig) {
-        StorageInventory storageInventory = new StorageInventory(storageConfig);
+    public StorageInventory createStorageInventory(StorageConfig storageConfig, Storage storage, int page) {
+        StorageInventory storageInventory = new StorageInventory(storageConfig, storage,page);
         storageInventories.put(storageInventory.getId(), storageInventory);
         return storageInventory;
     }
 
-    public StorageInventory createStorageInventory(InventoryType inventoryType, String title) {
-        StorageInventory storageInventory = new StorageInventory(inventoryType, title);
+    public StorageInventory createStorageInventory(InventoryType inventoryType, String title, Storage storage, int page) {
+        StorageInventory storageInventory = new StorageInventory(inventoryType, title, storage,page);
         storageInventories.put(storageInventory.getId(), storageInventory);
         return storageInventory;
     }
 
-    public StorageInventory createStorageInventory(int rows, String title) {
-        StorageInventory storageInventory = new StorageInventory(rows, title);
+    public StorageInventory createStorageInventory(int rows, String title, Storage storage, int page) {
+        StorageInventory storageInventory = new StorageInventory(rows, title, storage,page);
         storageInventories.put(storageInventory.getId(), storageInventory);
         return storageInventory;
     }

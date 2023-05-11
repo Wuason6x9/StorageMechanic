@@ -1,6 +1,9 @@
 package dev.wuason.storagemechanic;
 
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
+import dev.jorel.commandapi.arguments.IntegerArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
 import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.storages.Storage;
@@ -24,11 +27,21 @@ public class CommandManager {
                             sender.sendMessage(AdventureUtils.deserializeLegacy("StorageMechanic reloaded!"));
                         })
                 )
+                .withSubcommands(new CommandAPICommand("create")
+                        .withArguments(new StringArgument("storageConfigID"))
+                        .executes((sender, args) -> {
+                            core.getManagers().getStorageManager().createStorage((String)args[0]);
+                        })
+                )
                 .withSubcommands(new CommandAPICommand("open")
+                        .withArguments(new IntegerArgument("page"),new StringArgument("ID").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
+                            String[] ids = core.getManagers().getStorageManager().getStorageMap().keySet().toArray(new String[0]);
+                            return ids;
+                        })))
                         .executes((sender, args) -> {
 
-                            Storage storage = new Storage("storage1");
-                            storage.openStorage((Player)sender,0);
+                            Storage storage = core.getManagers().getStorageManager().getStorage((String)args[1]);
+                            storage.openStorage((Player)sender, (int)args[0]);
 
                         })
                 )

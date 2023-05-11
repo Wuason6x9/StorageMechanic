@@ -87,9 +87,11 @@ public class StorageConfigManager {
                         catch (IllegalArgumentException a){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage sound Config! storage_id: " + key + " sound_id: " + soundKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: soundType is null or invalid");continue;}
                         ArrayList<Integer> soundPages = StorageUtils.configFill(sectionSound.getStringList("pages"));
                         ArrayList<Integer> soundSlots = StorageUtils.configFill(sectionSound.getStringList("slots"));
+                        int volume = sectionSound.getInt("volume",100);
+                        Double pitch = sectionSound.getDouble("pitch",1D);
                         String sound = sectionSound.getString("sound",".");
                         if(sound.equals(".")){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage sound Config! storage_id: " + key + " sound_id: " + soundKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: sound is null or invalid");continue;}
-                        StorageSoundConfig storageSoundConfig = new StorageSoundConfig((String)soundKey,sound,soundPages,soundType,soundSlots);
+                        StorageSoundConfig storageSoundConfig = new StorageSoundConfig((String)soundKey,sound,soundPages,soundType,soundSlots,pitch,volume);
                         storageSoundConfigs.add(storageSoundConfig);
                     }
                 }
@@ -100,12 +102,14 @@ public class StorageConfigManager {
                 processItems(sectionDefaultItemsConfigs, storageDefaultItemsConfigs, "default",key,file);
 
                 boolean whiteListItemsEnabled = sectionStorage.getBoolean("items.whitelist.enabled", false); //VAR
+                String whiteListMessage = sectionStorage.getString("items.whitelist.message");
                 ArrayList<StorageItemConfig> storageWhiteListItemsConfigs = new ArrayList<>(); //VAR
                 ConfigurationSection sectionWhiteListItemsConfigs = sectionStorage.getConfigurationSection("items.whitelist.list");
                 processItems(sectionWhiteListItemsConfigs, storageWhiteListItemsConfigs, "whiteList",key,file);
 
 
                 boolean blackListItemsEnabled = sectionStorage.getBoolean("items.blacklist.enabled", false); //VAR
+                String blackListMessage = sectionStorage.getString("items.blacklist.message");
                 ArrayList<StorageItemConfig> storageBlackListItemsConfigs = new ArrayList<>(); //VAR
                 ConfigurationSection sectionBlackListItemsConfigs = sectionStorage.getConfigurationSection("items.blacklist.list");
                 processItems(sectionBlackListItemsConfigs, storageBlackListItemsConfigs, "blackList",key,file);
@@ -129,7 +133,7 @@ public class StorageConfigManager {
                     }
                 }
 
-                StorageConfig storageConfig = new StorageConfig((String)key,rows,pages,storageInventoryType,title,storageSoundConfigs,soundsEnabled,storageDefaultItemsConfigs,defaultItemsEnabled,storageWhiteListItemsConfigs,whiteListItemsEnabled,storageBlackListItemsConfigs,blackListItemsEnabled,storageInterfacesConfigs,interfacesEnabled);
+                StorageConfig storageConfig = new StorageConfig((String)key,rows,pages,storageInventoryType,title,storageSoundConfigs,soundsEnabled,storageDefaultItemsConfigs,defaultItemsEnabled,storageWhiteListItemsConfigs,whiteListItemsEnabled,storageBlackListItemsConfigs,blackListItemsEnabled,storageInterfacesConfigs,interfacesEnabled,blackListMessage,whiteListMessage);
                 storagesConfig.add(storageConfig);
             }
         }

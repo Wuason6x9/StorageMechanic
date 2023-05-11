@@ -8,13 +8,17 @@ public class StorageSoundConfig {
     private ArrayList<Integer> pages;
     private ArrayList<Integer> slots;
     private type type;
+    private float pitch;
+    private float volume;
 
-    public StorageSoundConfig(String id, String sound, ArrayList<Integer> pages, StorageSoundConfig.type type,ArrayList<Integer> slots) {
+    public StorageSoundConfig(String id, String sound, ArrayList<Integer> pages, StorageSoundConfig.type type, ArrayList<Integer> slots, Double pitch, int volume) {
         this.id = id;
         this.sound = sound;
         this.pages = pages;
         this.type = type;
         this.slots = slots;
+        this.pitch = pitch.floatValue();
+        this.volume = volume / 100;
     }
 
     public String getId() {
@@ -42,6 +46,14 @@ public class StorageSoundConfig {
         CLOSE,
         CLICK
 
+    }
+
+    public float getPitch() {
+        return pitch;
+    }
+
+    public float getVolume() {
+        return volume;
     }
 }
 

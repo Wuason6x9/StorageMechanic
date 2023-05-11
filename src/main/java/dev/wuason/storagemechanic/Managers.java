@@ -4,6 +4,7 @@ import dev.wuason.mechanics.Mechanics;
 import dev.wuason.storagemechanic.customblocks.CustomBlockManager;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
+import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfigManager;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventoryManager;
 import org.bukkit.Bukkit;
@@ -18,6 +19,7 @@ public class Managers {
     private StorageConfigManager storageConfigManager;
     private CommandManager commandManager;
     private StorageInventoryManager storageInventoryManager;
+    private StorageManager storageManager;
 
     public Managers(StorageMechanic core) {
         this.core = core;
@@ -33,6 +35,8 @@ public class Managers {
         commandManager = new CommandManager(core);
         commandManager.loadCommand();
         storageInventoryManager = new StorageInventoryManager();
+        storageManager = new StorageManager(core);
+
 
 
 
@@ -40,6 +44,7 @@ public class Managers {
         PluginManager pm = Bukkit.getPluginManager();
 
         pm.registerEvents(customBlockManager, core);
+        pm.registerEvents(storageManager,core);
 
     }
 
@@ -65,5 +70,9 @@ public class Managers {
 
     public StorageInventoryManager getStorageInventoryManager() {
         return storageInventoryManager;
+    }
+
+    public StorageManager getStorageManager() {
+        return storageManager;
     }
 }

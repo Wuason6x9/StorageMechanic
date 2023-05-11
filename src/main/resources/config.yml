@@ -1,0 +1,4 @@
+messages:
+  storage:
+    search_page_invalid: "<red>Please enter a valid page!"
+    search_page_enter: "<red>Please enter a valid page!"

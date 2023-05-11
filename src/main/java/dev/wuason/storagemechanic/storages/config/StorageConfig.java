@@ -18,8 +18,10 @@ public class StorageConfig {
     private boolean storageItemsBlackListEnabled = false;
     private ArrayList<StorageItemInterfaceConfig> storageItemsInterfaceConfig = new ArrayList<>();
     private boolean storageItemsInterfaceEnabled = false;
+    private String whiteListMessage = null;
+    private String blackListMessage = null;
 
-    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, ArrayList<StorageItemInterfaceConfig> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled) {
+    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, ArrayList<StorageItemInterfaceConfig> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage) {
         this.id = id;
         this.rows = rows;
         this.pages = pages;
@@ -35,6 +37,8 @@ public class StorageConfig {
         this.storageItemsBlackListEnabled = storageItemsBlackListEnabled;
         this.storageItemsInterfaceConfig = storageItemsInterfaceConfig;
         this.storageItemsInterfaceEnabled = storageItemsInterfaceEnabled;
+        this.whiteListMessage = whiteListMessage;
+        this.blackListMessage = blackListMessage;
     }
 
     public String getId() {
@@ -95,5 +99,13 @@ public class StorageConfig {
 
     public boolean isStorageItemsInterfaceEnabled() {
         return storageItemsInterfaceEnabled;
+    }
+
+    public String getWhiteListMessage() {
+        return whiteListMessage;
+    }
+
+    public String getBlackListMessage() {
+        return blackListMessage;
     }
 }

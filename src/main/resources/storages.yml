@@ -12,15 +12,21 @@ storages:
           type: close
           pages: [0,1]
           sound: 'minecraft:sound'
+          volume: 100
+          pitch: 1
         sound_2:
           type: open
           pages: [0,1]
           sound: 'minecraft:sound'
+          volume: 100
+          pitch: 1
         sound_3:
           type: click
           pages: [0,1]
           slots: [0]
           sound: 'minecraft:sound'
+          volume: 100
+          pitch: 1
     items:
       default:
         enabled: true
