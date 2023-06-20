@@ -1,7 +1,10 @@
 package dev.wuason.storagemechanic.utils;
 
 import dev.wuason.mechanics.utils.Utils;
+import dev.wuason.storagemechanic.StorageMechanic;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -76,7 +79,11 @@ public class StorageUtils {
         }
     }
 
-    public static String getStorageId(Location loc){
-        return loc.getX() + "_" + loc.getY() + "_" + loc.getZ();
+    public static String getBlockStorageId(Location loc){
+        return loc.getWorld().getUID() + "_" + loc.getBlockX() + "_" + loc.getBlockX() + "_" + loc.getBlockZ();
+    }
+    public static Location getBlockStorageLocation(String id){
+        String[] loc = id.split("_");
+        return new Location(Bukkit.getWorld(loc[0]),Double.parseDouble(loc[1]),Double.parseDouble(loc[2]),Double.parseDouble(loc[3]));
     }
 }

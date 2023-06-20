@@ -62,37 +62,39 @@ public class CustomBlockManager implements Listener {
 
             ConfigurationSection sectionCustomBlocks = config.getConfigurationSection("blocks");
 
-            for(Object key : sectionCustomBlocks.getKeys(false).toArray()){
+            if(sectionCustomBlocks != null){
+                for(Object key : sectionCustomBlocks.getKeys(false).toArray()){
 
-                ConfigurationSection customBlockSection = sectionCustomBlocks.getConfigurationSection((String)key);
-                Material material = null;
-                try {
-                    material = Material.valueOf(customBlockSection.getString("material").toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material is null");
-                    continue;
+                    ConfigurationSection customBlockSection = sectionCustomBlocks.getConfigurationSection((String)key);
+                    Material material = null;
+                    try {
+                        material = Material.valueOf(customBlockSection.getString("material").toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material is null");
+                        continue;
+                    }
+
+                    if(material == null){
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material is null");
+                        continue;
+                    }
+                    if(!material.isBlock()){
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material isn't a block!");
+                        continue;
+                    }
+
+                    String displayName = customBlockSection.getString("displayName");
+
+                    List<String> lore = customBlockSection.getStringList("lore");
+
+                    CustomBlock customBlock = new CustomBlock((String)key,material,displayName,lore);
+
+                    customBlocks.add(customBlock);
+
                 }
-
-                if(material == null){
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material is null");
-                    continue;
-                }
-                if(!material.isBlock()){
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material isn't a block!");
-                    continue;
-                }
-
-                String displayName = customBlockSection.getString("displayName");
-
-                List<String> lore = customBlockSection.getStringList("lore");
-
-                CustomBlock customBlock = new CustomBlock((String)key,material,displayName,lore);
-
-                customBlocks.add(customBlock);
-
             }
 
         }
@@ -118,7 +120,7 @@ public class CustomBlockManager implements Listener {
             int y = blockLocation.getBlockY();
             int z = blockLocation.getBlockZ();
 
-            blockDataContainer.set(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + ":" + x + ":" + y + ":" + z), PersistentDataType.STRING, customBlockId);
+            blockDataContainer.set(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + "x" + x + "x" + y + "x" + z), PersistentDataType.STRING, customBlockId);
 
             CustomBlockPlaceEvent CustomBlockPlaceEvent = new CustomBlockPlaceEvent(event,getCustomBlockById(customBlockId));
             Bukkit.getPluginManager().callEvent(CustomBlockPlaceEvent);
@@ -139,7 +141,7 @@ public class CustomBlockManager implements Listener {
 
         PersistentDataContainer chunkDataContainer = brokenBlock.getChunk().getPersistentDataContainer();
 
-        NamespacedKey blockKey = new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + ":" + x + ":" + y + ":" + z);
+        NamespacedKey blockKey = new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + "x" + x + "x" + y + "x" + z);
         if (chunkDataContainer.has(blockKey, PersistentDataType.STRING)) {
             String customBlockId = chunkDataContainer.get(blockKey, PersistentDataType.STRING);
 
@@ -163,7 +165,7 @@ public class CustomBlockManager implements Listener {
 
             PersistentDataContainer chunkDataContainer = clickedBlock.getChunk().getPersistentDataContainer();
 
-            NamespacedKey blockKey = new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + ":" + x + ":" + y + ":" + z);
+            NamespacedKey blockKey = new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + "x" + x + "x" + y + "x" + z);
             if (chunkDataContainer.has(blockKey, PersistentDataType.STRING)) {
                 String customBlockId = chunkDataContainer.get(blockKey, PersistentDataType.STRING);
 
@@ -212,5 +214,39 @@ public class CustomBlockManager implements Listener {
             return false;
         }
     }
+
+    public String getCustomBlockIdFromBlock(Block block) {
+        Location blockLocation = block.getLocation();
+        int x = blockLocation.getBlockX();
+        int y = blockLocation.getBlockY();
+        int z = blockLocation.getBlockZ();
+
+        PersistentDataContainer chunkDataContainer = block.getChunk().getPersistentDataContainer();
+        NamespacedKey blockKey = new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + "x" + x + "x" + y + "x" + z);
+
+        if (chunkDataContainer.has(blockKey, PersistentDataType.STRING)) {
+            return chunkDataContainer.get(blockKey, PersistentDataType.STRING);
+        }
+        return null;
+    }
+
+    public boolean isCustomBlock(Block block) {
+        return getCustomBlockIdFromBlock(block) != null;
+    }
+
+    public String getCustomBlockIdFromItemStack(ItemStack itemStack) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
+
+        if (itemDataContainer.has(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb"), PersistentDataType.STRING)) {
+            return itemDataContainer.get(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb"), PersistentDataType.STRING);
+        }
+        return null;
+    }
+
+    public boolean isCustomBlockItemStack(ItemStack itemStack) {
+        return getCustomBlockIdFromItemStack(itemStack) != null;
+    }
+
 
 }

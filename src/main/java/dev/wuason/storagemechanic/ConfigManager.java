@@ -25,6 +25,7 @@ public class ConfigManager {
         core.getManagers().getCustomBlockManager().loadCustomBlocks();
         core.getManagers().getItemInterfaceManager().loadItemsInterface();
         core.getManagers().getStorageConfigManager().loadStoragesConfig();
+        core.getManagers().getBlockStorageConfigManager().loadBlockStorageConfigs();
 
         configFile = new File(Mechanics.getInstance().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/config.yml");
         if(!configFile.exists()){

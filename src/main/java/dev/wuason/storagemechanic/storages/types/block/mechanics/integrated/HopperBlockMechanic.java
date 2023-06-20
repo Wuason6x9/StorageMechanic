@@ -1,4 +1,4 @@
 package dev.wuason.storagemechanic.storages.types.block.mechanics.integrated;
 
-public class HopperMechanic {
+public class HopperBlockMechanic {
 }

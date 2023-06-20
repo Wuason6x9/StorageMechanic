@@ -1,5 +1,5 @@
 Items:
-  item_blocked_1:
+  item1:
     itemType: blocked_item
     item: 'mc:stone'
     displayName: '<red>Test'

@@ -52,47 +52,48 @@ public class ItemInterfaceManager {
 
             ConfigurationSection sectionItemsInterfaces = config.getConfigurationSection("Items");
 
-            for(Object key : sectionItemsInterfaces.getKeys(false).toArray()){
+            if(sectionItemsInterfaces != null){
+                for(Object key : sectionItemsInterfaces.getKeys(false).toArray()){
 
-                ConfigurationSection sectionItemInterface = sectionItemsInterfaces.getConfigurationSection((String)key);
-                ItemInterfaceType itemInterfaceType = null;
-                try {
-                    itemInterfaceType = itemInterfaceType.valueOf(sectionItemInterface.getString("itemType").toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is null");
-                    continue;
+                    ConfigurationSection sectionItemInterface = sectionItemsInterfaces.getConfigurationSection((String)key);
+                    ItemInterfaceType itemInterfaceType = null;
+                    try {
+                        itemInterfaceType = itemInterfaceType.valueOf(sectionItemInterface.getString("itemType").toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is null");
+                        continue;
+                    }
+
+                    if(itemInterfaceType == null){
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is null");
+                        continue;
+                    }
+
+                    String item = sectionItemInterface.getString("item");
+
+                    if(item == null){
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
+                        continue;
+                    }
+                    if(Adapter.getItemStack(item) == null){
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
+                        continue;
+                    }
+
+                    String displayName = sectionItemInterface.getString("displayName");
+
+                    List<String> lore = sectionItemInterface.getStringList("lore");
+
+                    ItemInterface itemInterface = new ItemInterface(item,displayName,lore,itemInterfaceType,(String)key);
+
+                    itemsInterface.add(itemInterface);
+
                 }
-
-                if(itemInterfaceType == null){
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is null");
-                    continue;
-                }
-
-                String item = sectionItemInterface.getString("item");
-
-                if(item == null){
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
-                    continue;
-                }
-                if(Adapter.getItemStack(item) == null){
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
-                    continue;
-                }
-
-                String displayName = sectionItemInterface.getString("displayName");
-
-                List<String> lore = sectionItemInterface.getStringList("lore");
-
-                ItemInterface itemInterface = new ItemInterface(item,displayName,lore,itemInterfaceType,(String)key);
-
-                itemsInterface.add(itemInterface);
-
             }
-
         }
 
         AdventureUtils.sendMessagePluginConsole(core, "<aqua> Items Interface loaded: <yellow>" + itemsInterface.size());
