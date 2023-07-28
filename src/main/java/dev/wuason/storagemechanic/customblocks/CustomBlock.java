@@ -11,13 +11,15 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.List;
 
 public class CustomBlock {
-    String id;
-    Material material;
-    ItemStack itemStack;
+    private String id;
+    private Material material;
+    private ItemStack itemStack;
+    private CustomBlockProperties customBlockProperties;
 
-    public CustomBlock(String id, Material material, String displayName, List<String> lore) {
+    public CustomBlock(String id, Material material, String displayName, List<String> lore, CustomBlockProperties customBlockProperties) {
         this.id = id;
         this.material = material;
+        this.customBlockProperties = customBlockProperties;
 
         itemStack = Utils.createItemStackByAdapter("mc:" + material.toString(), displayName, lore, 1);
 
@@ -36,5 +38,11 @@ public class CustomBlock {
         return id;
     }
 
+    public Material getMaterial() {
+        return material;
+    }
 
+    public CustomBlockProperties getCustomBlockProperties() {
+        return customBlockProperties;
+    }
 }

@@ -28,31 +28,38 @@ storages:
           volume: 100
           pitch: 1
     items:
+      block:
+        enabled: true
+        list:
+          block1:
+            pages: [ 0,1 ]
+            slots: [ 0,1 ]
+            message: "test"
       default:
         enabled: true
         list:
           item_1:
             pages: [0,1]
             slots: [0]
-            item: 'mc:stone'
-            amount: 64
+            amount: 10-40
+            chance: 40
+            items:
+              - 'mc:stone'
       whitelist:
         enabled: true
-        message: "No se encuentra en la lista blanca!!!!"
+        message: "It is not in the white list!"
         list:
           items_1:
             pages: [0,1]
             slots: [0,3,4,5,6]
-            amount: 64
             items:
               - 'mc:diamond'
               - 'mc:emerald'
       blacklist:
         enabled: false
-        message: "Se encuentra en la lista negra!!!!"
+        message: "It is on the blacklist!"
         list:
           items_test:
-            amount: 64
             pages: [1]
             slots: [1]
             items:

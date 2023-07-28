@@ -1,0 +1,24 @@
+data:
+  method: LOCAL
+  database_config:
+    config_host:
+      host: 127.0.0.1
+      port: 3306
+    credentials:
+      user: user123
+      password: 1234
+    database_config:
+      database_name: StorageMechanic
+      driver: mysql
+messages:
+  commands:
+    custom_blocks:
+      get:
+        valid_id: "<green> you have received: %id%"
+        invalid_id: "<red>Invalid ID"
+  storage:
+    search_page_invalid: "<red>Please enter a valid page!"
+    search_page_enter: "<red>Please enter a valid page!"
+  type:
+    blockstorage:
+      isBreakeable: "<red>You can't destroy this block while it has an item inside!"

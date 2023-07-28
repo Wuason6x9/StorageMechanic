@@ -1,47 +1,45 @@
 package dev.wuason.storagemechanic.storages.config;
 
-import dev.wuason.mechanics.utils.Adapter;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class StorageItemConfig {
     private String id;
-    private int amount;
-    private ArrayList<Integer> slots = new ArrayList<>();
-    private ArrayList<Integer> pages = new ArrayList<>();
-    private List<String> items;
+    private String amount;
+    private Map<Integer, Set<Integer>> pagesToSlots;
+    private Set<String> items;
+    private float chance;
 
-
-    public StorageItemConfig(String id, int amount, ArrayList<Integer> slots, ArrayList<Integer> pages, List<String> items) {
+    public StorageItemConfig(String id, String amount, List<Integer> slots, List<Integer> pages, List<String> items, float chance) {
         this.id = id;
         this.amount = amount;
-        this.slots = slots;
-        this.pages = pages;
-        this.items = items;
+        this.items = new HashSet<>(items);
+        this.chance = chance;
 
+        this.pagesToSlots = new HashMap<>();
+        HashSet<Integer> hashSet = new HashSet<>(slots);
+
+        for(Integer i : pages){
+            pagesToSlots.put(i,hashSet);
+        }
     }
 
     public String getId() {
         return id;
     }
 
-    public int getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public ArrayList<Integer> getSlots() {
-        return slots;
+    public Map<Integer, Set<Integer>> getPagesToSlots() {
+        return pagesToSlots;
     }
 
-    public ArrayList<Integer> getPages() {
-        return pages;
-    }
-
-    public List<String> getItems() {
+    public Set<String> getItems() {
         return items;
     }
 
-
+    public float getChance() {
+        return chance;
+    }
 }

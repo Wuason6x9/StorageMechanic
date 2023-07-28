@@ -30,7 +30,7 @@ public class StorageInventory implements InventoryHolder {
         this.storage = storage;
         inventory = Bukkit.createInventory(this, InventoryType.valueOf(storageConfig.getInventoryType().toString()),storageConfig.getTitle());
         if(storageConfig.getInventoryType().equals(StorageInventoryTypeConfig.CHEST)){
-            inventory = Bukkit.createInventory(this,(storageConfig.getRows() * 9), AdventureUtils.deserializeLegacy(storageConfig.getTitle().replace("%MAX_PAGES%","" + storageConfig.getPages()).replace("%ACTUAL_PAGE%","" + (page + 1)).replace("%STORAGE_ID%",storage.getId())));
+            inventory = Bukkit.createInventory(this,(storageConfig.getRows() * 9), AdventureUtils.deserializeLegacy(storageConfig.getTitle().replaceAll("%MAX_PAGES%","" + storageConfig.getPages()).replaceAll("%ACTUAL_PAGE%","" + (page + 1)).replaceAll("%STORAGE_ID%",storage.getId())));
         }
 
     }
@@ -38,14 +38,14 @@ public class StorageInventory implements InventoryHolder {
         this.id = UUID.randomUUID().toString();
         this.page = page;
         this.storage = storage;
-        inventory = Bukkit.createInventory(this, inventoryType,AdventureUtils.deserializeLegacy(title.replace("%MAX_PAGES%","" + StorageMechanic.getInstance().getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig()).getPages()).replace("%ACTUAL_PAGE%","" + (page + 1)).replace("%STORAGE_ID%",storage.getId())));
+        inventory = Bukkit.createInventory(this, inventoryType,AdventureUtils.deserializeLegacy(title.replaceAll("%MAX_PAGES%","" + StorageMechanic.getInstance().getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig()).getPages()).replaceAll("%ACTUAL_PAGE%","" + (page + 1)).replaceAll("%STORAGE_ID%",storage.getId())));
     }
 
     public StorageInventory(int rows, String title, Storage storage, int page) {
         this.id = UUID.randomUUID().toString();
         this.page = page;
         this.storage = storage;
-        inventory = Bukkit.createInventory(this,(rows * 9),AdventureUtils.deserializeLegacy(title.replace("%MAX_PAGES%","" + StorageMechanic.getInstance().getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig()).getPages()).replace("%ACTUAL_PAGE%","" + (page + 1)).replace("%STORAGE_ID%",storage.getId())));
+        inventory = Bukkit.createInventory(this,(rows * 9),AdventureUtils.deserializeLegacy(title.replaceAll("%MAX_PAGES%","" + StorageMechanic.getInstance().getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig()).getPages()).replaceAll("%ACTUAL_PAGE%","" + (page + 1)).replaceAll("%STORAGE_ID%",storage.getId())));
     }
     public void closeInventoryAll(){
         while (!inventory.getViewers().isEmpty()){

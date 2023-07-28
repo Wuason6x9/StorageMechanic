@@ -1,0 +1,9 @@
+inventories:
+  inv1:
+    title: "test"
+    rows: 5
+    blocked_slots: [0-10]
+    items:
+      item1:
+        slots: [0-53]
+        item_interface: item1

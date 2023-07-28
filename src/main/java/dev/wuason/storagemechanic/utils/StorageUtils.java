@@ -1,21 +1,16 @@
 package dev.wuason.storagemechanic.utils;
 
 import dev.wuason.mechanics.utils.Utils;
-import dev.wuason.storagemechanic.StorageMechanic;
+import org.apache.commons.lang3.Range;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.io.BukkitObjectInputStream;
-import org.bukkit.util.io.BukkitObjectOutputStream;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
+
+import java.util.*;
 
 public class StorageUtils {
 
@@ -23,21 +18,32 @@ public class StorageUtils {
         if(!id.contains("_")) return true;
         return false;
     }
-
-    public static String serializeObject(Object ob) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1);
-        BukkitObjectOutputStream bukkitObjectOutputStream = new BukkitObjectOutputStream(byteArrayOutputStream);
-        bukkitObjectOutputStream.writeObject(ob);
-        bukkitObjectOutputStream.flush();
-        bukkitObjectOutputStream.close();
-        return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
+    public static boolean canNotBuild(Player player, Block block) {
+        if (player == null) return false;
+        final Location bLoc = (new Location(block.getLocation().getWorld(), block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).clone().add(0.5, 0.5, 0.5);
+        final Location pLoc = player.getLocation();
+        return Range.between(0.5, 1.5).contains(bLoc.getY() - pLoc.getY()) && Range.between(-0.80, 0.80).contains(bLoc.getX() - pLoc.getX()) && Range.between(-0.80, 0.80).contains(bLoc.getZ() - pLoc.getZ());
     }
-    public static Object deserializeObject(String data) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(Base64.getDecoder().decode(data));
-        BukkitObjectInputStream objectInputStream = new BukkitObjectInputStream(byteArrayInputStream);
-        return objectInputStream.readObject();
+    public static int randomNumberString(String numbers){
+        if(numbers == null) return -1;
+        if(!numbers.contains("-")) return Integer.parseInt(numbers);
+        String[] nString = numbers.split("-");
+        if(nString.length < 2) return Integer.parseInt(nString[0]);
+        if(nString[1] == null || nString[0] == null) return 64;
+        int min = Integer.parseInt(nString[0]);
+        int max = Integer.parseInt(nString[1]);
+        return randomNumber(min,max);
     }
-
+    public static int randomNumber(int min, int max){
+        return (int) (min + Math.round(Math.random() * (max - min)));
+    }
+    public static boolean chance(float probability) {
+        if (probability < 0.0f || probability > 100.0f) {
+            throw new IllegalArgumentException("ERROR CHANCE!!!!!!!!!!");
+        }
+        float randomValue = new Random().nextFloat() * 100.0f;
+        return randomValue < probability;
+    }
     public static ArrayList<Integer> configFill(List<String> arrayList){
 
         ArrayList<Integer> arrayListNumbers = new ArrayList<>();
@@ -80,10 +86,10 @@ public class StorageUtils {
     }
 
     public static String getBlockStorageId(Location loc){
-        return loc.getWorld().getUID() + "_" + loc.getBlockX() + "_" + loc.getBlockX() + "_" + loc.getBlockZ();
+        return loc.getWorld().getUID() + "_" + loc.getBlockX() + "_" + loc.getY() + "_" + loc.getBlockZ();
     }
     public static Location getBlockStorageLocation(String id){
         String[] loc = id.split("_");
-        return new Location(Bukkit.getWorld(loc[0]),Double.parseDouble(loc[1]),Double.parseDouble(loc[2]),Double.parseDouble(loc[3]));
+        return new Location(Bukkit.getWorld(UUID.fromString(loc[0])),Double.parseDouble(loc[1]),Double.parseDouble(loc[2]),Double.parseDouble(loc[3]));
     }
 }

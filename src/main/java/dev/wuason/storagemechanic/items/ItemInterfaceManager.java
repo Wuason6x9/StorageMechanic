@@ -1,11 +1,12 @@
 package dev.wuason.storagemechanic.items;
 
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.utils.Adapter;
+
+import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.customblocks.CustomBlock;
-import org.bukkit.Material;
+
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -35,7 +36,7 @@ public class ItemInterfaceManager {
 
         itemsInterface = new ArrayList<>();
 
-        File base = new File(Mechanics.getInstance().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/itemInterfaces/");
+        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/itemInterfaces/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -78,7 +79,7 @@ public class ItemInterfaceManager {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
                     }
-                    if(Adapter.getItemStack(item) == null){
+                    if(!Mechanics.getInstance().getManager().getAdapterManager().existAdapterID(item)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;

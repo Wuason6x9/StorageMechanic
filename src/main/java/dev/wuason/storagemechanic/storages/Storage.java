@@ -1,19 +1,19 @@
 package dev.wuason.storagemechanic.storages;
 
-import dev.wuason.mechanics.utils.Adapter;
+import dev.wuason.mechanics.Mechanics;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
-import dev.wuason.storagemechanic.storages.config.StorageConfig;
-import dev.wuason.storagemechanic.storages.config.StorageInventoryTypeConfig;
-import dev.wuason.storagemechanic.storages.config.StorageItemConfig;
-import dev.wuason.storagemechanic.storages.config.StorageItemInterfaceConfig;
+import dev.wuason.storagemechanic.storages.config.*;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
+import dev.wuason.storagemechanic.utils.StorageUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
+
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.Serializable;
 import java.util.*;
 
 public class Storage {
@@ -22,10 +22,15 @@ public class Storage {
 
     private String id;
     private String storageIdConfig;
-    private Date date = null;
+    private Date date = new Date();
 
     public Storage(String storageIdConfig) {
         this.id = UUID.randomUUID().toString();
+        this.storageIdConfig = storageIdConfig;
+    }
+
+    public Storage(String storageIdConfig, UUID id) {
+        this.id = id.toString();
         this.storageIdConfig = storageIdConfig;
     }
 
@@ -55,6 +60,14 @@ public class Storage {
             }
         }
     }
+    public void closeAllInventory(){
+        while(!inventories.isEmpty()){
+            StorageInventory storageInventory = (StorageInventory) (inventories.values().toArray())[0];
+            while (!storageInventory.getInventory().getViewers().isEmpty()){
+                storageInventory.getInventory().getViewers().get(0).closeInventory();
+            }
+        }
+    }
 
     public void openStorage(Player player, int page) {
 
@@ -65,32 +78,40 @@ public class Storage {
             if(storageConfig.getInventoryType().equals(StorageInventoryTypeConfig.CHEST)){
                 slots = (storageConfig.getRows() * 9);
             }
-            items.put(page, new ItemStack[slots]); //SLOTS
+
+            ItemStack[] itemsInv = new ItemStack[slots]; //SLOTS
+
+            if(storageConfig.isStorageItemsDefaultEnabled()){
+
+                for(StorageItemConfig itemDefault : storageConfig.getStorageItemsDefaultConfig()){
+                    if(!itemDefault.getPagesToSlots().containsKey(page)) continue;
+                    for(String item : itemDefault.getItems()){
+                        for(int s : itemDefault.getPagesToSlots().get(page)){
+                            if(!StorageUtils.chance(itemDefault.getChance())) continue;
+                            ItemStack itemStack = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(item);
+                            itemStack.setAmount(StorageUtils.randomNumberString(itemDefault.getAmount()));
+                            itemsInv[s] = itemStack;
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            items.put(page, itemsInv);
         }
 
         if (!inventories.containsKey(page)) {
             StorageInventory inventory = StorageMechanic.getInstance().getManagers().getStorageInventoryManager().createStorageInventory(storageConfig,this,page);
             inventory.getInventory().setContents(items.get(page));
-            if(date == null){
-                if(storageConfig.isStorageItemsDefaultEnabled()){
-                    for(StorageItemConfig itemDefault : storageConfig.getStorageItemsDefaultConfig()){
-                        if(itemDefault.getPages().indexOf(page) != (-1)){
-                            for(int s : itemDefault.getSlots()){
-                                for(String item : itemDefault.getItems()){
-                                    ItemStack itemStack = Adapter.getItemStack(item);
-                                    itemStack.setAmount(itemDefault.getAmount());
-                                    inventory.getInventory().setItem(s, itemStack);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+
             if(storageConfig.isStorageItemsInterfaceEnabled()){
                 for(StorageItemInterfaceConfig itemInterface : storageConfig.getStorageItemsInterfaceConfig()){
-                    if(itemInterface.getPages().contains(page)){
-                        for(int s : itemInterface.getSlots()){
-                            inventory.getInventory().setItem(s,itemInterface.getitemInterface().getItemStack());
+                    if(itemInterface.getPagesToSlots().containsKey(page)){
+                        for(int s : itemInterface.getPagesToSlots().get(page)){
+                            inventory.getInventory().setItem(s,itemInterface.getItemInterface().getItemStack());
                         }
                     }
                 }
@@ -98,10 +119,48 @@ public class Storage {
 
             inventories.put(page, inventory);
         }
-        if(date == null){
-            date = new Date();
-        }
         inventories.get(page).open(player);
+    }
+    public void loadAllItemsDefault(){
+        for (int p = 0; p < getTotalPages(); p++) {
+            loadItemsDefault(p);
+        }
+    }
+    public void loadItemsDefault(int page){
+
+        StorageConfig storageConfig = getStorageConfig();
+
+        if(storageConfig.isStorageItemsDefaultEnabled()){
+
+            if (!items.containsKey(page)) {
+
+                int slots = storageConfig.getInventoryType().getSize();
+                if(storageConfig.getInventoryType().equals(StorageInventoryTypeConfig.CHEST)){
+                    slots = (storageConfig.getRows() * 9);
+                }
+
+                ItemStack[] itemsInv = new ItemStack[slots]; //SLOTS
+
+                for(StorageItemConfig itemDefault : storageConfig.getStorageItemsDefaultConfig()){
+
+                    if(!itemDefault.getPagesToSlots().containsKey(page)) continue;
+                    for(String item : itemDefault.getItems()){
+                        for(int s : itemDefault.getPagesToSlots().get(page)){
+                            if(!StorageUtils.chance(itemDefault.getChance())) continue;
+                            ItemStack itemStack = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(item);
+                            itemStack.setAmount(StorageUtils.randomNumberString(itemDefault.getAmount()));
+                            itemsInv[s] = itemStack;
+
+                        }
+
+                    }
+
+                }
+
+                items.put(page, itemsInv);
+            }
+
+        }
     }
 
     public List<ItemStack> addItemStack(int page, ItemStack itemStack) {
@@ -225,6 +284,104 @@ public class Storage {
 
         return notRemovedItems;
     }
+    public void dropItemsFromPage(Location dropLocation, int page) {
+        List<ItemStack> itemsList = getItemsFromPage(page);
+        World world = dropLocation.getWorld();
+
+        ArrayList<ItemStack> itemStacks = new ArrayList<>();
+        for (ItemStack item : itemsList) {
+            if (item != null) {
+                itemStacks.add(item);
+                removeItemStack(page, item);
+            }
+        }
+        Bukkit.getScheduler().runTask(StorageMechanic.getInstance(),() -> {
+            for(ItemStack item : itemStacks){
+                world.dropItemNaturally(dropLocation, item);
+            }
+        });
+    }
+    public ArrayList<Object> isBlocked(int slot, int page){
+        ArrayList<Object> objects = new ArrayList<>();
+        StorageConfig storageConfig = getStorageConfig();
+        for(StorageBlockItemConfig storageBlockItemConfig : storageConfig.getStorageBlockedItemsConfig()){
+            if(!storageBlockItemConfig.getPagesToSlots().containsKey(page)){
+                objects.add(false);
+                return objects;
+            }
+            Set<Integer> slots = storageBlockItemConfig.getPagesToSlots().get(page);
+            if(slots != null){
+                if(slots.contains(slot)){
+                    objects.add(true);
+                    objects.add(storageBlockItemConfig.getMessage());
+                    return objects;
+                }
+                objects.add(false);
+                return objects;
+            }
+
+        }
+        objects.add(false);
+        return objects;
+    }
+    public boolean isItemInList(ItemStack itemStack, int slot, int page, ListType listType){
+        StorageConfig storageConfig = getStorageConfig();
+        String itemId = Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(itemStack);
+        switch (listType){
+
+            case BLACKLIST -> {
+                for(StorageItemConfig storageItemConfig : storageConfig.getStorageItemsBlackListConfig()){
+
+                    if(!storageItemConfig.getPagesToSlots().containsKey(page)){
+                        return false;
+                    }
+
+                    Set<Integer> slots = storageItemConfig.getPagesToSlots().get(page);
+                    if(slots != null){
+                        if(!slots.contains(slot)){
+                            return false;
+                        }
+                    }
+
+                    Set<String> items = storageItemConfig.getItems();
+
+                    if (items.contains(itemId)) return true;
+
+
+                }
+                return false;
+            }
+            case WHITELIST -> {
+                for(StorageItemConfig storageItemConfig : storageConfig.getStorageItemsWhiteListConfig()){
+                    if(!storageItemConfig.getPagesToSlots().containsKey(page)){
+                        return true;
+                    }
+
+                    Set<Integer> slots = storageItemConfig.getPagesToSlots().get(page);
+                    if(slots != null){
+                        if(!slots.contains(slot)){
+                            return true;
+                        }
+                    }
+
+                    Set<String> items = storageItemConfig.getItems();
+
+                    if (items.contains(itemId)) return true;
+
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public void dropAllItems(Location dropLocation) {
+        World world = dropLocation.getWorld();
+        for (int p = 0; p < getTotalPages(); p++) {
+            dropItemsFromPage(dropLocation,p);
+        }
+    }
+
     public List<ItemStack> addItemStackAtSlot(int page, int slot, ItemStack itemStack) {
         List<ItemStack> notAddedItems = new ArrayList<>();
 
@@ -310,13 +467,22 @@ public class Storage {
         }
     }
     public boolean isEmpty() {
-        for (ItemStack[] contents : items.values()) {
-            for (ItemStack itemStack : contents) {
-                if (itemStack != null && itemStack.getAmount() > 0) {
+        for (Integer page : items.keySet()) {
+            if (inventories.containsKey(page)) {
+                StorageInventory storageInventory = inventories.get(page);
+                if (!storageInventory.getInventory().isEmpty()) {
                     return false;
+                }
+            } else {
+                ItemStack[] contents = items.get(page);
+                for (ItemStack itemStack : contents) {
+                    if (itemStack != null && itemStack.getAmount() > 0) {
+                        return false;
+                    }
                 }
             }
         }
+
         return true;
     }
     public int getItemCount(ItemStack itemStackToCount) {
@@ -401,15 +567,38 @@ public class Storage {
         }
         return occupiedSlots;
     }
-    public List<ItemStack> getAllItems() {
-        List<ItemStack> allItems = new ArrayList<>();
-        for (ItemStack[] contents : items.values()) {
-            for (ItemStack itemStack : contents) {
-                if (itemStack != null && itemStack.getAmount() > 0) {
-                    allItems.add(itemStack.clone());
+    public List<ItemStack> getItemsFromPage(int page) {
+        List<ItemStack> itemsList = new ArrayList<>();
+
+        if (inventories.containsKey(page)) {
+            StorageInventory storageInventory = inventories.get(page);
+            ItemStack[] contents = storageInventory.getInventory().getContents();
+            for (ItemStack item : contents) {
+                if (item != null) {
+                    itemsList.add(item);
                 }
             }
         }
+
+        if (items.containsKey(page)) {
+            ItemStack[] contents = items.get(page);
+            for (ItemStack item : contents) {
+                if (item != null) {
+                    itemsList.add(item);
+                }
+            }
+        }
+
+        return itemsList;
+    }
+
+    public List<ItemStack> getAllItems() {
+        List<ItemStack> allItems = new ArrayList<>();
+
+        for (int page : items.keySet()) {
+            allItems.addAll(getItemsFromPage(page));
+        }
+
         return allItems;
     }
     public void removeAllItemsOfType(ItemStack itemStackToRemove) {
@@ -470,4 +659,10 @@ public class Storage {
     public Date getDate() {
         return date;
     }
+
+    public enum ListType{
+        WHITELIST,
+        BLACKLIST
+    }
+
 }

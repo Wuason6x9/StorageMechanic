@@ -1,0 +1,15 @@
+name: StorageMechanic
+version: '${version}'
+main: dev.wuason.storagemechanic.StorageMechanic
+api-version: 1.18
+load: POSTWORLD
+authors: [ Wuason ]
+description: wuason.mechanic.storagemechanic
+website: techmc.es
+softdepend:
+  - ItemsAdder
+  - Oraxen
+  - ChestSort
+  - MythicMobs
+  - PlaceholderAPI
+  - Mechanics

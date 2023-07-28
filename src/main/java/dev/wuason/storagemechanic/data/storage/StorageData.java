@@ -1,20 +1,19 @@
-package dev.wuason.storagemechanic.storages;
+package dev.wuason.storagemechanic.data.storage;
 
 import org.bukkit.inventory.ItemStack;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
-public class StorageSerializable implements Serializable {
+public class StorageData implements Serializable {
     private Map<Integer, ItemStack[]> items;
 
     private String id;
     private String storageIdConfig;
     private Date date;
 
-    public StorageSerializable(Map<Integer, ItemStack[]> items, String id, String storageIdConfig, Date date) {
+    public StorageData(Map<Integer, ItemStack[]> items, String id, String storageIdConfig, Date date) {
         this.items = items;
         this.id = id;
         this.storageIdConfig = storageIdConfig;

@@ -1,25 +1,22 @@
 package dev.wuason.storagemechanic.storages.types.block.config;
 
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.utils.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.customblocks.CustomBlock;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanic;
+import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfig;
 import dev.wuason.storagemechanic.utils.StorageUtils;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class BlockStorageConfigManager {
 
     private StorageMechanic core;
-    private ArrayList<BlockStorageConfig> blockStorageConfigs;
+    private HashMap<String,BlockStorageConfig> blockStorageConfigs = new HashMap<>();
+    private HashMap<String, Map.Entry<String, BlockStorageConfig>> blockStorageConfigsAdapter = new HashMap<>();
 
     public BlockStorageConfigManager(StorageMechanic core) {
         this.core = core;
@@ -27,9 +24,10 @@ public class BlockStorageConfigManager {
 
     public void loadBlockStorageConfigs(){
 
-        blockStorageConfigs = new ArrayList<>();
+        blockStorageConfigs = new HashMap<>();
+        blockStorageConfigsAdapter = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/StoragesBlocks/");
+        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/types/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -51,8 +49,8 @@ public class BlockStorageConfigManager {
                 for(Object key : sectionBlockStorages.getKeys(false).toArray()){
 
                     if(!StorageUtils.isValidConfigId((String)key)){
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage Config! storage_id: " + key + " in file: " + file.getName());
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: The storage id cannot contain \"_\" in the id!");
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Block Storage Config! Blockstorage_id: " + key + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: The Blockstorage id cannot contain \"_\" in the id!");
                         continue;
                     }
 
@@ -79,7 +77,7 @@ public class BlockStorageConfigManager {
 
                     String block = sectionBlockStorage.getString("block",".");
 
-                    if(block.equals(".") || !Adapter.isItemValid(block)){
+                    if(block.equals(".") || !Mechanics.getInstance().getManager().getAdapterManager().existAdapterID(block)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Block storage Config! blockstorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Block is null or invalid");
                         continue;
@@ -87,7 +85,7 @@ public class BlockStorageConfigManager {
 
                     String storage = sectionBlockStorage.getString("storage_id",".");
 
-                    if(block.equals(".") || !core.getManagers().getStorageConfigManager().existsStorageConfig(storage)){
+                    if(storage.equals(".") || !core.getManagers().getStorageConfigManager().existsStorageConfig(storage)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Block storage Config! blockstorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Storage_ID is null or invalid");
                         continue;
@@ -117,10 +115,14 @@ public class BlockStorageConfigManager {
 
                     BlockStorageConfig blockStorageConfig = new BlockStorageConfig(blockStorageType,(String)key,blockStorageProperties,blockStorageClickType,block,blockMechanics.toArray(BlockMechanic[]::new),storage);
 
-                    blockStorageConfigs.add(blockStorageConfig);
+                    blockStorageConfigs.put(blockStorageConfig.getId(),blockStorageConfig);
 
                 }
             }
+        }
+
+        for(Map.Entry<String, BlockStorageConfig> configEntry : blockStorageConfigs.entrySet()){
+            blockStorageConfigsAdapter.put(configEntry.getValue().getBlock(), configEntry);
         }
 
         AdventureUtils.sendMessagePluginConsole(core, "<aqua> BlockStorages loaded: <yellow>" + blockStorageConfigs.size());
@@ -128,47 +130,33 @@ public class BlockStorageConfigManager {
     }
 
 
-    public ArrayList<BlockStorageConfig> getBlockStorageConfigs() {
-        return this.blockStorageConfigs;
+    public Collection<BlockStorageConfig> getBlockStorageConfigs() {
+        return this.blockStorageConfigs.values();
     }
 
     // Método para agregar una nueva configuración de almacenamiento de bloques.
     public void addBlockStorageConfig(BlockStorageConfig config) {
-        this.blockStorageConfigs.add(config);
+        this.blockStorageConfigs.put(config.getId(),config);
     }
 
     // Método para eliminar una configuración de almacenamiento de bloques.
     public void removeBlockStorageConfig(BlockStorageConfig config) {
-        this.blockStorageConfigs.remove(config);
+        this.blockStorageConfigs.remove(config.getId());
     }
 
     // Método para buscar una configuración de almacenamiento de bloques por su ID.
-    public BlockStorageConfig findBlockStorageConfigById(String id) {
-        for (BlockStorageConfig config : blockStorageConfigs) {
-            if (config.getId().equals(id)) {
-                return config;
-            }
-        }
-        return null;
+    public Optional<BlockStorageConfig> findBlockStorageConfigById(String id) {
+        return Optional.of(blockStorageConfigs.getOrDefault(id,null));
     }
 
     public BlockStorageConfig findBlockStorageConfigByItemID(String id) {
-        for (BlockStorageConfig config : blockStorageConfigs) {
-            if (config.getBlock().equals(id)) {
-                return config;
-            }
-        }
-        return null;
+        Map.Entry<String,BlockStorageConfig> entry = blockStorageConfigsAdapter.getOrDefault(id.toLowerCase(Locale.ENGLISH),null);
+        return entry != null ? entry.getValue() : null;
     }
 
     // Método para comprobar si existe una configuración de almacenamiento de bloques por su ID.
     public boolean blockStorageConfigExists(String id) {
-        for (BlockStorageConfig config : blockStorageConfigs) {
-            if (config.getId().equals(id)) {
-                return true;
-            }
-        }
-        return false;
+        return blockStorageConfigs.containsKey(id);
     }
 
 }

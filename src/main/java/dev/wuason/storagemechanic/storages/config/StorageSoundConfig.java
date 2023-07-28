@@ -1,24 +1,28 @@
 package dev.wuason.storagemechanic.storages.config;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class StorageSoundConfig {
     private String id;
     private String sound;
-    private ArrayList<Integer> pages;
-    private ArrayList<Integer> slots;
-    private type type;
+    private Map<Integer, Set<Integer>> pagesToSlots;
+    private Type type;
     private float pitch;
     private float volume;
 
-    public StorageSoundConfig(String id, String sound, ArrayList<Integer> pages, StorageSoundConfig.type type, ArrayList<Integer> slots, Double pitch, int volume) {
+    public StorageSoundConfig(String id, String sound, List<Integer> pages, Type type, List<Integer> slots, Double pitch, int volume) {
         this.id = id;
         this.sound = sound;
-        this.pages = pages;
         this.type = type;
-        this.slots = slots;
         this.pitch = pitch.floatValue();
-        this.volume = volume / 100;
+        this.volume = volume / 100.0f;
+
+        this.pagesToSlots = new HashMap<>();
+        HashSet<Integer> hashSet = new HashSet<>(slots);
+
+        for(Integer i : pages){
+            pagesToSlots.put(i,hashSet);
+        }
     }
 
     public String getId() {
@@ -29,23 +33,12 @@ public class StorageSoundConfig {
         return sound;
     }
 
-    public ArrayList<Integer> getPages() {
-        return pages;
+    public Map<Integer, Set<Integer>> getPagesToSlots() {
+        return pagesToSlots;
     }
 
-    public ArrayList<Integer> getSlots() {
-        return slots;
-    }
-
-    public StorageSoundConfig.type getType() {
+    public Type getType() {
         return type;
-    }
-
-    public enum type {
-        OPEN,
-        CLOSE,
-        CLICK
-
     }
 
     public float getPitch() {
@@ -55,5 +48,10 @@ public class StorageSoundConfig {
     public float getVolume() {
         return volume;
     }
-}
 
+    public enum Type {
+        OPEN,
+        CLOSE,
+        CLICK
+    }
+}

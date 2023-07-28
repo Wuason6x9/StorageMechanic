@@ -1,0 +1,7 @@
+Items:
+  item1:
+    itemType: blocked_item
+    item: 'mc:stone'
+    displayName: '<red>Test'
+    lore:
+      - '<gold>test'

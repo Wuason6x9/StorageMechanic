@@ -1,28 +1,37 @@
 package dev.wuason.storagemechanic.storages.types.block;
 
-import dev.wuason.mechanics.utils.Adapter;
+import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.data.DataManager;
+import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
-import dev.wuason.storagemechanic.storages.StorageManager;
+import dev.wuason.storagemechanic.storages.types.block.compatibilities.ItemsAdderEvents;
+import dev.wuason.storagemechanic.storages.types.block.compatibilities.OraxenEvents;
+import dev.wuason.storagemechanic.storages.types.block.compatibilities.mythic.MythicCrucibleBlockEvents;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfig;
-import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfigManager;
-import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageType;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
 import dev.wuason.storagemechanic.utils.StorageUtils;
-import io.th0rgal.oraxen.utils.actions.ClickAction;
+import io.th0rgal.protectionlib.ProtectionLib;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.function.Function;
@@ -33,27 +42,44 @@ public class BlockStorageManager implements Listener {
     private BlockMechanicManager blockMechanicManager;
     private StorageMechanic core;
 
-    private HashMap<String,BlockStorage> blockStorages = new HashMap<>();
-    private HashMap<Chunk,BlockStorage> blockStorageChunks = new HashMap<>();
+    private volatile HashMap<String,BlockStorage> blockStorages = new HashMap<>();
+    private DataManager dataManager;
+    private BukkitTask taskSaves = null;
+    private ArrayList<BlockStorage> blockStoragesToSave = new ArrayList<>();
 
-    public BlockStorageManager(StorageMechanic core) {
+    public BlockStorageManager(StorageMechanic core, DataManager dataManager) {
         this.core = core;
         this.blockMechanicManager = new BlockMechanicManager(core);
+        this.dataManager = dataManager;
+        loadEvents();
+    }
+    public void loadEvents(){
+
+        if(Bukkit.getPluginManager().getPlugin("ItemsAdder") != null){
+            ItemsAdderEvents itemsAdderEvents = new ItemsAdderEvents(this);
+            Bukkit.getPluginManager().registerEvents(itemsAdderEvents,core);
+        }
+        if(Bukkit.getPluginManager().getPlugin("MythicCrucible") != null){
+            MythicCrucibleBlockEvents mythicCrucibleBlockEvents = new MythicCrucibleBlockEvents(this);
+            Bukkit.getPluginManager().registerEvents(mythicCrucibleBlockEvents,core);
+        }
+        if(Bukkit.getPluginManager().getPlugin("Oraxen") != null){
+            OraxenEvents oraxenEvents = new OraxenEvents(this);
+            Bukkit.getPluginManager().registerEvents(oraxenEvents,core);
+        }
 
     }
 
     public BlockStorage createBlockStorage(String blockStorageConfigID, Location blockLocation, Player player,String id){
-
         if(!blockStorages.containsKey(StorageUtils.getBlockStorageId(blockLocation)) && core.getManagers().getBlockStorageConfigManager().blockStorageConfigExists(blockStorageConfigID)){
-
-            BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID);
+            BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
 
             Storage storage = core.getManagers().getStorageManager().createStorage(blockStorageConfig.getStorageConfigID());
             HashMap<String,Storage> hashMap = new HashMap<>();
             hashMap.put(player.getUniqueId().toString(),storage);
             ArrayList<Location> locations = new ArrayList<>();
             locations.add(blockLocation);
-            BlockStorage blockStorage = new BlockStorage(id,blockStorageConfigID,hashMap,player,locations);
+            BlockStorage blockStorage = new BlockStorage(id,blockStorageConfigID,hashMap,player.getUniqueId(),locations);
 
             blockStorages.put(blockStorage.getId(),blockStorage);
 
@@ -63,6 +89,24 @@ public class BlockStorageManager implements Listener {
 
         return null;
     }
+    public BlockStorage createBlockStorage(String blockStorageConfigID, ArrayList<Location> locations, Player player,String id){
+
+        if(!blockStorages.containsKey(id) && core.getManagers().getBlockStorageConfigManager().blockStorageConfigExists(blockStorageConfigID)){
+
+            BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
+
+            HashMap<String,Storage> hashMap = new HashMap<>();
+            BlockStorage blockStorage = new BlockStorage(id,blockStorageConfigID,hashMap,player.getUniqueId(),locations);
+
+            blockStorages.put(blockStorage.getId(),blockStorage);
+
+            return blockStorage;
+
+        }
+
+        return null;
+    }
+
 
     public boolean openBlockStorage(String blockStorageId, Player player) {
 
@@ -95,12 +139,12 @@ public class BlockStorageManager implements Listener {
 
         if(!blockStorages.containsKey(id) && core.getManagers().getBlockStorageConfigManager().blockStorageConfigExists(blockStorageConfigID)){
 
-            BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID);
+            BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
 
             Storage storage = core.getManagers().getStorageManager().getStorage(storageID);
             HashMap<String,Storage> hashMap = new HashMap<>();
             hashMap.put(player.getUniqueId().toString(),storage);
-            BlockStorage blockStorage = new BlockStorage(id,blockStorageConfigID,hashMap,player,locations);
+            BlockStorage blockStorage = new BlockStorage(id,blockStorageConfigID,hashMap,player.getUniqueId(),locations);
 
             blockStorages.put(blockStorage.getId(),blockStorage);
 
@@ -111,43 +155,177 @@ public class BlockStorageManager implements Listener {
         return null;
     }
 
+    //ONUNLOADCHUNKS
+    @EventHandler
+    public void BlockStorageUnLoadChunk(ChunkUnloadEvent event){
 
-    //ONPLACE
-    public void BlockStoragePlaceEvent(Block block, ItemStack itemStack, Player player){
+        PersistentDataContainer persistentDataContainer = event.getChunk().getPersistentDataContainer();
 
-        PersistentDataContainer persistentDataContainer = itemStack.getItemMeta().getPersistentDataContainer();
+        for(NamespacedKey namespacedKey : persistentDataContainer.getKeys()){
 
-        if(persistentDataContainer.has(new NamespacedKey(core,"blockstorageshulker"), PersistentDataType.STRING)){
-            //seguir
-            String[] data = persistentDataContainer.get(new NamespacedKey(core,"blockstorageshulker"),PersistentDataType.STRING).split(":");
+            if(namespacedKey.getKey().contains("blockstorage_")){
 
-            String storageID = data[0];
-            String blockStorageConfigID = data[1];
+                String[] blockStorageData = persistentDataContainer.get(namespacedKey,PersistentDataType.STRING).split(":");
 
-            //load storage
-            //create BlockStorage
+                BlockStorage blockStorage = getBlockStorage(blockStorageData[0]);
+
+                if(blockStorage != null){
+
+                    TaskSave(blockStorage);
+
+                }
+
+            }
 
         }
 
     }
-    //ONBREAK
-    public void BlockStorageBreakEvent(Block block, ItemStack itemStack, Player player){
+    public void TaskSave(BlockStorage blockStorage){
+        blockStoragesToSave.add(blockStorage);
+        TaskStart();
+    }
+    public void TaskStart(){
+        if(taskSaves == null || taskSaves.isCancelled()){
+            taskSaves = Bukkit.getScheduler().runTaskAsynchronously(core,() -> {
+                while(!blockStoragesToSave.isEmpty()){
+                    BlockStorage blockStorage = blockStoragesToSave.get(0);
+                    saveBlockStorage(blockStorage,SaveCause.NORMAL_SAVE);
+                    blockStoragesToSave.remove(blockStorage);
+                }
+
+                taskSaves.cancel();
+            });
+        }
+    }
+
+    //ONPLACE
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void BlockStoragePlaceEvent(BlockPlaceEvent event){
+        if(event.getHand() == EquipmentSlot.HAND && event.getPlayer() != null && event.canBuild()){
+            PersistentDataContainer persistentDataContainerItem = event.getItemInHand().getItemMeta().getPersistentDataContainer();
+            if(persistentDataContainerItem.has(new NamespacedKey(core,"blockStorageShukler"), PersistentDataType.STRING)){
+
+                core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(persistentDataContainerItem.get(new NamespacedKey(core,"blockStorageShukler"),PersistentDataType.STRING).split(":")[1]).ifPresent(blockConfig -> {
+
+                    if(!blockConfig.getBlock().contains("ia")){
+                        if(StorageUtils.canNotBuild(event.getPlayer(), event.getBlockPlaced())) {
+                            event.setCancelled(true);
+                            return;
+                        };
+                        onBlockPlace(event.getBlockPlaced(), event.getPlayer(), event.getItemInHand());
+                    }
+
+                });
+
+            }
+        }
+    }
 
 
+
+
+    public void onBlockPlace(Block block, Player player,ItemStack itemHand){
+
+        PersistentDataContainer persistentDataContainerItem = itemHand.getItemMeta().getPersistentDataContainer();
+        if(persistentDataContainerItem.has(new NamespacedKey(core,"blockStorageShukler"), PersistentDataType.STRING)){
+
+            if(itemHand != null) player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+
+            String[] data = persistentDataContainerItem.get(new NamespacedKey(core,"blockStorageShukler"),PersistentDataType.STRING).split(":");
+
+            String blockStorageID = data[0];
+            String blockStorageConfigID = data[1];
+            String ownerUUID = data[2];
+            //NameSpace
+            PersistentDataContainer persistentDataContainerBlock = block.getChunk().getPersistentDataContainer();
+            int x = block.getX();
+            int y = block.getY();
+            int z = block.getZ();
+            NamespacedKey namespacedKey = new NamespacedKey(core,"BlockStorageShulker_" + x + "_" + y + "_" + z);
+
+            persistentDataContainerBlock.set(namespacedKey,PersistentDataType.STRING, blockStorageID + ":" + blockStorageConfigID + ":" + ownerUUID);
+
+        }
 
     }
+
+
+
+    //ONBREAK
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void BlockBreakEvent(BlockBreakEvent event){ //AHORA
+
+        if(event.getBlock() != null){
+            if(isBlockStorageByBlock(event.getBlock())){
+                Block block = event.getBlock();
+                BlockStorage blockStorage = getBlockStorageByBlock(event.getBlock());
+                BlockStorageConfig blockStorageConfig = blockStorage.getBlockStorageConfig();
+
+                switch (blockStorageConfig.getBlockStorageType()){
+                    case ENDER_CHEST -> {
+
+                        //ELIMINAR DE MEMORIA Y DE PERSISTENCIA
+                        removeBlockStoragePersistence(block);
+
+                    }
+                    case SHULKER -> { //GUARDAR EN DATA ✅
+                        removeBlockStoragePersistence(block);
+                        ItemStack item = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(blockStorageConfig.getBlock());
+                        ItemMeta itemMeta = item.getItemMeta();
+                        itemMeta.getPersistentDataContainer().set(new NamespacedKey(core,"blockStorageShukler"),PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorageConfig.getId() + ":" + blockStorage.getOwnerUUID());
+                        item.setItemMeta(itemMeta);
+                        block.getWorld().dropItem(block.getLocation(),item);
+                        blockStorage.delete();
+                        saveBlockStorage(blockStorage,SaveCause.NORMAL_SAVE);
+                    }
+                    default -> {
+                        if(!blockStorageConfig.getBlockStorageProperties().isBreakable()){
+                            boolean allEmpty = true;
+                            for(Storage storage : blockStorage.getStorages().values()){
+                                if(!storage.isEmpty()){
+                                    allEmpty = false;
+                                }
+                            }
+                            if(!allEmpty){
+                                AdventureUtils.playerMessage(core.getConfig().getString("messages.type.blockstorage.isBreakeable"), event.getPlayer());
+                                event.setCancelled(true);
+                                return;
+                            }
+                        }
+
+                        for(Storage storage : blockStorage.getStorages().values()){
+                            storage.dropAllItems(block.getLocation());
+                            storage.closeAllInventory();
+                            core.getManagers().getStorageManager().removeStorage(storage.getId());
+                        }
+                        blockStorage.getStorages().clear();
+                        //ELIMINAR DE MEMORIA Y DE PERSISTENCIA
+                        removeBlockStoragePersistence(block);
+                        removeBlockStorage(blockStorage.getId());
+                        blockStorage.delete();
+                    }
+                }
+            }
+        }
+    }
+
+
     //-------ONINTERACT--------
 
-    //----BLOCK----
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void BlockInteractEvent(PlayerInteractEvent event){
-        if(event.getHand().equals(EquipmentSlot.HAND)){
-            Block block = event.getClickedBlock();
-            Player player = event.getPlayer();
-            Action action = event.getAction();
+        if(event.getPlayer().isSneaking()) return;
+        if(event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND)) return;
+        if(event.getAction().toString().contains("AIR") || event.getAction().equals(Action.PHYSICAL)) return;
+        String adapterID = Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(event.getClickedBlock());
+        if(adapterID.contains("or:") && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+        onBlockInteract(event.getClickedBlock(),event.getItem(),event.getPlayer(),event,event.getAction(),adapterID);
+    }
 
-            System.out.println(block.getChunk().getPersistentDataContainer().getKeys());
-
+    public void onBlockInteract(Block block, ItemStack itemHand, Player player, Cancellable cancellable, Action action, String adapterID){
+        if(!player.isSneaking()){
+            if(!ProtectionLib.canInteract(player,block.getLocation())) return;
             if(block != null && player != null){
 
                 PersistentDataContainer persistentDataContainer = block.getChunk().getPersistentDataContainer();
@@ -157,7 +335,6 @@ public class BlockStorageManager implements Listener {
                 NamespacedKey namespacedKey = new NamespacedKey(core,"BlockStorage_" + x + "_" + y + "_" + z);
 
                 String[] blockStorageData = new String[3];
-                String adapterID = Adapter.getAdapterID(block);
                 if(persistentDataContainer.has(namespacedKey,PersistentDataType.STRING)){
                     blockStorageData = persistentDataContainer.get(namespacedKey,PersistentDataType.STRING).split(":");
                 }
@@ -166,8 +343,8 @@ public class BlockStorageManager implements Listener {
                     if(blockStorageExists(blockStorageData[0])){
                         BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigByItemID(adapterID);
                         if(action == blockStorageConfig.getBlockStorageClickType().getAction()){
-                            BlockStorage blockStorage = findBlockStorageById(blockStorageData[0]);
-                            event.setCancelled(true);
+                            BlockStorage blockStorage = getBlockStorage(blockStorageData[0]);
+                            cancellable.setCancelled(true);
                             switch (blockStorageConfig.getBlockStorageType()){
                                 case PERSONAL -> {
                                     if(!blockStorage.existStoragePlayer(player)){
@@ -194,88 +371,129 @@ public class BlockStorageManager implements Listener {
                     BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigByItemID(adapterID);
                     if(blockStorageConfig != null){
                         if(action == blockStorageConfig.getBlockStorageClickType().getAction()){
-                            event.setCancelled(true);
+                            cancellable.setCancelled(true);
+                            BlockStorage blockStorage = null;
                             switch (blockStorageConfig.getBlockStorageType()){
+                                case SHULKER -> {
+                                    NamespacedKey namespacedShulker = new NamespacedKey(core,"BlockStorageShulker_" + x + "_" + y + "_" + z);
+                                    if(persistentDataContainer.has(namespacedShulker,PersistentDataType.STRING)){
+                                        String[] blockStorageShulkerData = persistentDataContainer.get(namespacedShulker,PersistentDataType.STRING).split(":");
+                                        blockStorage = loadBlockStorage(blockStorageShulkerData[0]);
+                                        persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, blockStorageShulkerData[0] + ":" + blockStorageShulkerData[1] + ":" + blockStorageShulkerData[2]);
+                                        persistentDataContainer.remove(namespacedShulker);
+                                    }
+                                    else {
+                                        blockStorage = createBlockStorage(blockStorageConfig.getId(),block.getLocation(),player,StorageUtils.getBlockStorageId(block.getLocation()));
+                                        persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorage.getBlockStorageConfigID() + ":" + blockStorage.getOwnerUUID());
+                                    }
+                                }
                                 case ENDER_CHEST -> {
-                                    BlockStorage blockStorage = createBlockStorage(blockStorageConfig.getId(),block.getLocation(),player,blockStorageConfig.getId());
+                                    blockStorage = getBlockStorage(blockStorageConfig.getId());
+                                    ArrayList<Location> locations = new ArrayList<>();
+                                    if(blockStorage == null){
+                                        blockStorage = createBlockStorage(blockStorageConfig.getId(),locations,player,blockStorageConfig.getId());
+                                    }
+                                    locations = blockStorage.getLocs();
+                                    locations.add(new Location(block.getWorld(),block.getLocation().getX(),block.getY(),block.getZ()));
+                                    blockStorage.createStoragePlayer(player);
                                     persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorage.getBlockStorageConfigID() + ":" + blockStorage.getOwnerUUID());
-                                    openBlockStorage(blockStorage.getId(),player);
                                 }
                                 default -> {
-                                    BlockStorage blockStorage = createBlockStorage(blockStorageConfig.getId(),block.getLocation(),player,StorageUtils.getBlockStorageId(block.getLocation()));
+                                    blockStorage = createBlockStorage(blockStorageConfig.getId(),block.getLocation(),player,StorageUtils.getBlockStorageId(block.getLocation()));
                                     persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorage.getBlockStorageConfigID() + ":" + blockStorage.getOwnerUUID());
-                                    openBlockStorage(blockStorage.getId(),player);
                                 }
+                            }
+                            if(adapterID.contains("or:") || adapterID.contains("mc:") || adapterID.contains("sm:") || adapterID.contains("mmoitems:") || adapterID.contains("eb:") || adapterID.contains("mythiccrucible:")){
+                                openBlockStorage(blockStorage.getId(), player);
                             }
                         }
                     }
                 }
             }
         }
+
     }
 
-    public BlockStorageSerializable blockStorageToBlockStorageSerializable(BlockStorage blockStorage){
-        UUID ownerUUID = blockStorage.getOwnerUUID();
-        HashMap<String,String> hashMap = new HashMap<>();
-        String blockStorageID = blockStorage.getId();
-        String blockStorageConfigID = blockStorage.getBlockStorageConfigID();
-        blockStorage.getStorages().forEach((s, storage) -> hashMap.put(s,storage.getId()));
-
-        String[] locs = new String[blockStorage.getLocs().size()];
-
-        for(int i=0;i<blockStorage.getLocs().size();i++){
-
-            Location location = blockStorage.getLocs().get(i);
-
-            String loc = location.getWorld().getUID() + "_" + location.getX() + "_" + location.getY() + "_" + location.getZ();
-
-            locs[i] = loc;
-
+    public NamespacedKey getNamespacedKey(Block block){
+        return new NamespacedKey(core,"BlockStorage_" + block.getX() + "_" + block.getY() + "_" + block.getZ());
+    }
+    public boolean removeBlockStoragePersistence(Block block){
+        if(block.getChunk().getPersistentDataContainer().has(new NamespacedKey(core,"BlockStorage_" + block.getX() + "_" + block.getY() + "_" + block.getZ()),PersistentDataType.STRING)){
+            block.getChunk().getPersistentDataContainer().remove(new NamespacedKey(core,"BlockStorage_" + block.getX() + "_" + block.getY() + "_" + block.getZ()));
+            return true;
         }
-
-        return new BlockStorageSerializable(ownerUUID, hashMap, blockStorageID, blockStorageConfigID,locs);
+        return false;
     }
-
-    public BlockStorage blockStorageSerializableToBlockStorage(BlockStorageSerializable blockStorageSerializable){
-        StorageManager storageManager = core.getManagers().getStorageManager();
-        UUID ownerUUID = blockStorageSerializable.getOwnerUUID();
-        HashMap<String,Storage> hashMap = new HashMap<>();
-        String blockStorageID = blockStorageSerializable.getBlockStorageID();
-        String blockStorageConfigID = blockStorageSerializable.getBlockStorageConfigID();
-        blockStorageSerializable.getStoragesID().forEach((s, s2) -> hashMap.put(s,storageManager.getStorage(s2)));
-
-        Player player = Bukkit.getPlayer(ownerUUID); // Necesitas obtener al jugador desde su UUID, este código puede variar dependiendo de la API que uses.
-
-        ArrayList<Location> locs = new ArrayList<>();
-        String[] locsSerializable = blockStorageSerializable.getLocs();
-        for(int i=0;i<blockStorageSerializable.getLocs().length;i++){
-
-            String[] loc = locsSerializable[i].split("_");
-            World world = Bukkit.getWorld(loc[0]);
-            double x = Double.parseDouble(loc[1]);
-            double y = Double.parseDouble(loc[2]);
-            double z = Double.parseDouble(loc[3]);
-            Location location = new Location(world,x,y,z);
-            locs.add(location);
-
+    public boolean removeBlockStoragePersistence(PersistentDataContainer persistentDataContainer,int x, int y, int z){
+        if(persistentDataContainer.has(new NamespacedKey(core,"BlockStorage_" + x + "_" + y + "_" + z),PersistentDataType.STRING)){
+            persistentDataContainer.remove(new NamespacedKey(core,"BlockStorage_" + x + "_" + y + "_" + z));
+            return true;
         }
-
-        return new BlockStorage(blockStorageID, blockStorageConfigID, hashMap, player,locs);
+        return false;
+    }
+    public boolean removeBlockStoragePersistenceShulker(PersistentDataContainer persistentDataContainer,int x, int y, int z){
+        if(persistentDataContainer.has(new NamespacedKey(core,"BlockStorageShulker_" + x + "_" + y + "_" + z),PersistentDataType.STRING)){
+            persistentDataContainer.remove(new NamespacedKey(core,"BlockStorageShulker_" + x + "_" + y + "_" + z));
+            return true;
+        }
+        return false;
+    }
+    public void removeAllBlockStorageChunk(Chunk chunk){
+        for(NamespacedKey namespacedKey : chunk.getPersistentDataContainer().getKeys()){
+            if(namespacedKey.getKey().contains("BlockStorage")){
+                chunk.getPersistentDataContainer().remove(namespacedKey);
+            }
+        }
     }
 
 
+    //BASICS METHODS
     public void removeBlockStorage(String blockStorageId) {
-        this.blockStorages.remove(blockStorageId);
+        if(blockStorages.containsKey(blockStorageId)) blockStorages.remove(blockStorageId);
+        if(dataManager.getStorageManagerData().getBlockStorageManagerData().existBlockStorageData(blockStorageId)) dataManager.getStorageManagerData().getBlockStorageManagerData().removeBlockStorageData(blockStorageId);
     }
 
     // Método para buscar un BlockStorage por su ID
-    public BlockStorage findBlockStorageById(String blockStorageId) {
-        return this.blockStorages.get(blockStorageId);
+    public BlockStorage getBlockStorage(String blockStorageId) {
+        if(blockStorages.containsKey(blockStorageId)) return blockStorages.get(blockStorageId);
+        if(dataManager.getStorageManagerData().getBlockStorageManagerData().existBlockStorageData(blockStorageId)) return loadBlockStorage(blockStorageId);
+        return null;
     }
 
     // Método para verificar si existe un BlockStorage por su ID
     public boolean blockStorageExists(String blockStorageId) {
-        return this.blockStorages.containsKey(blockStorageId) ;
+        if(blockStorages.containsKey(blockStorageId)) return true;
+        if(dataManager.getStorageManagerData().getBlockStorageManagerData().existBlockStorageData(blockStorageId)) return true;
+        return false ;
+    }
+
+    //methods Data
+    public void saveBlockStorage(BlockStorage blockStorage, SaveCause saveCause){
+        String id = blockStorage.getId();
+        if(blockStorages.containsKey(id)) blockStorages.remove(id);
+        for(Storage storage : blockStorage.getStorages().values()){
+            core.getManagers().getStorageManager().saveStorage(storage,saveCause);
+        }
+        dataManager.getStorageManagerData().getBlockStorageManagerData().saveBlockStorage(blockStorage);
+    }
+    public BlockStorage loadBlockStorage(String id){
+        if(!blockStorages.containsKey(id)){
+            BlockStorage blockStorage = dataManager.getStorageManagerData().getBlockStorageManagerData().loadBlockStorageData(id);
+            if(blockStorage == null) return null;
+            blockStorages.put(blockStorage.getId(),blockStorage);
+            return blockStorage;
+        }
+        return null;
+    }
+
+    public void stop(){
+
+        while(!blockStorages.values().isEmpty()){
+            BlockStorage blockStorage = (BlockStorage) (blockStorages.values().toArray())[0];
+
+            saveBlockStorage(blockStorage,SaveCause.STOPPING_SAVE);
+        }
+
     }
 
     // Método para obtener todos los BlockStorages
@@ -327,33 +545,24 @@ public class BlockStorageManager implements Listener {
         return (List<T>) this.blockStorages.values().stream().map(mapper).collect(Collectors.toList());
     }
 
+    public boolean isBlockStorageByBlock(Block block){
+        if(block.getChunk().getPersistentDataContainer().has(new NamespacedKey(core,"BlockStorage_" + block.getX() + "_" + block.getY() + "_" + block.getZ()),PersistentDataType.STRING)) return true;
+        if(block.getChunk().getPersistentDataContainer().has(new NamespacedKey(core,"BlockStorageShulker_" + block.getX() + "_" + block.getY() + "_" + block.getZ()),PersistentDataType.STRING)) return true;
+        return false;
+    }
+    public String getBlockStorageIDByBlock(Block block){
+        if(block.getChunk().getPersistentDataContainer().has(new NamespacedKey(core,"BlockStorage_" + block.getX() + "_" + block.getY() + "_" + block.getZ()),PersistentDataType.STRING)) return block.getChunk().getPersistentDataContainer().get(new NamespacedKey(core,"BlockStorage_" + block.getX() + "_" + block.getY() + "_" + block.getZ()),PersistentDataType.STRING).split(":")[0];
+        if(block.getChunk().getPersistentDataContainer().has(new NamespacedKey(core,"BlockStorageShulker_" + block.getX() + "_" + block.getY() + "_" + block.getZ()),PersistentDataType.STRING)) return block.getChunk().getPersistentDataContainer().get(new NamespacedKey(core,"BlockStorageShulker_" + block.getX() + "_" + block.getY() + "_" + block.getZ()),PersistentDataType.STRING).split(":")[0];
+        return null;
+    }
+
+    public BlockStorage getBlockStorageByBlock(Block block){
+        return getBlockStorage(getBlockStorageIDByBlock(block));
+    }
 
     public BlockMechanicManager getBlockMechanicManager() {
         return blockMechanicManager;
     }
 
-    public void addBlockStorageChunk(Chunk chunk, BlockStorage blockStorage){
-        blockStorageChunks.put(chunk, blockStorage);
-    }
-
-    // Método para eliminar un BlockStorage de un Chunk específico.
-    public void removeBlockStorageChunk(Chunk chunk){
-        blockStorageChunks.remove(chunk);
-    }
-
-    // Método para obtener un BlockStorage de un Chunk específico.
-    public BlockStorage getBlockStorageChunk(Chunk chunk){
-        return blockStorageChunks.get(chunk);
-    }
-
-    // Método para comprobar si un Chunk específico contiene un BlockStorage.
-    public boolean containsChunk(Chunk chunk){
-        return blockStorageChunks.containsKey(chunk);
-    }
-
-    // Método para obtener todos los Chunks que contienen BlockStorages.
-    public Set<Chunk> getChunks(){
-        return blockStorageChunks.keySet();
-    }
 
 }

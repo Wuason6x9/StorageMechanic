@@ -3,7 +3,6 @@ version: '${version}'
 main: dev.wuason.storagemechanic.StorageMechanic
 api-version: 1.18
 load: POSTWORLD
-depend: [ Mechanics ]
 authors: [ Wuason ]
 description: wuason.mechanic.storagemechanic
 website: techmc.es
@@ -13,3 +12,10 @@ softdepend:
   - ChestSort
   - MythicMobs
   - PlaceholderAPI
+  - Mechanics
+  - Towny
+  - WorldGuard
+  - Factions
+  - Lands
+  - PlotSquared
+  - CrashClaim

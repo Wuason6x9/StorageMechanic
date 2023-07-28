@@ -1,12 +1,10 @@
-package dev.wuason.storagemechanic.storages.types.block;
+package dev.wuason.storagemechanic.data.storage.type.block;
 
-import dev.wuason.storagemechanic.storages.Storage;
-import org.bukkit.Location;
-
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class BlockStorageSerializable {
+public class BlockStorageData implements Serializable {
     private UUID ownerUUID;
     private HashMap<String,String> storagesID;
     private String blockStorageID;
@@ -14,7 +12,7 @@ public class BlockStorageSerializable {
 
     private String[] locs;
 
-    public BlockStorageSerializable(UUID ownerUUID, HashMap<String,String> storagesID, String blockStorageID, String blockStorageConfigID, String[] locs) {
+    public BlockStorageData(UUID ownerUUID, HashMap<String,String> storagesID, String blockStorageID, String blockStorageConfigID, String[] locs) {
         this.ownerUUID = ownerUUID;
         this.storagesID = storagesID;
         this.blockStorageID = blockStorageID;

@@ -1,24 +1,26 @@
 package dev.wuason.storagemechanic.storages.config;
 
-import dev.wuason.mechanics.utils.Adapter;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.ItemInterface;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class StorageItemInterfaceConfig {
     private String id;
-    private ArrayList<Integer> slots = new ArrayList<>();
-    private ArrayList<Integer> pages = new ArrayList<>();
+    private Map<Integer, Set<Integer>> pagesToSlots;
     private String item;
     private ItemInterface itemInterface;
 
-    public StorageItemInterfaceConfig(String id, ArrayList<Integer> slots, ArrayList<Integer> pages, String item) {
+    public StorageItemInterfaceConfig(String id, List<Integer> slots, List<Integer> pages, String item) {
         this.id = id;
-        this.slots = slots;
-        this.pages = pages;
         this.item = item;
+        this.pagesToSlots = new HashMap<>();
+        HashSet<Integer> hashSet = new HashSet<>(slots);
+
+        for(Integer i : pages){
+            pagesToSlots.put(i,hashSet);
+        }
+
         itemInterface = StorageMechanic.getInstance().getManagers().getItemInterfaceManager().getItemInterfaceById(item);
     }
 
@@ -26,19 +28,15 @@ public class StorageItemInterfaceConfig {
         return id;
     }
 
-    public ArrayList<Integer> getSlots() {
-        return slots;
-    }
-
-    public ArrayList<Integer> getPages() {
-        return pages;
+    public Map<Integer, Set<Integer>> getPagesToSlots() {
+        return pagesToSlots;
     }
 
     public String getItem() {
         return item;
     }
 
-    public ItemInterface getitemInterface() {
+    public ItemInterface getItemInterface() {
         return itemInterface;
     }
 }

@@ -14,6 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 
+import java.util.ArrayList;
+
 public class CommandManager {
     StorageMechanic core;
     CommandAPICommand command;
@@ -24,19 +26,13 @@ public class CommandManager {
     public void loadCommand(){
 
         command = new CommandAPICommand("StorageMechanic")
+                .withPermission("sm.command")
                 .withAliases("sm","storagem")
                 .withSubcommands(new CommandAPICommand("reload")
                         .withPermission("sm.command.reload")
                         .executes((sender, args) -> {
                             core.getManagers().getConfigManager().loadConfig();
                             sender.sendMessage(AdventureUtils.deserializeLegacy("StorageMechanic reloaded!"));
-                        })
-                )
-                .withSubcommands(new CommandAPICommand("create")
-                        .withPermission("sm.command.create")
-                        .withArguments(new StringArgument("storageConfigID"))
-                        .executes((sender, args) -> {
-                            core.getManagers().getStorageManager().createStorage((String)args[0]);
                         })
                 )
                 .withSubcommands(new CommandAPICommand("open")
@@ -57,7 +53,19 @@ public class CommandManager {
                         .withSubcommands(new CommandAPICommand("get")
                                 .withPermission("sm.command.customblocks.get")
                                 .withArguments(new IntegerArgument("quantity"))
-                                .withArguments(new GreedyStringArgument("id"))
+                                .withArguments(new GreedyStringArgument("id").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
+
+                                    String[] ids = new String[core.getManagers().getCustomBlockManager().getAllCustomBlocks().size()];
+
+                                    for(int i=0;i<core.getManagers().getCustomBlockManager().getAllCustomBlocks().size();i++){
+
+                                       ids[i] = core.getManagers().getCustomBlockManager().getAllCustomBlocks().get(i).getId();
+
+                                    }
+
+                                    return ids;
+
+                                })))
                                 .executes((sender, args) -> {
 
                                     Player player = (Player) sender;
@@ -77,13 +85,21 @@ public class CommandManager {
                                 })
                         )
                 )
+                .withSubcommands(new CommandAPICommand("deleteTrash")
+                        .withPermission("sm.command.deleteTrash")
+                        .executes((sender, args) -> {
+
+                            core.getManagers().getTrashSystemManager().cleanTrash();
+
+                        })
+                )
                 .withSubcommands(new CommandAPICommand("test")
 
                         .executes((sender, args) -> {
 
                             Player player = (Player) sender;
                             PersistentDataContainer persistentDataContainer = player.getLocation().getChunk().getPersistentDataContainer();
-                            persistentDataContainer.getKeys().forEach(namespacedKey -> persistentDataContainer.remove(namespacedKey));
+                            player.sendMessage(persistentDataContainer.getKeys().stream().toList().toString());
 
                         })
 

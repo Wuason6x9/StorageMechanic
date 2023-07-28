@@ -1,23 +1,21 @@
 package dev.wuason.storagemechanic.storages.config;
 
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.utils.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
+import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class StorageConfigManager {
 
     private StorageMechanic core;
 
-    private ArrayList<StorageConfig> storagesConfig;
+    private HashMap<String,StorageConfig> storagesConfig;
 
     public StorageConfigManager(StorageMechanic core) {
         this.core = core;
@@ -27,9 +25,9 @@ public class StorageConfigManager {
 
     public void loadStoragesConfig(){
 
-        storagesConfig = new ArrayList<>();
+        storagesConfig = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/storages/");
+        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/storages/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -83,8 +81,8 @@ public class StorageConfigManager {
                     if(sectionSounds != null){
                         for(Object soundKey : sectionSounds.getKeys(false).toArray()){
                             ConfigurationSection sectionSound = sectionSounds.getConfigurationSection((String)soundKey);
-                            StorageSoundConfig.type soundType = null;
-                            try {soundType = StorageSoundConfig.type.valueOf(sectionSound.getString("type",".").toUpperCase());}
+                            StorageSoundConfig.Type soundType = null;
+                            try {soundType = StorageSoundConfig.Type.valueOf(sectionSound.getString("type",".").toUpperCase());}
                             catch (IllegalArgumentException a){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage sound Config! storage_id: " + key + " sound_id: " + soundKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: soundType is null or invalid");continue;}
                             ArrayList<Integer> soundPages = StorageUtils.configFill(sectionSound.getStringList("pages"));
                             ArrayList<Integer> soundSlots = StorageUtils.configFill(sectionSound.getStringList("slots"));
@@ -134,8 +132,26 @@ public class StorageConfigManager {
                         }
                     }
 
-                    StorageConfig storageConfig = new StorageConfig((String)key,rows,pages,storageInventoryType,title,storageSoundConfigs,soundsEnabled,storageDefaultItemsConfigs,defaultItemsEnabled,storageWhiteListItemsConfigs,whiteListItemsEnabled,storageBlackListItemsConfigs,blackListItemsEnabled,storageInterfacesConfigs,interfacesEnabled,blackListMessage,whiteListMessage);
-                    storagesConfig.add(storageConfig);
+                    boolean storageBlockedEnabled = sectionStorage.getBoolean("items.block.enabled",false);
+
+                    ArrayList<StorageBlockItemConfig> storageBlockItemConfigs = new ArrayList<>();
+                    ConfigurationSection sectionBlockedItems = sectionStorage.getConfigurationSection("items.block.list");
+                    if(sectionBlockedItems != null){
+                        for(Object BlockedItemKey : sectionBlockedItems.getKeys(false).toArray()){
+                            ConfigurationSection sectionBlocked = sectionBlockedItems.getConfigurationSection((String)BlockedItemKey);
+                            ArrayList<Integer> blockedSlots = StorageUtils.configFill(sectionBlocked.getStringList("slots"));
+                            ArrayList<Integer> blockedPages = StorageUtils.configFill(sectionBlocked.getStringList("pages"));
+                            String message = sectionBlocked.getString("message");
+                            if(blockedSlots.isEmpty()){
+                                blockedSlots.addAll(StorageUtils.configFill(Collections.singletonList("0-53")));
+                            }
+                            StorageBlockItemConfig storageBlockItemConfig = new StorageBlockItemConfig((String)BlockedItemKey,blockedSlots,blockedPages,message);
+                            storageBlockItemConfigs.add(storageBlockItemConfig);
+                        }
+                    }
+
+                    StorageConfig storageConfig = new StorageConfig((String)key,rows,pages,storageInventoryType,title,storageSoundConfigs,soundsEnabled,storageDefaultItemsConfigs,defaultItemsEnabled,storageWhiteListItemsConfigs,whiteListItemsEnabled,storageBlackListItemsConfigs,blackListItemsEnabled,storageInterfacesConfigs,interfacesEnabled,blackListMessage,whiteListMessage,storageBlockItemConfigs,storageBlockedEnabled);
+                    storagesConfig.put(storageConfig.getId(),storageConfig);
                 }
             }
         }
@@ -159,48 +175,90 @@ public class StorageConfigManager {
                 ConfigurationSection sectionItemsConfig = sectionItemsConfigs.getConfigurationSection((String) itemsKey);
                 ArrayList<Integer> itemsPages = StorageUtils.configFill(sectionItemsConfig.getStringList("pages"));
                 ArrayList<Integer> itemsSlots = StorageUtils.configFill(sectionItemsConfig.getStringList("slots"));
+                if(itemsSlots.isEmpty()){
+                    itemsSlots.addAll(StorageUtils.configFill(Collections.singletonList("0-53")));
+                }
 
                 List<String> items = sectionItemsConfig.getStringList("items");
 
-                int amount = sectionItemsConfig.getInt("amount", 1);
+                float chance = Float.parseFloat(sectionItemsConfig.getString("chance","100.0"));
+                if(itemType.contains("default")){
+                    if(chance < 0.0f || chance > 100.0f){
+                        chance = 100.0f;
+                    }
+                }
+                String amount = sectionItemsConfig.getString("amount", "1");
                 if(!checkSlots(itemsSlots)){
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Some slot is wrong the range of slots is: 0 - 63");
                     continue;
                 }
-                if (amount > 64 || amount == 0) {
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
-                    AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
-                    continue;
+                if(itemType.contains("default")){
+                    if(amount.contains("-")){
+                        if(Utils.isNumber((amount.split("-"))[0])){
+                            if((Integer.parseInt((amount.split("-"))[0])) > 64 || (Integer.parseInt((amount.split("-"))[0])) == 0){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
+                                continue;
+                            }
+                        }
+                        else {
+                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
+                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
+                            continue;
+                        }
+                    }
+                    else {
+                        if(Utils.isNumber(amount)){
+                            if((Integer.parseInt(amount)) > 64 || (Integer.parseInt(amount)) == 0){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
+                                continue;
+                            }
+                        }
+                        else {
+                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
+                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
+                            continue;
+                        }
+                    }
+                    //2
+                    if(amount.contains("-") && amount.split("-").length > 1 && Utils.isNumber((amount.split("-"))[1])){
+                        if((Integer.parseInt((amount.split("-"))[1])) > 64 || (Integer.parseInt((amount.split("-"))[1])) == 0){
+                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
+                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
+                            continue;
+                        }
+                    }
+                    else {
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
+                        continue;
+                    }
                 }
-                if (!Adapter.isItemsValid(items)) {
+                if (!Mechanics.getInstance().getManager().getAdapterManager().isItemsValid(items)) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + "Item is null or invalid");
                     continue;
                 }
-                StorageItemConfig storageItemConfig = new StorageItemConfig((String) itemsKey, amount, itemsSlots, itemsPages, items);
+                StorageItemConfig storageItemConfig = new StorageItemConfig((String) itemsKey, amount, itemsSlots, itemsPages, items,chance);
                 storageItemsConfigs.add(storageItemConfig);
             }
         }
     }
 
-    public ArrayList<StorageConfig> getStoragesConfig() {
-        return storagesConfig;
+    public Collection<StorageConfig> getStoragesConfig() {
+        return storagesConfig.values();
     }
 
     // Obtener un StorageConfig específico por su ID
     public StorageConfig getStorageConfigById(String id) {
-        for (StorageConfig storageConfig : storagesConfig) {
-            if (storageConfig.getId().equals(id)) {
-                return storageConfig;
-            }
-        }
-        return null;
+        return storagesConfig.getOrDefault(id,null);
     }
 
     // Verificar si existe un StorageConfig con la ID dada
     public boolean existsStorageConfig(String id) {
-        return getStorageConfigById(id) != null;
+        return storagesConfig.containsKey(id);
     }
 
 }

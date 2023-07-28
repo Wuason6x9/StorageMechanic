@@ -1,0 +1,23 @@
+storage:
+  item:
+    item1:
+      storage_id: storage1
+      item: "mc:stick"
+      open: RIGHT
+  block:
+    blockstorage1:
+      storage_id: storage1
+      block: "sm:block1"
+      open: RIGHT
+      type: CHEST
+      properties:
+        isBreakable: true
+      mechanics:
+        hopper: enabled
+  furniture:
+    furniturestorage1:
+      storage_id: storage1
+      furniture: "sm:block1"
+      type: CHEST
+      properties:
+        isBreakable: true
