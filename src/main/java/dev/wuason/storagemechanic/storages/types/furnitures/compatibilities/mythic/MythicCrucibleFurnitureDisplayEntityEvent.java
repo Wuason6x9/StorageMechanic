@@ -19,6 +19,7 @@ public class MythicCrucibleFurnitureDisplayEntityEvent implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onFurnitureInteractHitbox(PlayerInteractEntityEvent event) {
+        if(event.getRightClicked() == null || !(event.getRightClicked() instanceof Interaction)) return;
         Interaction hitbox = (Interaction)event.getRightClicked();
         PersistentDataContainer data = hitbox.getPersistentDataContainer();
         if (data.has(FurnitureDataKeys.FURNITURE_BASE, PersistentDataType.STRING)) {

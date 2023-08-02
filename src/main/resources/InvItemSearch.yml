@@ -1,0 +1,19 @@
+inventory:
+  id: searchItem
+  type: CHEST
+  rows: 6
+  title: 'test'
+  slots:
+    blocked_slots:
+      - "player:0-20"
+    data_slots:
+      - "player:0-53" #player or openned
+    items:
+      - "panel_block:player:11"
+items:
+  blocked_item:
+    item: mc:stone
+    amount: 10
+    display: 'test'
+    lore:
+      - 'test'

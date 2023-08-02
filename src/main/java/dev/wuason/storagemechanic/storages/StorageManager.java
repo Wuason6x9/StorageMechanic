@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages;
 
 import dev.wuason.mechanics.utils.AdventureUtils;
+import dev.wuason.storagemechanic.Managers;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
@@ -9,6 +10,7 @@ import dev.wuason.storagemechanic.items.ItemInterfaceManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.config.StorageSoundConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
+import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -33,10 +35,12 @@ public class StorageManager implements Listener{
     private Map<String, Storage> storageMap = new HashMap<>();
     private Map<UUID, WaitingInputData> waitingInput = new ConcurrentHashMap<>();
     private DataManager dataManager;
+    private Managers managers;
 
-    public StorageManager(StorageMechanic core, DataManager dataManager) {
+    public StorageManager(StorageMechanic core, DataManager dataManager, Managers managers) {
         this.core = core;
         this.dataManager = dataManager;
+        this.managers = managers;
     }
 
     public Storage createStorage(String storageIdConfig) {
@@ -63,6 +67,7 @@ public class StorageManager implements Listener{
             StorageInventory storageInventory = (StorageInventory) holder;
             Storage storage = storageInventory.getStorage();
             StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
+            DragItemCheck(storage, storageInventory, event, storageConfig);
             if(storageConfig.isStorageBlockItemEnabled()){
                 DragItemBlocked(storage, storageInventory, event, storageConfig);
             }
@@ -99,6 +104,7 @@ public class StorageManager implements Listener{
                 }
             }
             if(event.getClickedInventory().getType().equals(InventoryType.PLAYER) && event.getClick().isShiftClick()){
+                ShiftClickItemCheck(storage, storageInventory, event, storageConfig);
                 if(storageConfig.isStorageBlockItemEnabled()) {
                     if(storageInventory.getInventory().firstEmpty() != -1 && event.getCurrentItem() != null){
 
@@ -124,6 +130,7 @@ public class StorageManager implements Listener{
                     ItemInterface itemInterface = core.getManagers().getItemInterfaceManager().getItemInterfaceByItemStack(clickedItem);
                     ClickItemInterface(storage,storageInventory,event,storageConfig,itemInterface);
                 }
+                ClickItemCheck(storage, storageInventory, event, storageConfig);
                 if(storageConfig.isStorageBlockItemEnabled()){
                     ClickItemBlocked(storage, storageInventory, event, storageConfig);
                 }
@@ -183,7 +190,7 @@ public class StorageManager implements Listener{
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
         if (waitingInput.containsKey(playerId)) {
-            event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_enter")));
+            event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_enter"),null));
             event.setCancelled(true);
             try {
                 int pageNumber = Integer.parseInt(event.getMessage());
@@ -193,15 +200,151 @@ public class StorageManager implements Listener{
                     Bukkit.getScheduler().runTask(core,()-> storage.openStorage(event.getPlayer(), (pageNumber - 1)));
                 }
                 else {
-                    event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_invalid")));
+                    event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_invalid"),null));
                 }
             } catch (NumberFormatException e) {
-                event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_invalid")));
+                event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_invalid"),null));
             }
             waitingInput.remove(playerId);
             event.setCancelled(true);
         }
     }
+
+
+    //CHECK ITEM
+    public void ClickItemCheck(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
+        HumanEntity humanEntity = event.getWhoClicked();
+        ItemStack cursor = event.getCursor();
+
+        if(cursor != null && !cursor.getType().equals(Material.AIR)){
+
+            //ITEM STORAGE
+            if(managers.getItemStorageManager().isItemStorage(cursor)){
+                String[] src = managers.getItemStorageManager().getDataFromItemStack(cursor).split(":");
+                if(src[1].equals(storage.getId())){
+                    event.setCancelled(true);
+                    return;
+                }
+                if(!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()){
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            //FURNITURE STORAGE
+            if(managers.getFurnitureStorageManager().isShulker(cursor)){
+                String[] src = managers.getFurnitureStorageManager().getShulkerData(cursor).split(":");
+                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
+                    if(!furnitureStorageC.getFurnitureStorageProperties().isStorageable()){
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+            //BLOCK STORAGE
+            if(managers.getBlockStorageManager().isShulker(cursor)){
+                String[] src = managers.getBlockStorageManager().getShulkerData(cursor).split(":");
+                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
+                    if(!blockStorageC.getBlockStorageProperties().isStorageable()){
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+
+        }
+    }
+    public void ShiftClickItemCheck(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
+
+        HumanEntity humanEntity = event.getWhoClicked();
+        ItemStack clickedItem = event.getCurrentItem();
+        int slot = storageInventory.getInventory().firstEmpty();
+
+        if(!clickedItem.getType().equals(Material.AIR)){
+
+            //ITEM STORAGE
+            if(managers.getItemStorageManager().isItemStorage(clickedItem)){
+                String[] src = managers.getItemStorageManager().getDataFromItemStack(clickedItem).split(":");
+                if(src[1].equals(storage.getId())){
+                    event.setCancelled(true);
+                    return;
+                }
+                if(!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()){
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
+            //FURNITURE STORAGE
+            if(managers.getFurnitureStorageManager().isShulker(clickedItem)){
+                String[] src = managers.getFurnitureStorageManager().getShulkerData(clickedItem).split(":");
+                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
+                    if(!furnitureStorageC.getFurnitureStorageProperties().isStorageable()){
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+            //BLOCK STORAGE
+            if(managers.getBlockStorageManager().isShulker(clickedItem)){
+                String[] src = managers.getBlockStorageManager().getShulkerData(clickedItem).split(":");
+                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
+                    if(!blockStorageC.getBlockStorageProperties().isStorageable()){
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+        }
+
+    }
+    public void DragItemCheck(Storage storage,StorageInventory storageInventory,InventoryDragEvent event,StorageConfig storageConfig){
+
+        HumanEntity humanEntity = event.getWhoClicked();
+        ItemStack cursor = event.getCursor();
+        if(cursor == null){
+            cursor = (ItemStack) (event.getNewItems().values().toArray())[0];
+        }
+        if(cursor != null && !cursor.getType().equals(Material.AIR)){
+
+            //ITEM STORAGE
+            if(managers.getItemStorageManager().isItemStorage(cursor)){
+                String[] src = managers.getItemStorageManager().getDataFromItemStack(cursor).split(":");
+                if(src[1].equals(storage.getId())){
+                    event.setCancelled(true);
+                    return;
+                }
+                if(!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()){
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
+            //FURNITURE STORAGE
+            if(managers.getFurnitureStorageManager().isShulker(cursor)){
+                String[] src = managers.getFurnitureStorageManager().getShulkerData(cursor).split(":");
+                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
+                    if(!furnitureStorageC.getFurnitureStorageProperties().isStorageable()){
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+            //BLOCK STORAGE
+            if(managers.getBlockStorageManager().isShulker(cursor)){
+                String[] src = managers.getBlockStorageManager().getShulkerData(cursor).split(":");
+                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
+                    if(!blockStorageC.getBlockStorageProperties().isStorageable()){
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+
+        }
+
+    }
+
+
     public void ClickItemCheckList(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
 
         HumanEntity humanEntity = event.getWhoClicked();
@@ -354,7 +497,7 @@ public class StorageManager implements Listener{
             case SEARCH_PAGE -> {
                 Player player = (Player) event.getWhoClicked();
                 player.closeInventory();
-                player.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_enter")));
+                player.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_enter"),null));
                 UUID playerId = player.getUniqueId();
                 waitingInput.put(playerId, new WaitingInputData(storage, storageInventory.getPage()));
 
@@ -388,7 +531,14 @@ public class StorageManager implements Listener{
         return null;
     }
 
+    public void removeStorageFromInputWait(String id){
+        for(Map.Entry<UUID,WaitingInputData> entry : waitingInput.entrySet()){
+            if(id.equals(entry.getValue().getStorage().getId())) waitingInput.remove(entry.getKey());
+        }
+    }
+
     public void removeStorage(String id) {
+        removeStorageFromInputWait(id);
         if(storageMap.containsKey(id)) storageMap.remove(id);
         if(dataManager.getStorageManagerData().existStorageData(id)) dataManager.getStorageManagerData().removeStorageData(id);
     }

@@ -1,11 +1,10 @@
 package dev.wuason.storagemechanic;
 
-import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPIConfig;
+import dev.wuason.fastinv.FastInvManager;
 import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MechanicsUtils;
-import io.th0rgal.protectionlib.ProtectionLib;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,22 +25,32 @@ public final class StorageMechanic extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        if(!Bukkit.getPluginManager().isPluginEnabled("Mechanics")){
+            getLogger().severe("-------------------------------------------------------------------------");
+            getLogger().severe("-------------------------------------------------------------------------");
+            getLogger().severe(" ");
+            getLogger().severe(" ");
+            getLogger().severe("ERROR LOADING STORAGE MECHANIC!");
+            getLogger().severe("You must not put the plugin in the following folder! put in plugins/Mechanics/mechanics");
+            getLogger().severe(" ");
+            getLogger().severe(" ");
+            getLogger().severe("-------------------------------------------------------------------------");
+            getLogger().severe("-------------------------------------------------------------------------");
+            getPluginLoader().disablePlugin(this);
+            return;
+        }
         AdventureUtils.sendMessagePluginConsole(this, "<green>Loading StorageMechanic...");
     }
 
     @Override
     public void onEnable() {
-
         if(!MechanicsUtils.isMechanicLoaded(this)){
             getLogger().severe("ERROR LOADING STORAGE MECHANIC!");
             getLogger().severe("You must not put the plugin in the following folder!");
             getPluginLoader().disablePlugin(this);
         }
         loadConfig();
-        ProtectionLib.init(this);
-        CommandAPI.onLoad(new CommandAPIConfig().silentLogs(true));
-        CommandAPI.onEnable(this);
-
+        FastInvManager.register(this);
 
         AdventureUtils.sendMessagePluginConsole(this, "<green>Loading Managers...");
         managers = new Managers(this);

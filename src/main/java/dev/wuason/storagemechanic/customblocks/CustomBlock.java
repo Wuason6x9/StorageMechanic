@@ -1,5 +1,7 @@
 package dev.wuason.storagemechanic.customblocks;
 
+import dev.wuason.mechanics.items.ItemBuilderMechanic;
+import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import org.bukkit.Material;
@@ -12,22 +14,22 @@ import java.util.List;
 
 public class CustomBlock {
     private String id;
-    private Material material;
+    private String item;
     private ItemStack itemStack;
     private CustomBlockProperties customBlockProperties;
 
-    public CustomBlock(String id, Material material, String displayName, List<String> lore, CustomBlockProperties customBlockProperties) {
+    public CustomBlock(String id, String item, String displayName, List<String> lore, CustomBlockProperties customBlockProperties) {
         this.id = id;
-        this.material = material;
+        this.item = item;
         this.customBlockProperties = customBlockProperties;
+        ItemBuilderMechanic itemBuilderMechanic = new ItemBuilderMechanic(item,1);
 
-        itemStack = Utils.createItemStackByAdapter("mc:" + material.toString(), displayName, lore, 1);
+        if(lore != null) itemBuilderMechanic.setLore(AdventureUtils.deserializeLegacyList(lore,null));
+        if(displayName != null) itemBuilderMechanic.setName(AdventureUtils.deserializeLegacy(displayName,null));
 
-        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemBuilderMechanic.addPersistentData(new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicb"),id);
 
-        itemMeta.getPersistentDataContainer().set(new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicb"), PersistentDataType.STRING, id);
-
-        itemStack.setItemMeta(itemMeta);
+        itemStack = itemBuilderMechanic.build();
     }
 
     public ItemStack getItemStack() {
@@ -38,8 +40,8 @@ public class CustomBlock {
         return id;
     }
 
-    public Material getMaterial() {
-        return material;
+    public String getItem() {
+        return item;
     }
 
     public CustomBlockProperties getCustomBlockProperties() {

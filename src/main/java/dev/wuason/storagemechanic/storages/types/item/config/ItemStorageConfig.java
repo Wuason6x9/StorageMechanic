@@ -5,12 +5,14 @@ public class ItemStorageConfig {
     private String itemAdapter;
     private ItemStorageClickType itemStorageClickType;
     private String storageConfigID;
+    private ItemStoragePropertiesConfig itemStoragePropertiesConfig;
 
-    public ItemStorageConfig(String id, String itemAdapter, ItemStorageClickType itemStorageClickType, String storageConfigID) {
+    public ItemStorageConfig(String id, String itemAdapter, ItemStorageClickType itemStorageClickType, String storageConfigID, ItemStoragePropertiesConfig itemStoragePropertiesConfig) {
         this.id = id;
         this.itemAdapter = itemAdapter;
         this.itemStorageClickType = itemStorageClickType;
         this.storageConfigID = storageConfigID;
+        this.itemStoragePropertiesConfig = itemStoragePropertiesConfig;
     }
 
     public String getId() {
@@ -27,5 +29,9 @@ public class ItemStorageConfig {
 
     public String getStorageConfigID() {
         return storageConfigID;
+    }
+
+    public ItemStoragePropertiesConfig getItemStoragePropertiesConfig() {
+        return itemStoragePropertiesConfig;
     }
 }

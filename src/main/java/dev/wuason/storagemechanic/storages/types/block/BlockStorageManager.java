@@ -2,6 +2,7 @@ package dev.wuason.storagemechanic.storages.types.block;
 
 import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
+import dev.wuason.protectionlib.ProtectionLib;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
@@ -12,7 +13,6 @@ import dev.wuason.storagemechanic.storages.types.block.compatibilities.mythic.My
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfig;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
 import dev.wuason.storagemechanic.utils.StorageUtils;
-import io.th0rgal.protectionlib.ProtectionLib;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -46,6 +46,7 @@ public class BlockStorageManager implements Listener {
     private DataManager dataManager;
     private BukkitTask taskSaves = null;
     private ArrayList<BlockStorage> blockStoragesToSave = new ArrayList<>();
+    private final NamespacedKey BLOCK_SHULKER_NAMESPACEDKEY = new NamespacedKey(StorageMechanic.getInstance(),"blockstorageshulker");
 
     public BlockStorageManager(StorageMechanic core, DataManager dataManager) {
         this.core = core;
@@ -203,9 +204,9 @@ public class BlockStorageManager implements Listener {
     public void BlockStoragePlaceEvent(BlockPlaceEvent event){
         if(event.getHand() == EquipmentSlot.HAND && event.getPlayer() != null && event.canBuild()){
             PersistentDataContainer persistentDataContainerItem = event.getItemInHand().getItemMeta().getPersistentDataContainer();
-            if(persistentDataContainerItem.has(new NamespacedKey(core,"blockStorageShukler"), PersistentDataType.STRING)){
+            if(persistentDataContainerItem.has(new NamespacedKey(core,"blockStorageShulker"), PersistentDataType.STRING)){
 
-                core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(persistentDataContainerItem.get(new NamespacedKey(core,"blockStorageShukler"),PersistentDataType.STRING).split(":")[1]).ifPresent(blockConfig -> {
+                core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(persistentDataContainerItem.get(new NamespacedKey(core,"blockStorageShulker"),PersistentDataType.STRING).split(":")[1]).ifPresent(blockConfig -> {
 
                     if(!blockConfig.getBlock().contains("ia")){
                         if(StorageUtils.canNotBuild(event.getPlayer(), event.getBlockPlaced())) {
@@ -227,11 +228,11 @@ public class BlockStorageManager implements Listener {
     public void onBlockPlace(Block block, Player player,ItemStack itemHand){
 
         PersistentDataContainer persistentDataContainerItem = itemHand.getItemMeta().getPersistentDataContainer();
-        if(persistentDataContainerItem.has(new NamespacedKey(core,"blockStorageShukler"), PersistentDataType.STRING)){
+        if(persistentDataContainerItem.has(new NamespacedKey(core,"blockStorageShulker"), PersistentDataType.STRING)){
 
             if(itemHand != null) player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
 
-            String[] data = persistentDataContainerItem.get(new NamespacedKey(core,"blockStorageShukler"),PersistentDataType.STRING).split(":");
+            String[] data = persistentDataContainerItem.get(new NamespacedKey(core,"blockStorageShulker"),PersistentDataType.STRING).split(":");
 
             String blockStorageID = data[0];
             String blockStorageConfigID = data[1];
@@ -273,7 +274,7 @@ public class BlockStorageManager implements Listener {
                         removeBlockStoragePersistence(block);
                         ItemStack item = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(blockStorageConfig.getBlock());
                         ItemMeta itemMeta = item.getItemMeta();
-                        itemMeta.getPersistentDataContainer().set(new NamespacedKey(core,"blockStorageShukler"),PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorageConfig.getId() + ":" + blockStorage.getOwnerUUID());
+                        itemMeta.getPersistentDataContainer().set(new NamespacedKey(core,"blockStorageShulker"),PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorageConfig.getId() + ":" + blockStorage.getOwnerUUID());
                         item.setItemMeta(itemMeta);
                         block.getWorld().dropItem(block.getLocation(),item);
                         blockStorage.delete();
@@ -485,6 +486,14 @@ public class BlockStorageManager implements Listener {
         }
         return null;
     }
+
+    public boolean isShulker(ItemStack itemStack){
+        return itemStack.getItemMeta().getPersistentDataContainer().has(BLOCK_SHULKER_NAMESPACEDKEY, PersistentDataType.STRING);
+    }
+    public String getShulkerData(ItemStack itemStack){
+        return itemStack.getItemMeta().getPersistentDataContainer().get(BLOCK_SHULKER_NAMESPACEDKEY,PersistentDataType.STRING);
+    }
+
 
     public void stop(){
 

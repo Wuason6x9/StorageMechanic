@@ -1,5 +1,6 @@
 package dev.wuason.storagemechanic.storages.types.entity.skills;
 
+import dev.wuason.protectionlib.ProtectionLib;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
@@ -8,7 +9,6 @@ import io.lumine.mythic.api.config.MythicLineConfig;
 import io.lumine.mythic.api.skills.ITargetedEntitySkill;
 import io.lumine.mythic.api.skills.SkillMetadata;
 import io.lumine.mythic.api.skills.SkillResult;
-import io.th0rgal.protectionlib.ProtectionLib;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

@@ -28,10 +28,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class CustomBlockManager implements Listener {
 
@@ -67,25 +64,7 @@ public class CustomBlockManager implements Listener {
                 for(Object key : sectionCustomBlocks.getKeys(false).toArray()){
 
                     ConfigurationSection customBlockSection = sectionCustomBlocks.getConfigurationSection((String)key);
-                    Material material = null;
-                    try {
-                        material = Material.valueOf(customBlockSection.getString("material").toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material is null");
-                        continue;
-                    }
-
-                    if(material == null){
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material is null");
-                        continue;
-                    }
-                    if(!material.isBlock()){
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading custom block! customblock_id: " + key + " in file: " + file.getName());
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Material isn't a block!");
-                        continue;
-                    }
+                    String material = customBlockSection.getString("material", "mc:stone");
 
                     String displayName = customBlockSection.getString("displayName");
 

@@ -4,6 +4,8 @@ storage:
       storage_id: storage1
       item: "mc:stick"
       open: RIGHT
+      properties:
+        isStorageable: false
   block:
     blockstorage1:
       storage_id: storage1
@@ -12,6 +14,7 @@ storage:
       type: CHEST
       properties:
         isBreakable: true
+        isStorageable: false
       mechanics:
         hopper: enabled
   furniture:
@@ -21,3 +24,4 @@ storage:
       type: CHEST
       properties:
         isBreakable: true
+        isStorageable: false

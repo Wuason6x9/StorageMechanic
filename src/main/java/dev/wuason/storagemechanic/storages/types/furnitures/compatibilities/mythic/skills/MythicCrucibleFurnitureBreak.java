@@ -21,7 +21,7 @@ public class MythicCrucibleFurnitureBreak implements INoTargetSkill {
 
     @Override
     public SkillResult cast(SkillMetadata skillMetadata) {
-
+        if(skillMetadata.getTrigger() == null) return SkillResult.ERROR;
         if(skillMetadata.getCaster() instanceof Furniture){
             Furniture furniture = (Furniture) skillMetadata.getCaster();
             Player player = (Player) skillMetadata.getTrigger().getBukkitEntity();

@@ -2,6 +2,7 @@ package dev.wuason.storagemechanic.storages.types.furnitures;
 
 import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
+import dev.wuason.protectionlib.ProtectionLib;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
@@ -12,7 +13,6 @@ import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.myth
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.skills.EventCancel;
 import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfig;
 import dev.wuason.storagemechanic.utils.StorageUtils;
-import io.th0rgal.protectionlib.ProtectionLib;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -463,6 +463,13 @@ public class FurnitureStorageManager {
             return furnitureStorage;
         }
         return null;
+    }
+
+    public boolean isShulker(ItemStack itemStack){
+        return itemStack.getItemMeta().getPersistentDataContainer().has(FURNITURE_SHULKER_NAMESPACEDKEY, PersistentDataType.STRING);
+    }
+    public String getShulkerData(ItemStack itemStack){
+        return itemStack.getItemMeta().getPersistentDataContainer().get(FURNITURE_SHULKER_NAMESPACEDKEY,PersistentDataType.STRING);
     }
 
     public void stop(){

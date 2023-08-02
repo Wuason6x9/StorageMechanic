@@ -1,11 +1,7 @@
 package dev.wuason.storagemechanic;
 
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.GreedyStringArgument;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
-import dev.wuason.mechanics.Mechanics;
+import dev.wuason.commandapi.CommandAPICommand;
+import dev.wuason.commandapi.arguments.*;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.customblocks.CustomBlock;
 import dev.wuason.storagemechanic.storages.Storage;
@@ -15,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class CommandManager {
     StorageMechanic core;
@@ -32,7 +29,7 @@ public class CommandManager {
                         .withPermission("sm.command.reload")
                         .executes((sender, args) -> {
                             core.getManagers().getConfigManager().loadConfig();
-                            sender.sendMessage(AdventureUtils.deserializeLegacy("StorageMechanic reloaded!"));
+                            sender.sendMessage(AdventureUtils.deserializeLegacy("StorageMechanic reloaded!",null));
                         })
                 )
                 .withSubcommands(new CommandAPICommand("open")
@@ -43,8 +40,8 @@ public class CommandManager {
                         })))
                         .executes((sender, args) -> {
 
-                            Storage storage = core.getManagers().getStorageManager().getStorage((String)args[1]);
-                            storage.openStorage((Player)sender, (int)args[0]);
+                            Storage storage = core.getManagers().getStorageManager().getStorage((String)args.get(1));
+                            storage.openStorage((Player)sender, (int)args.get(0));
 
                         })
                 )
@@ -52,8 +49,7 @@ public class CommandManager {
                         .withPermission("sm.command.customblocks")
                         .withSubcommands(new CommandAPICommand("get")
                                 .withPermission("sm.command.customblocks.get")
-                                .withArguments(new IntegerArgument("quantity"))
-                                .withArguments(new GreedyStringArgument("id").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
+                                .withArguments(new StringArgument("id").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
 
                                     String[] ids = new String[core.getManagers().getCustomBlockManager().getAllCustomBlocks().size()];
 
@@ -66,14 +62,14 @@ public class CommandManager {
                                     return ids;
 
                                 })))
+                                .withArguments(new IntegerArgument("amount"))
                                 .executes((sender, args) -> {
 
                                     Player player = (Player) sender;
-                                    int quantity = (int) args[0];
-                                    String id = (String) args[1];
-
+                                    int quantity = (int) args.get(1);
+                                    String id = (String) args.get(0);
                                     CustomBlock customBlock = core.getManagers().getCustomBlockManager().getCustomBlockById(id);
-
+                                    if(quantity<1||quantity>64) quantity = 64;
                                     if(customBlock != null){
                                         ItemStack itemStack = customBlock.getItemStack();
                                         itemStack.setAmount(quantity);
@@ -84,6 +80,43 @@ public class CommandManager {
                                     AdventureUtils.playerMessage(core.getConfig().getString("messages.commands.custom_blocks.get.invalid_id","Invalid ID").replace("%id%",id), player);
                                 })
                         )
+                        .withSubcommands(new CommandAPICommand("give")
+                                .withPermission("sm.command.customblocks.give")
+                                .withArguments(new EntitySelectorArgument.ManyPlayers("player"))
+                                .withArguments(new StringArgument("id").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
+
+                                    String[] ids = new String[core.getManagers().getCustomBlockManager().getAllCustomBlocks().size()];
+
+                                    for(int i=0;i<core.getManagers().getCustomBlockManager().getAllCustomBlocks().size();i++){
+
+                                        ids[i] = core.getManagers().getCustomBlockManager().getAllCustomBlocks().get(i).getId();
+
+                                    }
+
+                                    return ids;
+
+                                })))
+                                .withArguments(new IntegerArgument("amount"))
+                                .executes((sender, args) -> {
+                                    Collection<Player> players = (Collection<Player>) args.get(0);
+                                    if(players.isEmpty()) return;
+                                    int quantity = (int) args.get(2);
+                                    String id = (String) args.get(1);
+                                    CustomBlock customBlock = core.getManagers().getCustomBlockManager().getCustomBlockById(id);
+                                    if(quantity<1||quantity>64) quantity = 64;
+                                    if(customBlock != null){
+                                        ItemStack itemStack = customBlock.getItemStack();
+                                        itemStack.setAmount(quantity);
+                                        for(Player player : players){
+                                            StorageUtils.addItemToInventoryOrDrop(player,itemStack);
+                                        }
+                                        sender.sendMessage(AdventureUtils.deserializeLegacy(core.getConfig().getString("messages.commands.custom_blocks.get.valid_id","you have received: " + id).replace("%id%",id),null));
+                                        return;
+                                    }
+
+                                    sender.sendMessage(AdventureUtils.deserializeLegacy(core.getConfig().getString("messages.commands.custom_blocks.get.invalid_id","Invalid ID").replace("%id%",id),null));
+                                })
+                        )
                 )
                 .withSubcommands(new CommandAPICommand("deleteTrash")
                         .withPermission("sm.command.deleteTrash")
@@ -92,17 +125,6 @@ public class CommandManager {
                             core.getManagers().getTrashSystemManager().cleanTrash();
 
                         })
-                )
-                .withSubcommands(new CommandAPICommand("test")
-
-                        .executes((sender, args) -> {
-
-                            Player player = (Player) sender;
-                            PersistentDataContainer persistentDataContainer = player.getLocation().getChunk().getPersistentDataContainer();
-                            player.sendMessage(persistentDataContainer.getKeys().stream().toList().toString());
-
-                        })
-
                 )
                 .withPermission("sm.command.main");
 

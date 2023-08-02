@@ -73,7 +73,7 @@ public class StorageUtils {
 
     }
 
-
+    @Deprecated
     public static void addItemToInventoryOrDrop(Player player, ItemStack itemStack) {
         HashMap<Integer, ItemStack> remainingItems = player.getInventory().addItem(itemStack);
         if (!remainingItems.isEmpty()) {

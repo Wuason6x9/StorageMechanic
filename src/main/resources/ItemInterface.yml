@@ -5,3 +5,12 @@ Items:
     displayName: '<red>Test'
     lore:
       - '<gold>test'
+  item2:
+    itemType: SEARCH_ITEM
+    item: 'mc:stone'
+    displayName: '<red>Test'
+    lore:
+      - '<gold>test'
+    properties:
+      inv_id: searchItem #inventory
+      inv_result_id: searchItemResult

@@ -37,45 +37,38 @@ public class ItemStorageManager implements Listener {
     public void OnInteract(PlayerInteractEvent e){
 
         if(e.getHand() != null && e.getHand().equals(EquipmentSlot.HAND) && e.hasItem() && !e.getItem().getType().equals(Material.AIR)){
-            BukkitTask task = Bukkit.getScheduler().runTaskAsynchronously(core,() -> {
-                try{
-                    if(isItemStorage(e.getItem())){
-                        String[] src = getDataFromItemStack(e.getItem()).split(":");
-                        StorageManager storageManager = core.getManagers().getStorageManager();
-                        if(!storageManager.storageExists(src[1])){
-                            removeStorageFromItemStack(e.getItem());
-                            removeStoragePlayerData(UUID.fromString(src[2]), src[1]);
-                            Bukkit.getScheduler().runTask(core,() -> e.getPlayer().getInventory().remove(e.getItem()));
-                            return;
-                        }
-                        Storage storage = storageManager.getStorage(src[1]);
-                        if(!core.getManagers().getItemStorageConfigManager().getItemStorageConfigs().containsKey(src[0])){
-                            core.getManagers().getStorageManager().removeStorage(src[1]);
-                            removeStorageFromItemStack(e.getItem());
-                            removeStoragePlayerData(UUID.fromString(src[2]), src[1]);
-                            Bukkit.getScheduler().runTask(core,() -> e.getPlayer().getInventory().remove(e.getItem()));
-                            return;
-                        }
-                        ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().getItemStorageConfigs().get(src[0]);
-                        if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
-                        Bukkit.getScheduler().runTask(core,() -> storage.openStorage(e.getPlayer(),0));
-                        return;
-                    }
-                    ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(e.getItem()));
-                    if(itemStorageConfig == null) return;
-                    if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
-                    Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID());
-                    addStoragePlayerData(e.getPlayer().getUniqueId(),storage.getId(),itemStorageConfig.getId());
-
-                    setStorageFromItemStack(e.getItem(),storage.getId(),itemStorageConfig.getId(),e.getPlayer().getUniqueId());
-
-                    Bukkit.getScheduler().runTask(core,() -> storage.openStorage(e.getPlayer(), 0));
-
-
-                } catch (Exception exception) {
-                    exception.printStackTrace();
+            if(isItemStorage(e.getItem())){
+                String[] src = getDataFromItemStack(e.getItem()).split(":");
+                StorageManager storageManager = core.getManagers().getStorageManager();
+                if(!storageManager.storageExists(src[1])){
+                    removeStorageFromItemStack(e.getItem());
+                    removeStoragePlayerData(UUID.fromString(src[2]), src[1]);
+                    Bukkit.getScheduler().runTask(core,() -> e.getPlayer().getInventory().remove(e.getItem()));
+                    return;
                 }
-            });
+                Storage storage = storageManager.getStorage(src[1]);
+                if(!core.getManagers().getItemStorageConfigManager().getItemStorageConfigs().containsKey(src[0])){
+                    core.getManagers().getStorageManager().removeStorage(src[1]);
+                    removeStorageFromItemStack(e.getItem());
+                    removeStoragePlayerData(UUID.fromString(src[2]), src[1]);
+                    Bukkit.getScheduler().runTask(core,() -> e.getPlayer().getInventory().remove(e.getItem()));
+                    return;
+                }
+                ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().getItemStorageConfigs().get(src[0]);
+                if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
+                e.setCancelled(true);
+                Bukkit.getScheduler().runTask(core,() -> storage.openStorage(e.getPlayer(),0));
+                return;
+            }
+            ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(e.getItem()));
+            if(itemStorageConfig == null) return;
+            if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
+            Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID());
+            addStoragePlayerData(e.getPlayer().getUniqueId(),storage.getId(),itemStorageConfig.getId());
+
+            setStorageFromItemStack(e.getItem(),storage.getId(),itemStorageConfig.getId(),e.getPlayer().getUniqueId());
+            e.setCancelled(true);
+            Bukkit.getScheduler().runTask(core,() -> storage.openStorage(e.getPlayer(), 0));
         }
 
     }

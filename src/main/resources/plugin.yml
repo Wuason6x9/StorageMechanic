@@ -9,13 +9,6 @@ website: techmc.es
 softdepend:
   - ItemsAdder
   - Oraxen
-  - ChestSort
   - MythicMobs
   - PlaceholderAPI
   - Mechanics
-  - Towny
-  - WorldGuard
-  - Factions
-  - Lands
-  - PlotSquared
-  - CrashClaim

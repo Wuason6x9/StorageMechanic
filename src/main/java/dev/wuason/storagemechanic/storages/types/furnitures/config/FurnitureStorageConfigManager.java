@@ -66,7 +66,9 @@ public class FurnitureStorageConfigManager {
                     }
 
                     //a
-                    FurnitureStorageProperties furnitureStorageProperties = new FurnitureStorageProperties(sectionFurnitureStorage.getBoolean("properties.isBreakable",true));
+                    boolean breakable = sectionFurnitureStorage.getBoolean("properties.isBreakable",true);
+                    boolean storageable = sectionFurnitureStorage.getBoolean("properties.isStorageable",false);
+                    FurnitureStorageProperties furnitureStorageProperties = new FurnitureStorageProperties(breakable,storageable);
 
                     String furniture = sectionFurnitureStorage.getString("furniture",".");
 

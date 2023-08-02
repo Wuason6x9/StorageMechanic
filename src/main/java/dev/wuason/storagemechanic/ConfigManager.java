@@ -74,6 +74,7 @@ public class ConfigManager {
         core.getManagers().getBlockStorageConfigManager().loadBlockStorageConfigs();
         core.getManagers().getItemStorageConfigManager().loadItemStorageConfigs();
         core.getManagers().getFurnitureStorageConfigManager().loadFurnitureStorageConfigs();
+        core.getManagers().getInventoryConfigManager().loadInventoriesConfig();
 
         configFile = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/config.yml");
         if(!configFile.exists()){

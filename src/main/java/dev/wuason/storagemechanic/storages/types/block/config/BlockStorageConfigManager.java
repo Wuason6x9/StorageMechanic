@@ -65,7 +65,9 @@ public class BlockStorageConfigManager {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Type is null or invalid");
                         continue;
                     }
-                    BlockStorageProperties blockStorageProperties = new BlockStorageProperties(sectionBlockStorage.getBoolean("properties.isBreakable",true));
+                    boolean breakable = sectionBlockStorage.getBoolean("properties.isBreakable",true);
+                    boolean storageable = sectionBlockStorage.getBoolean("properties.isStorageable",false);
+                    BlockStorageProperties blockStorageProperties = new BlockStorageProperties(breakable,storageable);
                     BlockStorageClickType blockStorageClickType;
                     try {
                         blockStorageClickType = BlockStorageClickType.valueOf(sectionBlockStorage.getString("open"));

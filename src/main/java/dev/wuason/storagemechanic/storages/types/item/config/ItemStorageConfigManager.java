@@ -83,7 +83,11 @@ public class ItemStorageConfigManager {
                         continue;
                     }
 
-                    ItemStorageConfig itemStorageConfig = new ItemStorageConfig((String)key,itemId,itemStorageClickType,storage);
+                    //PROPERTIES
+                    boolean storageable = sectionItemStorage.getBoolean("properties.isStorageable",false);
+                    ItemStoragePropertiesConfig itemStoragePropertiesConfig = new ItemStoragePropertiesConfig(storageable);
+
+                    ItemStorageConfig itemStorageConfig = new ItemStorageConfig((String)key,itemId,itemStorageClickType,storage,itemStoragePropertiesConfig);
                     itemStorageConfigs.put((String)key,itemStorageConfig);
 
                 }
