@@ -3,10 +3,12 @@ package dev.wuason.storagemechanic.storages;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.Managers;
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.api.events.storage.ClickPageStorageEvent;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
+import dev.wuason.storagemechanic.items.properties.SearchItemProperties;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.config.StorageSoundConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
@@ -30,7 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class StorageManager implements Listener{
+public class StorageManager implements Listener {
     private StorageMechanic core;
     private Map<String, Storage> storageMap = new HashMap<>();
     private Map<UUID, WaitingInputData> waitingInput = new ConcurrentHashMap<>();
@@ -78,6 +80,7 @@ public class StorageManager implements Listener{
     }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
+
         if(event.getClickedInventory() == null) return;
         InventoryHolder holder = event.getInventory().getHolder();
         if (holder instanceof StorageInventory) {
@@ -103,7 +106,7 @@ public class StorageManager implements Listener{
                     }
                 }
             }
-            if(event.getClickedInventory().getType().equals(InventoryType.PLAYER) && event.getClick().isShiftClick()){
+            if(event.getCurrentItem() != null && event.getClickedInventory().getType().equals(InventoryType.PLAYER) && event.getClick().isShiftClick()){
                 ShiftClickItemCheck(storage, storageInventory, event, storageConfig);
                 if(storageConfig.isStorageBlockItemEnabled()) {
                     if(storageInventory.getInventory().firstEmpty() != -1 && event.getCurrentItem() != null){
@@ -139,6 +142,8 @@ public class StorageManager implements Listener{
                 }
             }
 
+            ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event,storageInventory);
+            Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
 
         }
     }
@@ -494,6 +499,11 @@ public class StorageManager implements Listener{
     }
     private void ClickItemInterface(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig,ItemInterface itemInterface){
         switch (itemInterface.getItemInterfaceType()){
+            case SEARCH_ITEM -> {
+                Player player = (Player) event.getWhoClicked();
+                SearchItemProperties properties = (SearchItemProperties) itemInterface.getProperties();
+                core.getManagers().getInventoryManager().getSearchItemInventoryManager().openSearchItemMenu(player,properties.getInvId(),properties.getInvResultId(),storage,properties.getSearchType());
+            }
             case SEARCH_PAGE -> {
                 Player player = (Player) event.getWhoClicked();
                 player.closeInventory();

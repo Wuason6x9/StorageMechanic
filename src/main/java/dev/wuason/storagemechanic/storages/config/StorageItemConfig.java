@@ -1,23 +1,30 @@
 package dev.wuason.storagemechanic.storages.config;
 
+import dev.wuason.mechanics.Mechanics;
+import org.bukkit.inventory.ItemStack;
+
 import java.util.*;
 
 public class StorageItemConfig {
     private String id;
     private String amount;
     private Map<Integer, Set<Integer>> pagesToSlots;
-    private Set<String> items;
+    private Set<String> itemsList;
     private float chance;
+    private ItemStack[] items;
 
-    public StorageItemConfig(String id, String amount, List<Integer> slots, List<Integer> pages, List<String> items, float chance) {
+    public StorageItemConfig(String id, String amount, List<Integer> slots, List<Integer> pages, List<String> itemsList, float chance) {
         this.id = id;
         this.amount = amount;
-        this.items = new HashSet<>(items);
+        this.itemsList = new HashSet<>(itemsList);
         this.chance = chance;
-
         this.pagesToSlots = new HashMap<>();
         HashSet<Integer> hashSet = new HashSet<>(slots);
-
+        //BUILD ITEMS
+        items = new ItemStack[itemsList.size()];
+        for(int i=0;i<itemsList.size();i++){
+            items[i] = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(itemsList.get(i));
+        }
         for(Integer i : pages){
             pagesToSlots.put(i,hashSet);
         }
@@ -35,11 +42,17 @@ public class StorageItemConfig {
         return pagesToSlots;
     }
 
-    public Set<String> getItems() {
+    public Set<String> getItemsList() {
+        return itemsList;
+    }
+
+    public ItemStack[] getItems() {
         return items;
     }
 
     public float getChance() {
         return chance;
     }
+
+
 }

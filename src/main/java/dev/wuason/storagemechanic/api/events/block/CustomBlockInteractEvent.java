@@ -1,19 +1,19 @@
-package dev.wuason.storagemechanic.customblocks.events;
+package dev.wuason.storagemechanic.api.events.block;
 
 
 import dev.wuason.storagemechanic.customblocks.CustomBlock;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
-public class CustomBlockDestroyEvent extends BlockBreakEvent implements Cancellable {
+public class CustomBlockInteractEvent extends PlayerInteractEvent implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
     private CustomBlock customBlock;
     private boolean cancelled;
 
-    public CustomBlockDestroyEvent(BlockBreakEvent event, CustomBlock customBlock) {
-        super(event.getBlock(), event.getPlayer());
+    public CustomBlockInteractEvent(PlayerInteractEvent event, CustomBlock customBlock) {
+        super(event.getPlayer(), event.getAction(), event.getItem(), event.getClickedBlock(), event.getBlockFace(), event.getHand());
         this.customBlock = customBlock;
     }
 

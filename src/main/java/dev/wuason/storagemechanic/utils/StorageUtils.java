@@ -24,26 +24,7 @@ public class StorageUtils {
         final Location pLoc = player.getLocation();
         return Range.between(0.5, 1.5).contains(bLoc.getY() - pLoc.getY()) && Range.between(-0.80, 0.80).contains(bLoc.getX() - pLoc.getX()) && Range.between(-0.80, 0.80).contains(bLoc.getZ() - pLoc.getZ());
     }
-    public static int randomNumberString(String numbers){
-        if(numbers == null) return -1;
-        if(!numbers.contains("-")) return Integer.parseInt(numbers);
-        String[] nString = numbers.split("-");
-        if(nString.length < 2) return Integer.parseInt(nString[0]);
-        if(nString[1] == null || nString[0] == null) return 64;
-        int min = Integer.parseInt(nString[0]);
-        int max = Integer.parseInt(nString[1]);
-        return randomNumber(min,max);
-    }
-    public static int randomNumber(int min, int max){
-        return (int) (min + Math.round(Math.random() * (max - min)));
-    }
-    public static boolean chance(float probability) {
-        if (probability < 0.0f || probability > 100.0f) {
-            throw new IllegalArgumentException("ERROR CHANCE!!!!!!!!!!");
-        }
-        float randomValue = new Random().nextFloat() * 100.0f;
-        return randomValue < probability;
-    }
+
     public static ArrayList<Integer> configFill(List<String> arrayList){
 
         ArrayList<Integer> arrayListNumbers = new ArrayList<>();

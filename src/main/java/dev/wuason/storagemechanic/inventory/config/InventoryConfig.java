@@ -12,10 +12,10 @@ public class InventoryConfig {
     private String title;
     private Set<Integer> blockedSlots = new HashSet<>();
     private Set<Integer> dataSlots = new HashSet<>();
-    private HashMap<Set<Integer>,ItemInventoryConfig> itemsInventory = new HashMap<>();
+    private HashMap<Integer,ItemInventoryConfig> itemsInventory = new HashMap<>();
     private String id;
 
-    public InventoryConfig(InventoryType inventoryType, int rows, String title, Set<Integer> blockedSlots, Set<Integer> dataSlots, HashMap<Set<Integer>, ItemInventoryConfig> itemsInventory, String id) {
+    public InventoryConfig(InventoryType inventoryType, int rows, String title, Set<Integer> blockedSlots, Set<Integer> dataSlots, HashMap<Integer, ItemInventoryConfig> itemsInventory, String id) {
         this.inventoryType = inventoryType;
         this.rows = rows;
         this.title = title;
@@ -25,7 +25,7 @@ public class InventoryConfig {
         this.id = id;
     }
 
-    public HashMap<Set<Integer>, ItemInventoryConfig> getItemsInventory() {
+    public HashMap<Integer, ItemInventoryConfig> getItemsInventory() {
         return itemsInventory;
     }
 

@@ -7,6 +7,9 @@ import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.customblocks.CustomBlock;
 
+import dev.wuason.storagemechanic.inventory.inventories.SearchItem.SearchType;
+import dev.wuason.storagemechanic.items.properties.Properties;
+import dev.wuason.storagemechanic.items.properties.SearchItemProperties;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -19,6 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class ItemInterfaceManager {
 
@@ -84,12 +88,31 @@ public class ItemInterfaceManager {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
                     }
+                    Properties properties = null;
+
+                    switch (itemInterfaceType){
+                        case SEARCH_ITEM -> {
+                            String invId = sectionItemInterface.getString("properties.inv_id","searchItem");
+                            String invResultId = sectionItemInterface.getString("properties.inv_result_id","searchItemResult");
+                            String type = sectionItemInterface.getString("properties.type","name");
+                            SearchType searchType = null;
+                            try {
+                                searchType = SearchType.valueOf(type.toUpperCase(Locale.ENGLISH));
+                            }
+                            catch (Exception e){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: SearchType is invalid");
+                                continue;
+                            }
+                            properties = new SearchItemProperties(invId,invResultId,searchType);
+                        }
+                    }
 
                     String displayName = sectionItemInterface.getString("displayName");
 
                     List<String> lore = sectionItemInterface.getStringList("lore");
 
-                    ItemInterface itemInterface = new ItemInterface(item,displayName,lore,itemInterfaceType,(String)key);
+                    ItemInterface itemInterface = new ItemInterface(item,displayName,lore,itemInterfaceType,(String)key,properties);
 
                     itemsInterface.add(itemInterface);
 

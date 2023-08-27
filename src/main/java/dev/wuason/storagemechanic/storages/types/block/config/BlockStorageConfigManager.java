@@ -152,7 +152,7 @@ public class BlockStorageConfigManager {
     }
 
     public BlockStorageConfig findBlockStorageConfigByItemID(String id) {
-        Map.Entry<String,BlockStorageConfig> entry = blockStorageConfigsAdapter.getOrDefault(id.toLowerCase(Locale.ENGLISH),null);
+        Map.Entry<String,BlockStorageConfig> entry = blockStorageConfigsAdapter.getOrDefault(id,null);
         return entry != null ? entry.getValue() : null;
     }
 

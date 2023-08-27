@@ -4,12 +4,10 @@ inventory:
   rows: 6
   title: 'test'
   slots:
-    blocked_slots:
-      - "player:0-20"
-    data_slots:
-      - "player:0-53" #player or openned
+    blocked_slots: [0-20]
+    data_slots: [0-53]
     items:
-      - "panel_block:player:11"
+      - "panel_block:11"
 items:
   blocked_item:
     item: mc:stone

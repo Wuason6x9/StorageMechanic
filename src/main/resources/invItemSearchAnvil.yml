@@ -1,0 +1,57 @@
+inventory:
+  id: searchItemAnvil1
+  type: ANVIL
+  title: 'test'
+  slots:
+    blocked_slots: [1-3,5-7] #apply
+    data_slots: [9-35]
+    items:
+      - "research_item:5"
+      - "close_item:4"
+      - "open_result_inv_item:3"
+      - "next_item:8"
+      - "back_item:0"
+      - "blocked_item1:1"
+      - "repair_item:999"
+      - "result_lore:998"
+items:
+  research_item:
+    type: RESEARCH_ITEM
+    amount: 1
+    item: ia:storagemechanic:search_item
+    display: "<rainbow> CLICK TO RESEARCH!"
+    lore:
+      - "Searching: %search_status%"
+  result_lore:
+    type: RESULT_LORE
+    lore:
+      - "<red>Click to get on close!"
+      - "<red>Page: <aqua>%page% <red>slot: <aqua>%slot%"
+  open_result_inv_item:
+    type: OPEN_RESULT_INV_ITEM
+    item: ia:storagemechanic:sort_item
+    amount: 1
+    display: 'Open inv results'
+  close_item:
+    type: CLOSE_ITEM
+    item: ia:mcicons:icon_cancel
+    amount: 1
+    display: 'CLOSE'
+  next_item:
+    type: NEXT_ITEM
+    item: ia:storagemechanic:next_page
+    amount: 1
+    display: '<rainbow>NEXT'
+  back_item:
+    type: BACK_ITEM
+    item: ia:storagemechanic:back_page
+    amount: 1
+    display: '<rainbow>BACK'
+  repair_item:
+    type: REPAIR_ITEM
+    item: ia:storagemechanic:empty_item
+    amount: 1
+  blocked_item1:
+    type: BLOCKED_ITEM
+    item: ia:storagemechanic:blocked_item
+    amount: 1

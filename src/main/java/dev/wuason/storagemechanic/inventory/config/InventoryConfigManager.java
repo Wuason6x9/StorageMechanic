@@ -59,6 +59,8 @@ public class InventoryConfigManager {
             }
             int rows = config.getInt("inventory.rows", 3);
             String title = config.getString("inventory.title", "<red>--- UNNAMED ---");
+
+
             Set<Integer> blockedSlots = new HashSet<>(StorageUtils.configFill((List<String>) config.getList("inventory.slots.blocked_slots",new ArrayList<>())));
             Set<Integer> dataSlots = new HashSet<>(StorageUtils.configFill((List<String>) config.getList("inventory.slots.data_slots",new ArrayList<>())));
 
@@ -68,7 +70,7 @@ public class InventoryConfigManager {
 
                 for(String key : itemsConfigurationSection.getKeys(false)){
 
-                    ConfigurationSection itemConfigurationSection = config.getConfigurationSection(key);
+                    ConfigurationSection itemConfigurationSection = itemsConfigurationSection.getConfigurationSection(key);
 
                     String itemId = key;
 
@@ -81,21 +83,27 @@ public class InventoryConfigManager {
                     int amount = itemConfigurationSection.getInt("amount",1);
                     String display = itemConfigurationSection.getString("display");
                     List<String> lore = itemConfigurationSection.getStringList("lore");
+                    String type = itemConfigurationSection.getString("type").toUpperCase(Locale.ENGLISH);
 
-                    ItemInventoryConfig itemInventoryConfig = new ItemInventoryConfig(itemId,item,amount,display,lore);
+                    ItemInventoryConfig itemInventoryConfig = new ItemInventoryConfig(itemId,item,amount,display,lore,type);
                     items.put(key,itemInventoryConfig);
                 }
 
             }
-            AdventureUtils.sendMessagePluginConsole(core, "<aqua> Items loaded: <yellow>" + items.size() + "<aqua> in inventory: <yellow>" + id);
-            HashMap<Set<Integer>,ItemInventoryConfig> itemsSlots = new HashMap<>();
+            //AdventureUtils.sendMessagePluginConsole(core, "<aqua> Items loaded: <yellow>" + items.size() + "<aqua> in inventory: <yellow>" + id);
+            HashMap<Integer,ItemInventoryConfig> itemsSlots = new HashMap<>();
             for(String itemSlot : (List<String>)config.getList("inventory.slots.items",new ArrayList<>())){
 
                 String[] src = itemSlot.split(":");
 
                 String itemId = src[0];
                 Set<Integer> slots = new HashSet<>(StorageUtils.configFill(Collections.singletonList(src[1])));
-                itemsSlots.put(slots,items.get(itemId));
+
+                for(int s : slots){
+                    ItemInventoryConfig itemInventoryConfig = items.get(itemId);
+                    itemInventoryConfig.setSlot(s);
+                    itemsSlots.put(s,itemInventoryConfig);
+                }
 
             }
 
@@ -107,6 +115,14 @@ public class InventoryConfigManager {
 
         AdventureUtils.sendMessagePluginConsole(core, "<aqua> Inventories loaded: <yellow>" + inventories.size());
 
+    }
+
+    public List<ItemInventoryConfig> getAllItemsByType(String configId, String type){
+        List<ItemInventoryConfig> list = new ArrayList<>();
+        for(ItemInventoryConfig item : inventories.get(configId).getItemsInventory().values()){
+            if(item.getType().toUpperCase().equals(type.toUpperCase(Locale.ENGLISH))) list.add(item);
+        }
+        return list;
     }
 
     public HashMap<String, InventoryConfig> getInventories() {

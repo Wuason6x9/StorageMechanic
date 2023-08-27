@@ -1,13 +1,11 @@
 package dev.wuason.storagemechanic;
 
-import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.compatibilities.MythicMobs;
 import dev.wuason.storagemechanic.customblocks.CustomBlockManager;
 import dev.wuason.storagemechanic.data.DataManager;
-import dev.wuason.storagemechanic.inventory.InventoryManager;
+import dev.wuason.storagemechanic.inventory.InventoriesManager;
 import dev.wuason.storagemechanic.inventory.config.InventoryConfigManager;
-import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfigManager;
@@ -15,6 +13,7 @@ import dev.wuason.storagemechanic.storages.inventory.StorageInventoryManager;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorageManager;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfigManager;
 import dev.wuason.storagemechanic.storages.types.entity.EntityMythicManager;
+import dev.wuason.storagemechanic.storages.types.entity.MythicManager;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
 import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfigManager;
 import dev.wuason.storagemechanic.storages.types.item.ItemStorageManager;
@@ -22,9 +21,6 @@ import dev.wuason.storagemechanic.storages.types.item.config.ItemStorageConfigMa
 import dev.wuason.storagemechanic.systems.TrashSystemManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
-
-import java.util.ArrayList;
-import java.util.UUID;
 
 public class Managers {
     private StorageMechanic core;
@@ -42,11 +38,11 @@ public class Managers {
     private TrashSystemManager trashSystemManager;
     private ItemStorageConfigManager itemStorageConfigManager;
     private ItemStorageManager itemStorageManager;
-    private EntityMythicManager entityMythicManager;
+    private MythicManager mythicManager;
     private FurnitureStorageManager furnitureStorageManager;
     private FurnitureStorageConfigManager furnitureStorageConfigManager;
     private InventoryConfigManager inventoryConfigManager;
-    private InventoryManager inventoryManager;
+    private InventoriesManager inventoryManager;
 
     public Managers(StorageMechanic core) {
         this.core = core;
@@ -77,11 +73,11 @@ public class Managers {
         itemStorageManager = new ItemStorageManager(core);
         if(MythicMobs.isExistMythic()){
             AdventureUtils.sendMessagePluginConsole(core," <yellow>MythicMobs hooked!");
-            entityMythicManager = new EntityMythicManager(core);
-            pm.registerEvents(entityMythicManager,core);
+            mythicManager = new MythicManager(core);
+            pm.registerEvents(mythicManager,core);
         }
         furnitureStorageManager = new FurnitureStorageManager(core, dataManager);
-        inventoryManager = new InventoryManager(core);
+        inventoryManager = new InventoriesManager(core,storageManager);
 
 
         trashSystemManager = new TrashSystemManager(core,dataManager,blockStorageConfigManager,furnitureStorageConfigManager); //7
@@ -100,6 +96,9 @@ public class Managers {
 
     public void stop(){
         AdventureUtils.sendMessagePluginConsole(core,"<red> Stopping StorageMechanic...");
+
+        inventoryManager.stop();
+
         //storages types
 
         //BLOCKSTORAGE
@@ -168,8 +167,8 @@ public class Managers {
         return itemStorageManager;
     }
 
-    public EntityMythicManager getEntityMythicManager() {
-        return entityMythicManager;
+    public MythicManager getMythicManager() {
+        return mythicManager;
     }
 
     public FurnitureStorageManager getFurnitureStorageManager() {
@@ -180,7 +179,7 @@ public class Managers {
         return inventoryConfigManager;
     }
 
-    public InventoryManager getInventoryManager() {
+    public InventoriesManager getInventoryManager() {
         return inventoryManager;
     }
 

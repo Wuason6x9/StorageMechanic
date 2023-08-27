@@ -148,7 +148,7 @@ public class FurnitureStorageConfigManager {
     }
 
     public FurnitureStorageConfig findFurnitureStorageConfigByItemID(String id) {
-        Map.Entry<String,FurnitureStorageConfig> entry = furnitureStorageConfigsAdapter.getOrDefault(id.toLowerCase(Locale.ENGLISH),null);
+        Map.Entry<String,FurnitureStorageConfig> entry = furnitureStorageConfigsAdapter.getOrDefault(id,null);
         return entry != null ? entry.getValue() : null;
     }
 

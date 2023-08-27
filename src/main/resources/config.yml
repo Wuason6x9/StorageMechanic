@@ -1,5 +1,5 @@
 data:
-  method: LOCAL
+  method: LOCAL #LOCAL OR DATABASE
   database_config:
     config_host:
       host: 127.0.0.1

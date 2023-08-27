@@ -8,6 +8,7 @@ import io.lumine.mythic.api.config.MythicLineConfig;
 import io.lumine.mythic.api.skills.ITargetedEntitySkill;
 import io.lumine.mythic.api.skills.SkillMetadata;
 import io.lumine.mythic.api.skills.SkillResult;
+import org.bukkit.Bukkit;
 
 public class SmLoadDefaultItemsMythicMechanic implements ITargetedEntitySkill {
     private StorageMechanic core;
@@ -20,7 +21,8 @@ public class SmLoadDefaultItemsMythicMechanic implements ITargetedEntitySkill {
         StorageManager storageManager = core.getManagers().getStorageManager();
         if(!storageManager.storageExists(abstractEntity.getUniqueId().toString())) return SkillResult.ERROR;
         Storage storage = storageManager.getStorage(abstractEntity.getUniqueId().toString());
-        storage.loadAllItemsDefault();
+        Bukkit.getScheduler().runTaskAsynchronously(core,() -> storage.loadAllItemsDefault());
+
         return SkillResult.SUCCESS;
     }
 }

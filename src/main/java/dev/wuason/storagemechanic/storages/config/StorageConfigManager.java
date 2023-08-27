@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.config;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.AdapterManager;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
@@ -236,12 +237,17 @@ public class StorageConfigManager {
                         continue;
                     }
                 }
-                if (!Mechanics.getInstance().getManager().getAdapterManager().isItemsValid(items)) {
+                AdapterManager adapterManager = Mechanics.getInstance().getManager().getAdapterManager();
+                if (!adapterManager.isItemsValid(items)) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + "Item is null or invalid");
                     continue;
                 }
-                StorageItemConfig storageItemConfig = new StorageItemConfig((String) itemsKey, amount, itemsSlots, itemsPages, items,chance);
+                List<String> itemsComputed = new ArrayList<>();
+                for(String i : items){
+                    itemsComputed.add(adapterManager.getAdapterID(adapterManager.getItemStack(i)));
+                }
+                StorageItemConfig storageItemConfig = new StorageItemConfig((String) itemsKey, amount, itemsSlots, itemsPages, itemsComputed,chance);
                 storageItemsConfigs.add(storageItemConfig);
             }
         }
