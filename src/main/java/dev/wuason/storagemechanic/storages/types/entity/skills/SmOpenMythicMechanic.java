@@ -35,12 +35,15 @@ public class SmOpenMythicMechanic implements ITargetedEntitySkill {
         if(!storageManager.storageExists(abstractEntity.getUniqueId().toString())) return SkillResult.ERROR;
         Storage storage = storageManager.getStorage(abstractEntity.getUniqueId().toString());
         Player player = (Player) skillMetadata.getTrigger().getBukkitEntity();
-        Bukkit.getScheduler().runTask(core,() -> storage.openStorage(player,0));
         ActiveMob activeMob = (ActiveMob)skillMetadata.getCaster();
         MythicMob mythicMob = activeMob.getType();
-        if(storage.getAllViewers().size()<2){
-            core.getManagers().getMythicManager().runSkills(mythicMob.getInternalName(),activeMob, StorageTriggers.OPEN_STORAGE, BukkitAdapter.adapt(player.getLocation()),BukkitAdapter.adapt(player),null);
-        }
+        Bukkit.getScheduler().runTask(core,() -> {
+            storage.openStorage(player, 0);
+            if(storage.getAllViewers().size()<2){
+                core.getManagers().getMythicManager().runSkills(mythicMob,activeMob, StorageTriggers.OPEN_STORAGE, BukkitAdapter.adapt(player.getLocation()),BukkitAdapter.adapt(player),null);
+            }
+        });
+
         return SkillResult.SUCCESS;
     }
 }

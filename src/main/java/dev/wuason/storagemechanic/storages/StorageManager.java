@@ -8,6 +8,7 @@ import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
+import dev.wuason.storagemechanic.items.properties.CleanItemProperties;
 import dev.wuason.storagemechanic.items.properties.SearchItemProperties;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.config.StorageSoundConfig;
@@ -358,13 +359,13 @@ public class StorageManager implements Listener {
         if(cursor != null && !cursor.getType().equals(Material.AIR)){
 
             if(storageConfig.isStorageItemsWhiteListEnabled()){
-                if(!storage.isItemInList(cursor,event.getSlot(),storageInventory.getPage(), Storage.ListType.WHITELIST)){
+                if(!storage.isItemInList(cursor,event.getSlot(),storageInventory.getPage(), Storage.ListType.WHITELIST,storageConfig)){
                     AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), (Player) humanEntity);
                     event.setCancelled(true);
                 }
             }
             if(storageConfig.isStorageItemsBlackListEnabled()){
-                if(storage.isItemInList(cursor,event.getSlot(),storageInventory.getPage(), Storage.ListType.BLACKLIST)){
+                if(storage.isItemInList(cursor,event.getSlot(),storageInventory.getPage(), Storage.ListType.BLACKLIST,storageConfig)){
                     AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), (Player) humanEntity);
                     event.setCancelled(true);
                 }
@@ -382,13 +383,13 @@ public class StorageManager implements Listener {
         if(!clickedItem.getType().equals(Material.AIR)){
 
             if(storageConfig.isStorageItemsWhiteListEnabled()){
-                if(!storage.isItemInList(clickedItem,slot,storageInventory.getPage(), Storage.ListType.WHITELIST)){
+                if(!storage.isItemInList(clickedItem,slot,storageInventory.getPage(), Storage.ListType.WHITELIST,storageConfig)){
                     AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), (Player) humanEntity);
                     event.setCancelled(true);
                 }
             }
             if(storageConfig.isStorageItemsBlackListEnabled()){
-                if(storage.isItemInList(clickedItem,slot,storageInventory.getPage(), Storage.ListType.BLACKLIST)){
+                if(storage.isItemInList(clickedItem,slot,storageInventory.getPage(), Storage.ListType.BLACKLIST,storageConfig)){
                     AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), (Player) humanEntity);
                     event.setCancelled(true);
                 }
@@ -410,7 +411,7 @@ public class StorageManager implements Listener {
             if(storageConfig.isStorageItemsWhiteListEnabled()){
 
                 for(Integer s : event.getRawSlots()){
-                    if(!storage.isItemInList(cursor,s,storageInventory.getPage(), Storage.ListType.WHITELIST)){
+                    if(!storage.isItemInList(cursor,s,storageInventory.getPage(), Storage.ListType.WHITELIST,storageConfig)){
                         AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), (Player) humanEntity);
                         event.setCancelled(true);
                     }
@@ -419,7 +420,7 @@ public class StorageManager implements Listener {
             if(storageConfig.isStorageItemsBlackListEnabled()){
 
                 for(Integer s : event.getRawSlots()){
-                    if(storage.isItemInList(cursor,s,storageInventory.getPage(), Storage.ListType.BLACKLIST)){
+                    if(storage.isItemInList(cursor,s,storageInventory.getPage(), Storage.ListType.BLACKLIST,storageConfig)){
                         AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), (Player) humanEntity);
                         event.setCancelled(true);
                     }
@@ -439,7 +440,7 @@ public class StorageManager implements Listener {
         if(cursor != null && !cursor.getType().equals(Material.AIR)){
 
             if(storageConfig.isStorageBlockItemEnabled()){
-                ArrayList<Object> objects = storage.isBlocked(event.getSlot(), storageInventory.getPage());
+                ArrayList<Object> objects = storage.isBlocked(event.getSlot(), storageInventory.getPage(),storageConfig);
                 if((boolean) objects.get(0)){
                     if(objects.get(1) != null){
                         AdventureUtils.playerMessage((String) objects.get(1), (Player) humanEntity);
@@ -460,7 +461,7 @@ public class StorageManager implements Listener {
         if(!clickedItem.getType().equals(Material.AIR)){
 
             if(storageConfig.isStorageBlockItemEnabled()){
-                ArrayList<Object> objects = storage.isBlocked(slot, storageInventory.getPage());
+                ArrayList<Object> objects = storage.isBlocked(slot, storageInventory.getPage(),storageConfig);
                 if((boolean) objects.get(0)){
                     if(objects.get(1) != null){
                         AdventureUtils.playerMessage((String) objects.get(1), (Player) humanEntity);
@@ -484,7 +485,7 @@ public class StorageManager implements Listener {
             if(storageConfig.isStorageBlockItemEnabled()){
 
                 for(Integer s : event.getRawSlots()){
-                    ArrayList<Object> objects = storage.isBlocked(s, storageInventory.getPage());
+                    ArrayList<Object> objects = storage.isBlocked(s, storageInventory.getPage(),storageConfig);
                     if((boolean) objects.get(0)){
                         if(objects.get(1) != null){
                             AdventureUtils.playerMessage((String) objects.get(1), (Player) humanEntity);
@@ -499,6 +500,15 @@ public class StorageManager implements Listener {
     }
     private void ClickItemInterface(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig,ItemInterface itemInterface){
         switch (itemInterface.getItemInterfaceType()){
+            case CLEAN_ITEM -> {
+                Player player = (Player) event.getWhoClicked();
+                CleanItemProperties cleanItemProperties = (CleanItemProperties) itemInterface.getProperties();
+                for(int page : cleanItemProperties.getPages()){
+                    for(int slot : cleanItemProperties.getSlots()){
+                        storage.clearSlot(page,slot);
+                    }
+                }
+            }
             case SEARCH_ITEM -> {
                 Player player = (Player) event.getWhoClicked();
                 SearchItemProperties properties = (SearchItemProperties) itemInterface.getProperties();

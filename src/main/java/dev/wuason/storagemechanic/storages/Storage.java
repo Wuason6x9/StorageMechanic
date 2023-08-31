@@ -85,7 +85,7 @@ public class Storage {
                             if(mobManager.isActiveMob(uuid)){
                                 ActiveMob activeMob = mobManager.getActiveMob(uuid).get();
                                 MythicMob mythicMob = activeMob.getType();
-                                core.getManagers().getMythicManager().runSkills(mythicMob.getInternalName(),activeMob, StorageTriggers.CLOSE_STORAGE, BukkitAdapter.adapt(storageInventory.getInventory().getViewers().get(0).getLocation()),BukkitAdapter.adapt((Player)storageInventory.getInventory().getViewers().get(0)),null);
+                                core.getManagers().getMythicManager().runSkills(mythicMob,activeMob, StorageTriggers.CLOSE_STORAGE, BukkitAdapter.adapt(storageInventory.getInventory().getViewers().get(0).getLocation()),BukkitAdapter.adapt((Player)storageInventory.getInventory().getViewers().get(0)),null);
                             }
                         }
                         catch (Exception e){
@@ -145,17 +145,13 @@ public class Storage {
         if (!inventories.containsKey(page)) {
             StorageInventory inventory = StorageMechanic.getInstance().getManagers().getStorageInventoryManager().createStorageInventory(storageConfig,this,page);
             inventory.getInventory().setContents(items.get(page));
-
             if(storageConfig.isStorageItemsInterfaceEnabled()){
-                for(StorageItemInterfaceConfig itemInterface : storageConfig.getStorageItemsInterfaceConfig()){
-                    if(itemInterface.getPagesToSlots().containsKey(page)){
-                        for(int s : itemInterface.getPagesToSlots().get(page)){
-                            inventory.getInventory().setItem(s,itemInterface.getItemInterface().getItemStack());
-                        }
+                if(storageConfig.getStorageItemsInterfaceConfig().containsKey(page)){
+                    for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : storageConfig.getStorageItemsInterfaceConfig().get(page).entrySet()){
+                        inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
                     }
                 }
             }
-
             inventories.put(page, inventory);
         }
         StorageInventory storageInventoryPage = inventories.get(page);
@@ -168,7 +164,6 @@ public class Storage {
         for (int p = 0; p < getTotalPages(); p++) {
             loadItemsDefault(p);
         }
-        System.out.println("Loaded default Items! ItemsLoaded: " + getAllItems().size());
     }
     public void loadItemsDefault(int page){
 
@@ -205,6 +200,7 @@ public class Storage {
 
     public List<ItemStack> addItemStack(int page, ItemStack itemStack) {
         List<ItemStack> notAddedItems = new ArrayList<>();
+        StorageConfig storageConfig = getStorageConfig();
 
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
@@ -223,6 +219,85 @@ public class Storage {
 
             int remainingAmount = itemStack.getAmount();
             for (int i = 0; i < contents.length && remainingAmount > 0; i++) {
+                if(isItemInterfaceSlot(page,i,storageConfig)) continue;
+                if (contents[i] == null || contents[i].getAmount() == 0) {
+                    contents[i] = itemStack.clone();
+                    contents[i].setAmount(remainingAmount);
+                    remainingAmount = 0;
+                } else if (contents[i].isSimilar(itemStack)) {
+                    int currentAmount = contents[i].getAmount();
+                    int maxAmount = contents[i].getMaxStackSize();
+                    int totalAmount = currentAmount + remainingAmount;
+
+                    if (totalAmount <= maxAmount) {
+                        contents[i].setAmount(totalAmount);
+                        remainingAmount = 0;
+                    } else {
+                        contents[i].setAmount(maxAmount);
+                        remainingAmount = totalAmount - maxAmount;
+                    }
+                }
+            }
+            if (remainingAmount > 0) {
+                ItemStack notAddedItem = itemStack.clone();
+                notAddedItem.setAmount(remainingAmount);
+                notAddedItems.add(notAddedItem);
+            }
+        }
+
+        return notAddedItems;
+    }
+
+    public List<ItemStack> addItemStackWithRestrictions(int page, ItemStack itemStack) {
+        List<ItemStack> notAddedItems = new ArrayList<>();
+        StorageConfig storageConfig = getStorageConfig();
+
+        if (inventories.containsKey(page)) {
+            StorageInventory storageInventory = inventories.get(page);
+            Inventory inventory = storageInventory.getInventory();
+
+            int remainingAmount = itemStack.getAmount();
+            for (int i = 0; i < inventory.getSize() && remainingAmount > 0; i++) {
+                if (!canBePlaced(itemStack, page, i, storageConfig)) continue;
+
+                ItemStack currentSlot = inventory.getItem(i);
+                if (currentSlot == null || currentSlot.getAmount() == 0) {
+                    ItemStack cloneItem = itemStack.clone();
+                    cloneItem.setAmount(remainingAmount);
+                    inventory.setItem(i, cloneItem);
+                    remainingAmount = 0;
+                } else if (currentSlot.isSimilar(itemStack)) {
+                    int currentAmount = currentSlot.getAmount();
+                    int maxAmount = currentSlot.getMaxStackSize();
+                    int totalAmount = currentAmount + remainingAmount;
+
+                    if (totalAmount <= maxAmount) {
+                        currentSlot.setAmount(totalAmount);
+                        remainingAmount = 0;
+                    } else {
+                        currentSlot.setAmount(maxAmount);
+                        remainingAmount = totalAmount - maxAmount;
+                    }
+                }
+            }
+            if (remainingAmount > 0) {
+                ItemStack notAddedItem = itemStack.clone();
+                notAddedItem.setAmount(remainingAmount);
+                notAddedItems.add(notAddedItem);
+            }
+        }
+        else {
+            ItemStack[] contents = items.get(page);
+            if (contents == null) {
+                int slots = getStorageConfig().getInventoryType().getSize();
+                contents = new ItemStack[slots];
+                items.put(page, contents);
+            }
+
+            int remainingAmount = itemStack.getAmount();
+            for (int i = 0; i < contents.length && remainingAmount > 0; i++) {
+                System.out.println(canBePlaced(itemStack,page,i,storageConfig) + " page: " + page + " slot: " + i);
+                if(!canBePlaced(itemStack,page,i,storageConfig)) continue;
                 if (contents[i] == null || contents[i].getAmount() == 0) {
                     contents[i] = itemStack.clone();
                     contents[i].setAmount(remainingAmount);
@@ -324,6 +399,22 @@ public class Storage {
 
         return notRemovedItems;
     }
+
+    public void clearSlot(int page, int slot) {
+        if (inventories.containsKey(page)) {
+            if(isItemInterfaceSlot(page,slot,getStorageConfig())) return;
+            StorageInventory storageInventory = inventories.get(page);
+            Inventory inventory = storageInventory.getInventory();
+            inventory.clear(slot);
+        }
+        else {
+            ItemStack[] contents = items.getOrDefault(page,null);
+            if (contents != null) {
+                contents[slot] = null;
+            }
+        }
+    }
+
     public void dropItemsFromPage(Location dropLocation, int page) {
         List<ItemStack> itemsList = getItemsFromPage(page);
         World world = dropLocation.getWorld();
@@ -341,9 +432,12 @@ public class Storage {
             }
         });
     }
-    public ArrayList<Object> isBlocked(int slot, int page){
+    public ArrayList<Object> isBlocked(int slot, int page, StorageConfig storageConfig){ //1: true or false 2:messsage
         ArrayList<Object> objects = new ArrayList<>();
-        StorageConfig storageConfig = getStorageConfig();
+        if(!storageConfig.isStorageBlockItemEnabled()){
+            objects.add(false);
+            return objects;
+        }
         for(StorageBlockItemConfig storageBlockItemConfig : storageConfig.getStorageBlockedItemsConfig()){
             if(!storageBlockItemConfig.getPagesToSlots().containsKey(page)){
                 continue;
@@ -360,12 +454,22 @@ public class Storage {
         objects.add(false);
         return objects;
     }
-    public boolean isItemInList(ItemStack itemStack, int slot, int page, ListType listType){
-        StorageConfig storageConfig = getStorageConfig();
+    public boolean canBePlaced(ItemStack item, int page, int slot, StorageConfig storageConfig){
+        System.out.println(isItemInterfaceSlot(page,slot,storageConfig) + " = interface");
+        System.out.println(isBlocked(slot,page,storageConfig) + " = blocked slot");
+        return (!isItemInterfaceSlot(page,slot,storageConfig) && !((boolean)isBlocked(slot,page,storageConfig).get(0)) && !isItemInList(item,slot,page,ListType.BLACKLIST,storageConfig) && isItemInList(item,slot,page,ListType.WHITELIST,storageConfig));
+    }
+    public boolean isItemInterfaceSlot(int page, int slot, StorageConfig storageConfig){
+        if(!storageConfig.getStorageItemsInterfaceConfig().containsKey(page)) return false;
+        HashMap<Integer,StorageItemInterfaceConfig> hashMap = storageConfig.getStorageItemsInterfaceConfig().get(page);
+        return hashMap.containsKey(slot);
+    }
+    public boolean isItemInList(ItemStack itemStack, int slot, int page, ListType listType, StorageConfig storageConfig){
         String itemId = Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(itemStack);
         switch (listType){
 
             case BLACKLIST -> {
+                if(!storageConfig.isStorageBlockItemEnabled()) return false;
                 for(StorageItemConfig storageItemConfig : storageConfig.getStorageItemsBlackListConfig()){
 
                     if(!storageItemConfig.getPagesToSlots().containsKey(page)){
@@ -387,7 +491,7 @@ public class Storage {
                 return false;
             }
             case WHITELIST -> {
-
+                if(!storageConfig.isStorageItemsWhiteListEnabled()) return true;
                 for(StorageItemConfig storageItemConfig : storageConfig.getStorageItemsWhiteListConfig()){
                     if(!storageItemConfig.getPagesToSlots().containsKey(page)){
                         continue;
@@ -513,10 +617,36 @@ public class Storage {
 
         return notAddedItems;
     }
-    public void addItemStackToAllPages(ItemStack itemStack) {
+    public List<ItemStack> addItemStackToAllPages(ItemStack itemStack) {
+        List<ItemStack> noAddedItems = new ArrayList<>();
+        noAddedItems.add(itemStack);
         for (int i = 0; i < getTotalPages(); i++) {
-            addItemStack(i, itemStack);
+            List<ItemStack> noAddedPage = new ArrayList<>();
+            while (!noAddedItems.isEmpty()){
+                List<ItemStack> noAdded = addItemStack(i, noAddedItems.get(0));
+                noAddedItems.remove(0);
+                if(noAdded.size()>0) noAddedPage.addAll(noAdded);
+            }
+            if(noAddedPage.size()==0) break;
+            noAddedItems.addAll(noAddedPage);
         }
+        return noAddedItems;
+    }
+
+    public List<ItemStack> addItemStackToAllPagesWithRestrictions(ItemStack itemStack) {
+        List<ItemStack> noAddedItems = new ArrayList<>();
+        noAddedItems.add(itemStack);
+        for (int i = 0; i < getTotalPages(); i++) {
+            List<ItemStack> noAddedPage = new ArrayList<>();
+            while (!noAddedItems.isEmpty()){
+                List<ItemStack> noAdded = addItemStackWithRestrictions(i, noAddedItems.get(0));
+                noAddedItems.remove(0);
+                if(noAdded.size()>0) noAddedPage.addAll(noAdded);
+            }
+            if(noAddedPage.size()==0) break;
+            noAddedItems.addAll(noAddedPage);
+        }
+        return noAddedItems;
     }
     public void removeItemStackFromAllPages(ItemStack itemStack) {
         for (int i = 0; i < getTotalPages(); i++) {
@@ -731,10 +861,14 @@ public class Storage {
             removeItemStack(i, itemStackToRemove);
         }
     }
-    public void addItemStackListToAllPages(List<ItemStack> itemStackList) {
+    public List<ItemStack> addItemStackListToAllPages(List<ItemStack> itemStackList) {
+        List<ItemStack> noAddedItems = new ArrayList<>();
         for (ItemStack itemStack : itemStackList) {
-            addItemStackToAllPages(itemStack);
+            List<ItemStack> noAdded = addItemStackToAllPages(itemStack);
+            if(noAdded.size()==0) break;
+            noAddedItems.addAll(noAdded);
         }
+        return noAddedItems;
     }
     public void removeItemStackListFromAllPages(List<ItemStack> itemStackList) {
         for (ItemStack itemStack : itemStackList) {

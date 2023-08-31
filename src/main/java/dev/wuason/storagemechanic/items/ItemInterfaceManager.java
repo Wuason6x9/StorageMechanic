@@ -8,8 +8,10 @@ import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.customblocks.CustomBlock;
 
 import dev.wuason.storagemechanic.inventory.inventories.SearchItem.SearchType;
+import dev.wuason.storagemechanic.items.properties.CleanItemProperties;
 import dev.wuason.storagemechanic.items.properties.Properties;
 import dev.wuason.storagemechanic.items.properties.SearchItemProperties;
+import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -91,6 +93,16 @@ public class ItemInterfaceManager {
                     Properties properties = null;
 
                     switch (itemInterfaceType){
+                        case CLEAN_ITEM -> {
+                            List<String> pagesString = sectionItemInterface.getStringList("properties.pages");
+                            List<String> slotsString = sectionItemInterface.getStringList("properties.slots");
+                            if(slotsString == null || pagesString == null){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: CLEAN_ITEM slots or pages is invalid!");
+                                continue;
+                            }
+                            properties = new CleanItemProperties(StorageUtils.configFill(pagesString),StorageUtils.configFill(slotsString));
+                        }
                         case SEARCH_ITEM -> {
                             String invId = sectionItemInterface.getString("properties.inv_id","searchItem");
                             String invResultId = sectionItemInterface.getString("properties.inv_result_id","searchItemResult");

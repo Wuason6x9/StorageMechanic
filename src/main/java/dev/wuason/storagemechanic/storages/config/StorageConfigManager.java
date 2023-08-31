@@ -117,7 +117,7 @@ public class StorageConfigManager {
 
                     boolean interfacesEnabled = sectionStorage.getBoolean("interfaces.enabled",false); //VAR
 
-                    ArrayList<StorageItemInterfaceConfig> storageInterfacesConfigs = new ArrayList<>(); //VAR
+                    HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageInterfacesConfigs = new HashMap<>(); //VAR
                     ConfigurationSection sectionInterfaces = sectionStorage.getConfigurationSection("interfaces.list");
                     if(sectionInterfaces != null){
                         for(Object interfaceItemKey : sectionInterfaces.getKeys(false).toArray()){
@@ -128,8 +128,14 @@ public class StorageConfigManager {
                             String interfaceItem = sectionInterface.getString("item",".");
                             if(interfaceItem.equals(".")){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage interfaceItem Config! storage_id: " + key + " interfaceItem_id: " + interfaceItemKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: interfaceItem is null or invalid");continue;}
                             if(!core.getManagers().getItemInterfaceManager().existsItemInterface(interfaceItem)){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage interfaceItem Config! storage_id: " + key + " interfaceItem_id: " + interfaceItemKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: interfaceItem is null or invalid");continue;}
-                            StorageItemInterfaceConfig storageInterfacesConfig = new StorageItemInterfaceConfig((String)interfaceItemKey,interfaceItemSlots,interfaceItemPages,interfaceItem);
-                            storageInterfacesConfigs.add(storageInterfacesConfig);
+                            StorageItemInterfaceConfig storageInterfacesConfig = new StorageItemInterfaceConfig((String)interfaceItemKey,interfaceItem);
+                            for(int page : interfaceItemPages){
+                                for(int slot : interfaceItemSlots){
+                                    if(!storageInterfacesConfigs.containsKey(page)) storageInterfacesConfigs.put(page, new HashMap<>());
+                                    HashMap<Integer, StorageItemInterfaceConfig> map = storageInterfacesConfigs.get(page);
+                                    map.put(slot,storageInterfacesConfig);
+                                }
+                            }
                         }
                     }
 

@@ -23,7 +23,7 @@ public class MythicManager implements Listener {
     private EntityMythicManager entityMythicManager;
     private StorageTriggers storageTriggers;
     private StorageMechanic core;
-    private HashMap<String, HashMap<SkillTrigger, Queue<SkillMechanic>>> triggerSkills = new HashMap<>();
+    private HashMap<MythicMob, HashMap<SkillTrigger, Queue<SkillMechanic>>> triggerSkills = new HashMap<>();
     public MythicManager(StorageMechanic core) {
         this.core = core;
         load();
@@ -44,18 +44,18 @@ public class MythicManager implements Listener {
             HashMap<SkillTrigger, Queue<SkillMechanic>> map = new HashMap<>();
             for(SkillTrigger trigger : StorageTriggers.getTriggers()){
                 Queue<SkillMechanic> skillMechanics = mythicMob.getSkills(trigger);
-                if(skillMechanics.size()>0){
+                if(!skillMechanics.isEmpty()){
                     map.put(trigger,skillMechanics);
                 }
             }
-            triggerSkills.put(mythicMob.getInternalName(), map);
+            triggerSkills.put(mythicMob, map);
         }
     }
-    public boolean runSkills(String internalName, SkillCaster caster, SkillTrigger cause, AbstractLocation origin, AbstractEntity trigger, Consumer<SkillMetadata> transformer) {
-        if (!triggerSkills.containsKey(internalName) && !triggerSkills.get(internalName).containsKey(cause)) {
+    public boolean runSkills(MythicMob mob, SkillCaster caster, SkillTrigger cause, AbstractLocation origin, AbstractEntity trigger, Consumer<SkillMetadata> transformer) {
+        if (!triggerSkills.containsKey(mob) || !triggerSkills.get(mob).containsKey(cause)) {
             return false;
         } else {
-            TriggeredSkill ts = new TriggeredSkill(cause, caster, origin, trigger, (Collection)triggerSkills.get(internalName).get(cause), true, (meta) -> {
+            TriggeredSkill ts = new TriggeredSkill(cause, caster, origin, trigger, (Collection)triggerSkills.get(mob).get(cause), true, (meta) -> {
                 if (transformer != null) {
                     transformer.accept(meta);
                 }

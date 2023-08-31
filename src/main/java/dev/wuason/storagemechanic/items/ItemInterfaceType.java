@@ -6,5 +6,6 @@ public enum ItemInterfaceType {
     SEARCH_PAGE,
     SORT_ITEMS,
     BLOCKED_ITEM,
-    SEARCH_ITEM
+    SEARCH_ITEM,
+    CLEAN_ITEM
 }

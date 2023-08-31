@@ -52,6 +52,9 @@ public class EntityMythicManager implements Listener {
         if(event.getMechanicName().equalsIgnoreCase(Skills.smLoadDefaultItems.toString())){
             event.register(new SmLoadDefaultItemsMythicMechanic(event.getConfig(), core));
         }
+        if(event.getMechanicName().equalsIgnoreCase(Skills.smCollect.toString())){
+            event.register(new SmCollectMythicMechanic(core));
+        }
 
     }
 
@@ -63,6 +66,8 @@ public class EntityMythicManager implements Listener {
         smSave,
         smDrop,
         smOpen,
-        smLoadDefaultItems
+        smLoadDefaultItems,
+        smCollect
+
     }
 }

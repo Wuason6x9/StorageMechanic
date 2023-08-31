@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class StorageConfig {
     private String id;
@@ -16,7 +17,7 @@ public class StorageConfig {
     private boolean storageItemsWhiteListEnabled = false;
     private ArrayList<StorageItemConfig> storageItemsBlackListConfig = new ArrayList<>();
     private boolean storageItemsBlackListEnabled = false;
-    private ArrayList<StorageItemInterfaceConfig> storageItemsInterfaceConfig = new ArrayList<>();
+    private HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig = new HashMap<>();
     private boolean storageItemsInterfaceEnabled = false;
 
     private ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig = new ArrayList<>();
@@ -24,7 +25,7 @@ public class StorageConfig {
     private String whiteListMessage = null;
     private String blackListMessage = null;
 
-    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, ArrayList<StorageItemInterfaceConfig> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled) {
+    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled) {
         this.id = id;
         this.rows = rows;
         this.pages = pages;
@@ -98,7 +99,7 @@ public class StorageConfig {
         return storageItemsBlackListEnabled;
     }
 
-    public ArrayList<StorageItemInterfaceConfig> getStorageItemsInterfaceConfig() {
+    public HashMap<Integer, HashMap<Integer, StorageItemInterfaceConfig>> getStorageItemsInterfaceConfig() {
         return storageItemsInterfaceConfig;
     }
 
