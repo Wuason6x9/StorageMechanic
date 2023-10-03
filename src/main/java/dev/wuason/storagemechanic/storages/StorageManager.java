@@ -1,19 +1,24 @@
 package dev.wuason.storagemechanic.storages;
 
+import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.Managers;
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.actions.Action;
+import dev.wuason.storagemechanic.actions.events.ClickStorageItemInterfaceAction;
+import dev.wuason.storagemechanic.actions.events.EventEnum;
 import dev.wuason.storagemechanic.api.events.storage.ClickPageStorageEvent;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
+import dev.wuason.storagemechanic.items.properties.ActionItemProperties;
 import dev.wuason.storagemechanic.items.properties.CleanItemProperties;
+import dev.wuason.storagemechanic.items.properties.PlaceHolderItemProperties;
 import dev.wuason.storagemechanic.items.properties.SearchItemProperties;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.config.StorageSoundConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
-import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -25,6 +30,9 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,17 +54,17 @@ public class StorageManager implements Listener {
         this.managers = managers;
     }
 
-    public Storage createStorage(String storageIdConfig) {
+    public Storage createStorage(String storageIdConfig, StorageOriginContext storageOriginContext) {
         if(core.getManagers().getStorageConfigManager().existsStorageConfig(storageIdConfig)){
-            Storage storage = new Storage(storageIdConfig);
+            Storage storage = new Storage(storageIdConfig,storageOriginContext);
             storageMap.put(storage.getId(), storage);
             return storage;
         }
         return null;
     }
-    public Storage createStorage(String storageIdConfig, UUID id) {
+    public Storage createStorage(String storageIdConfig, UUID id, StorageOriginContext storageOriginContext) {
         if(core.getManagers().getStorageConfigManager().existsStorageConfig(storageIdConfig)){
-            Storage storage = new Storage(storageIdConfig,id);
+            Storage storage = new Storage(storageIdConfig,id,storageOriginContext);
             storageMap.put(storage.getId(), storage);
             return storage;
         }
@@ -79,7 +87,7 @@ public class StorageManager implements Listener {
             }
         }
     }
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
 
         if(event.getClickedInventory() == null) return;
@@ -129,9 +137,10 @@ public class StorageManager implements Listener {
                 // Cancel event if clicked item is an interface item
                 ItemStack clickedItem = event.getCurrentItem();
                 ItemInterfaceManager itemInterfaceManager = core.getManagers().getItemInterfaceManager();
-                if (clickedItem != null && itemInterfaceManager.isItemInterface(clickedItem)) {
+                if (clickedItem != null && (itemInterfaceManager.isItemInterface(clickedItem) || itemInterfaceManager.isItemInterfaceWithPlaceHolderItem(clickedItem))) {
                     event.setCancelled(true);
                     ItemInterface itemInterface = core.getManagers().getItemInterfaceManager().getItemInterfaceByItemStack(clickedItem);
+                    if(itemInterface == null) itemInterface = core.getManagers().getItemInterfaceManager().getItemInterfaceByItemStackPlaceholder(clickedItem);
                     ClickItemInterface(storage,storageInventory,event,storageConfig,itemInterface);
                 }
                 ClickItemCheck(storage, storageInventory, event, storageConfig);
@@ -142,7 +151,8 @@ public class StorageManager implements Listener {
                     ClickItemCheckList(storage, storageInventory, event, storageConfig);
                 }
             }
-
+            //Events
+            core.getManagers().getActionManager().callActionsEvent(EventEnum.CLICK_STORAGE_ITEM,storage,(Player) event.getWhoClicked(), event , storageInventory);
             ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event,storageInventory);
             Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
 
@@ -155,6 +165,9 @@ public class StorageManager implements Listener {
             StorageInventory storageInventory = (StorageInventory) holder;
             Storage storage = storageInventory.getStorage();
             StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
+
+            //events
+            core.getManagers().getActionManager().callActionsEvent(EventEnum.OPEN_STORAGE_PAGE,storage, (Player) event.getPlayer(), event, storageInventory);
 
             //SOUNDS
             if(storageConfig.isStorageSoundEnabled()){
@@ -176,8 +189,14 @@ public class StorageManager implements Listener {
             StorageInventory storageInventory = (StorageInventory) holder;
             Storage storage = storageInventory.getStorage();
             StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
+
+            Object[] objects = {event, storageInventory};
+
+            //events
+            core.getManagers().getActionManager().callActionsEvent(EventEnum.CLOSE_STORAGE_PAGE,storage, (Player) event.getPlayer(), objects);
+
             //SAVE STORAGE
-            storage.closeStorage(storageInventory.getPage());
+            storage.closeStorage(storageInventory.getPage(), (Player) event.getPlayer());
 
             //SOUNDS
             if(storageConfig.isStorageSoundEnabled()){
@@ -500,12 +519,87 @@ public class StorageManager implements Listener {
     }
     private void ClickItemInterface(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig,ItemInterface itemInterface){
         switch (itemInterface.getItemInterfaceType()){
+            case ACTION -> {
+                Player player = (Player) event.getWhoClicked();
+                ActionItemProperties actionItemProperties = (ActionItemProperties) itemInterface.getProperties();
+                ClickStorageItemInterfaceAction eventAction = new ClickStorageItemInterfaceAction(event,itemInterface,storageInventory);
+                Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
+                    Action action = core.getManagers().getActionManager().createAction(storage, actionItemProperties.getActionId(), player, eventAction);
+                    action.execute();
+                });
+            }
+            case PLACEHOLDER -> {
+                Player player = (Player) event.getWhoClicked();
+                PlaceHolderItemProperties placeHolderItemProperties = (PlaceHolderItemProperties) itemInterface.getProperties();
+                ItemStack clickedItem = event.getCurrentItem();
+                ItemMeta clickedItemMeta = clickedItem.getItemMeta();
+                PersistentDataContainer persistentDataContainer = clickedItemMeta.getPersistentDataContainer();
+                if(persistentDataContainer.has(PlaceHolderItemProperties.NAMESPACED_KEY, PersistentDataType.STRING)){
+                    if(event.getCursor() != null && !event.getCursor().getType().equals(Material.AIR)) {
+                        ItemStack itemCursor = event.getCursor();
+                        if(!clickedItem.getType().equals(itemCursor.getType())) return;
+                        ItemStack itemClickedClone = clickedItem.clone();
+                        ItemMeta itemMetaClone = itemClickedClone.getItemMeta();
+                        itemMetaClone.getPersistentDataContainer().remove(PlaceHolderItemProperties.NAMESPACED_KEY);
+                        itemMetaClone.getPersistentDataContainer().remove(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE);
+                        itemClickedClone.setItemMeta(itemMetaClone);
+                        if(!itemClickedClone.isSimilar(itemCursor)) return;
+                        if(itemClickedClone.getMaxStackSize()==itemClickedClone.getAmount() || itemCursor.getAmount()>itemClickedClone.getMaxStackSize()) return;
+                        if((itemClickedClone.getAmount() + itemCursor.getAmount())>=itemClickedClone.getMaxStackSize()){
+                            clickedItem.setAmount(itemClickedClone.getMaxStackSize());
+                            if(((itemClickedClone.getAmount() + itemCursor.getAmount()) - itemClickedClone.getMaxStackSize())==0) player.setItemOnCursor(null);
+                            else itemCursor.setAmount(((itemClickedClone.getAmount() + itemCursor.getAmount()) - itemClickedClone.getMaxStackSize()));
+                            return;
+                        }
+                        player.setItemOnCursor(null);
+                        clickedItem.setAmount((itemClickedClone.getAmount() + itemCursor.getAmount()));
+                        return;
+                    };
+                    if(event.getClick().isRightClick() && clickedItem.getAmount()>1){
+                        int amount = clickedItem.getAmount() / 2;
+                        clickedItem.setAmount(clickedItem.getAmount() - amount);
+                        ItemStack item = clickedItem.clone();
+                        ItemMeta itemMeta = item.getItemMeta();
+                        PersistentDataContainer itemPersistentDataContainer = itemMeta.getPersistentDataContainer();
+                        itemPersistentDataContainer.remove(PlaceHolderItemProperties.NAMESPACED_KEY);
+                        itemPersistentDataContainer.remove(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE);
+                        item.setItemMeta(itemMeta);
+                        item.setAmount(amount);
+                        player.setItemOnCursor(item);
+                        return;
+                    }
+                    ItemStack item = clickedItem.clone();
+                    ItemStack itemInterfaceCloned = itemInterface.getItemStack();
+                    clickedItem.setType(itemInterfaceCloned.getType());
+                    clickedItem.setItemMeta(itemInterfaceCloned.getItemMeta());
+                    clickedItem.setAmount(itemInterfaceCloned.getAmount());
+                    ItemMeta itemMeta = item.getItemMeta();
+                    PersistentDataContainer itemPersistentDataContainer = itemMeta.getPersistentDataContainer();
+                    itemPersistentDataContainer.remove(PlaceHolderItemProperties.NAMESPACED_KEY);
+                    itemPersistentDataContainer.remove(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE);
+                    item.setItemMeta(itemMeta);
+                    player.setItemOnCursor(item);
+                    return;
+                }
+                if(event.getCursor() == null || event.getCursor().getType().equals(Material.AIR)) return;
+                ItemStack itemCursor = event.getCursor();
+                String itemId = Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(itemCursor);
+                if(placeHolderItemProperties.isWhitelistEnabled() && !placeHolderItemProperties.getWhitelistItems().contains(itemId)) return;
+                if(placeHolderItemProperties.isBlacklistEnabled() && placeHolderItemProperties.getWhitelistItems().contains(itemId)) return;
+                clickedItem.setType(itemCursor.getType());
+                clickedItem.setAmount(itemCursor.getAmount());
+                ItemMeta itemMeta = itemCursor.getItemMeta();
+                itemMeta.getPersistentDataContainer().set(PlaceHolderItemProperties.NAMESPACED_KEY,PersistentDataType.STRING,itemId);
+                itemMeta.getPersistentDataContainer().set(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE,PersistentDataType.STRING, itemInterface.getId());
+                clickedItem.setItemMeta(itemMeta);
+                player.setItemOnCursor(null);
+            }
             case CLEAN_ITEM -> {
                 Player player = (Player) event.getWhoClicked();
                 CleanItemProperties cleanItemProperties = (CleanItemProperties) itemInterface.getProperties();
                 for(int page : cleanItemProperties.getPages()){
                     for(int slot : cleanItemProperties.getSlots()){
-                        storage.clearSlot(page,slot);
+                        storage.clearSlotWithRestrictions(page,slot);
                     }
                 }
             }
@@ -571,6 +665,10 @@ public class StorageManager implements Listener {
     //DATA
     public void saveStorage(Storage storage, SaveCause saveCause){
         String id = storage.getId();
+        if(storage.getStorageConfig().getStorageProperties().isTempStorage()) {
+            storageMap.remove(id);
+            return;
+        }
         if(storageMap.containsKey(id)) storageMap.remove(id);
         if(saveCause.equals(SaveCause.NORMAL_SAVE)){
             Bukkit.getScheduler().runTask(core, storage::closeAllInventory);

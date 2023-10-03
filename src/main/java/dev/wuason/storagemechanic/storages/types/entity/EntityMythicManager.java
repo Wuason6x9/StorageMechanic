@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 public class EntityMythicManager implements Listener {
     private StorageMechanic core;
-    private Map<SkillTrigger, Queue<SkillMechanic>> mechanics = Maps.newConcurrentMap();
+
 
     public EntityMythicManager(StorageMechanic core) {
         this.core = core;
@@ -55,6 +55,9 @@ public class EntityMythicManager implements Listener {
         if(event.getMechanicName().equalsIgnoreCase(Skills.smCollect.toString())){
             event.register(new SmCollectMythicMechanic(core));
         }
+        if(event.getMechanicName().equalsIgnoreCase(Skills.smExecuteAction.toString())){
+            event.register(new SmExecuteAction(event.getConfig(), core));
+        }
 
     }
 
@@ -67,7 +70,8 @@ public class EntityMythicManager implements Listener {
         smDrop,
         smOpen,
         smLoadDefaultItems,
-        smCollect
+        smCollect,
+        smExecuteAction
 
     }
 }

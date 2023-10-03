@@ -69,6 +69,7 @@ public class ConfigManager {
             throw new RuntimeException(e);
         }
         core.getManagers().getCustomBlockManager().loadCustomBlocks();
+        core.getManagers().getActionConfigManager().loadActions();
         core.getManagers().getItemInterfaceManager().loadItemsInterface();
         core.getManagers().getStorageConfigManager().loadStoragesConfig();
         core.getManagers().getBlockStorageConfigManager().loadBlockStorageConfigs();

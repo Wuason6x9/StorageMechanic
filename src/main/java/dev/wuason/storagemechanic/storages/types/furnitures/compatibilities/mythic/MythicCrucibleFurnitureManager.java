@@ -77,7 +77,7 @@ public class MythicCrucibleFurnitureManager implements Listener {
     }
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerInteractBlock(PlayerInteractEvent event){
-        if(!event.getHand().equals(EquipmentSlot.HAND) || !event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+        if(event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND) || !event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         Block block = event.getClickedBlock();
         MythicCrucible.inst().getItemManager().getFurnitureManager().getFurniture(block).ifPresent((f) -> {
             onMythicFurnitureInteract(f.getFurnitureData(),event.getPlayer(),f.getEntity().getBukkitEntity(),event.getPlayer().getInventory().getItemInMainHand(),event);

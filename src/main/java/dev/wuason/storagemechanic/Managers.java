@@ -1,6 +1,8 @@
 package dev.wuason.storagemechanic;
 
 import dev.wuason.mechanics.utils.AdventureUtils;
+import dev.wuason.storagemechanic.actions.ActionManager;
+import dev.wuason.storagemechanic.actions.config.ActionConfigManager;
 import dev.wuason.storagemechanic.compatibilities.MythicMobs;
 import dev.wuason.storagemechanic.customblocks.CustomBlockManager;
 import dev.wuason.storagemechanic.data.DataManager;
@@ -12,6 +14,7 @@ import dev.wuason.storagemechanic.storages.config.StorageConfigManager;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventoryManager;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorageManager;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfigManager;
+import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
 import dev.wuason.storagemechanic.storages.types.entity.EntityMythicManager;
 import dev.wuason.storagemechanic.storages.types.entity.MythicManager;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
@@ -43,6 +46,10 @@ public class Managers {
     private FurnitureStorageConfigManager furnitureStorageConfigManager;
     private InventoryConfigManager inventoryConfigManager;
     private InventoriesManager inventoryManager;
+    private BlockMechanicManager blockMechanicManager;
+    private ActionConfigManager actionConfigManager;
+    private ActionManager actionManager;
+
 
     public Managers(StorageMechanic core) {
         this.core = core;
@@ -52,7 +59,11 @@ public class Managers {
         AdventureUtils.sendMessagePluginConsole(core," Starting Managers!");
         PluginManager pm = Bukkit.getPluginManager();
 
+        //NEW MECHANICS
+        this.blockMechanicManager = new BlockMechanicManager(core);
+        //CONFIGS
         customBlockManager = new CustomBlockManager(core); //1
+        actionConfigManager = new ActionConfigManager(core);
         itemInterfaceManager = new ItemInterfaceManager(core);//2
         storageConfigManager = new StorageConfigManager(core);//3
         blockStorageConfigManager = new BlockStorageConfigManager(core); //4
@@ -69,7 +80,7 @@ public class Managers {
         commandManager.loadCommand();
         storageInventoryManager = new StorageInventoryManager();
         storageManager = new StorageManager(core, dataManager, this);
-        blockStorageManager = new BlockStorageManager(core, dataManager);
+        blockStorageManager = new BlockStorageManager(core, dataManager,blockMechanicManager);
         itemStorageManager = new ItemStorageManager(core);
         if(MythicMobs.isExistMythic()){
             AdventureUtils.sendMessagePluginConsole(core," <yellow>MythicMobs hooked!");
@@ -78,6 +89,7 @@ public class Managers {
         }
         furnitureStorageManager = new FurnitureStorageManager(core, dataManager);
         inventoryManager = new InventoriesManager(core,storageManager);
+        actionManager = new ActionManager(core);
 
 
         trashSystemManager = new TrashSystemManager(core,dataManager,blockStorageConfigManager,furnitureStorageConfigManager); //7
@@ -185,5 +197,16 @@ public class Managers {
 
     public FurnitureStorageConfigManager getFurnitureStorageConfigManager() {
         return furnitureStorageConfigManager;
+    }
+
+    public BlockMechanicManager getBlockMechanicManager() {
+        return blockMechanicManager;
+    }
+    public ActionConfigManager getActionConfigManager() {
+        return actionConfigManager;
+    }
+
+    public ActionManager getActionManager() {
+        return actionManager;
     }
 }

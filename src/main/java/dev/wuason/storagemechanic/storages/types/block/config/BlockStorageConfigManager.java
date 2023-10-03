@@ -4,6 +4,8 @@ import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanic;
+import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
+import dev.wuason.storagemechanic.storages.types.block.mechanics.integrated.hopper.HopperBlockMechanic;
 import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfig;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.configuration.ConfigurationSection;
@@ -93,29 +95,39 @@ public class BlockStorageConfigManager {
                         continue;
                     }
 
-                    ArrayList<BlockMechanic> blockMechanics = new ArrayList<>();
+                    HashMap<String,BlockStorageMechanicConfig> mechanicConfigHashMap = new HashMap<>();
+                    BlockMechanicManager blockMechanicManager = core.getManagers().getBlockMechanicManager();
+                    ConfigurationSection configurationMechanicsSection = sectionBlockStorage.getConfigurationSection("mechanics");
+                    if(configurationMechanicsSection != null){
+                        for(Object mechanicKey : configurationMechanicsSection.getKeys(false)){
 
-                    for(Object mechanicKey : sectionBlockStorage.getConfigurationSection("mechanics").getKeys(false)){
-
-                        boolean enabled = sectionBlockStorage.getBoolean("mechanics." + mechanicKey,false);
-
-                        if(enabled){
-
-                            if(!core.getManagers().getBlockStorageManager().getBlockMechanicManager().mechanicExists((String)mechanicKey)){
-
+                            if(!blockMechanicManager.mechanicExists(((String)mechanicKey).toUpperCase(Locale.ENGLISH))) {
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Block storage mechanic Config! blockstorage_id: " + key + "BlockMechanic_id: " + mechanicKey + " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: mechanic is invalid");
                                 continue;
+                            };
+                            BlockMechanic blockMechanic = blockMechanicManager.getMechanic(((String)mechanicKey).toUpperCase(Locale.ENGLISH));
+                            boolean enabled = sectionBlockStorage.getBoolean("mechanics." + mechanicKey + ".enabled", false);
+                            if(!blockStorageType.equals(BlockStorageType.CHEST)) enabled = false;
+                            BlockMechanicProperties blockMechanicProperties = null;
+
+                            switch (blockMechanic.getId()){
+                                case HopperBlockMechanic.ID -> {
+
+                                    long tick = sectionBlockStorage.getLong("mechanics." + mechanicKey + ".properties.transfer_tick", 8);
+                                    int transferAmount = sectionBlockStorage.getInt("mechanics." + mechanicKey + ".properties.transfer_amount", 1);
+
+                                    blockMechanicProperties = new BlockHopperMechanicProperties(tick,transferAmount);
+
+                                }
 
                             }
-
-                            blockMechanics.add(core.getManagers().getBlockStorageManager().getBlockMechanicManager().getMechanic((String)mechanicKey));
-
+                            BlockStorageMechanicConfig blockStorageMechanicConfig = new BlockStorageMechanicConfig(enabled,blockMechanicProperties,blockMechanic);
+                            mechanicConfigHashMap.put(blockMechanic.getId(),blockStorageMechanicConfig);
                         }
-
                     }
 
-                    BlockStorageConfig blockStorageConfig = new BlockStorageConfig(blockStorageType,(String)key,blockStorageProperties,blockStorageClickType,block,blockMechanics.toArray(BlockMechanic[]::new),storage);
+                    BlockStorageConfig blockStorageConfig = new BlockStorageConfig(blockStorageType,(String)key,blockStorageProperties,blockStorageClickType,block,storage,mechanicConfigHashMap);
 
                     blockStorageConfigs.put(blockStorageConfig.getId(),blockStorageConfig);
 

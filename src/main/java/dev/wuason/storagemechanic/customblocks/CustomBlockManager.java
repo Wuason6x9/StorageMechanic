@@ -269,7 +269,10 @@ public class CustomBlockManager implements Listener {
 
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
-        event.blockList().removeIf(this::isCustomBlock);
+        /*for(int i=0;i<event.blockList().size();i++){
+            if(isCustomBlock(event.blockList().get(i))) event.setCancelled(true););
+        }*/
+        event.blockList().removeIf(block -> isCustomBlock(block));
     }
 
     @EventHandler
@@ -281,12 +284,16 @@ public class CustomBlockManager implements Listener {
 
     @EventHandler
     public void onBlockPistonRetract(BlockPistonRetractEvent event) {
-        event.getBlocks().removeIf(this::isCustomBlock);
+        for(int i=0;i<event.getBlocks().size();i++){
+            if(isCustomBlock(event.getBlocks().get(i))) event.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onBlockPistonExtend(BlockPistonExtendEvent event) {
-        event.getBlocks().removeIf(this::isCustomBlock);
+        for(int i=0;i<event.getBlocks().size();i++){
+            if(isCustomBlock(event.getBlocks().get(i))) event.setCancelled(true);
+        }
     }
 
     @EventHandler

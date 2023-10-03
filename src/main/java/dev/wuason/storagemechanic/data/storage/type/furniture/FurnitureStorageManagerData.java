@@ -92,8 +92,9 @@ public class FurnitureStorageManagerData {
         HashMap<String, Storage> hashMap = new HashMap<>();
         String furnitureStorageID = furnitureStorageData.getFurnitureStorageID();
         String furnitureStorageConfigID = furnitureStorageData.getFurnitureStorageConfigID();
-        furnitureStorageData.getStoragesID().forEach((s, s2) -> hashMap.put(s,storageManager.getStorage(s2)));
-
+        furnitureStorageData.getStoragesID().forEach((s, s2) -> {
+            if(storageManager.storageExists(s2)) hashMap.put(s, storageManager.getStorage(s2));
+        });
         ArrayList<Location> locs = new ArrayList<>();
         String[] locsSerializable = furnitureStorageData.getLocs();
         for(int i=0;i<furnitureStorageData.getLocs().length;i++){

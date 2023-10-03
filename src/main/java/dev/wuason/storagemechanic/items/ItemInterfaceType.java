@@ -7,5 +7,8 @@ public enum ItemInterfaceType {
     SORT_ITEMS,
     BLOCKED_ITEM,
     SEARCH_ITEM,
-    CLEAN_ITEM
+    CLEAN_ITEM,
+    PLACEHOLDER, //USE FOR PLACE ITEMS
+    ACTION
+
 }

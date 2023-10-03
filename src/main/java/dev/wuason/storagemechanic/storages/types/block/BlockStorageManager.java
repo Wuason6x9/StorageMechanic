@@ -7,6 +7,7 @@ import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
+import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.types.block.compatibilities.ItemsAdderEvents;
 import dev.wuason.storagemechanic.storages.types.block.compatibilities.OraxenEvents;
 import dev.wuason.storagemechanic.storages.types.block.compatibilities.mythic.MythicCrucibleBlockEvents;
@@ -48,9 +49,9 @@ public class BlockStorageManager implements Listener {
     private ArrayList<BlockStorage> blockStoragesToSave = new ArrayList<>();
     private final NamespacedKey BLOCK_SHULKER_NAMESPACEDKEY = new NamespacedKey(StorageMechanic.getInstance(),"blockstorageshulker");
 
-    public BlockStorageManager(StorageMechanic core, DataManager dataManager) {
+    public BlockStorageManager(StorageMechanic core, DataManager dataManager, BlockMechanicManager blockMechanicManager) {
         this.core = core;
-        this.blockMechanicManager = new BlockMechanicManager(core);
+        this.blockMechanicManager = blockMechanicManager;
         this.dataManager = dataManager;
         loadEvents();
     }
@@ -75,7 +76,11 @@ public class BlockStorageManager implements Listener {
         if(!blockStorages.containsKey(StorageUtils.getBlockStorageId(blockLocation)) && core.getManagers().getBlockStorageConfigManager().blockStorageConfigExists(blockStorageConfigID)){
             BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
 
-            Storage storage = core.getManagers().getStorageManager().createStorage(blockStorageConfig.getStorageConfigID());
+            Storage storage = core.getManagers().getStorageManager().createStorage(blockStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.context.BLOCK_STORAGE, new ArrayList<>(){{
+                add(blockStorageConfigID);
+                add(id);
+                add(player.getUniqueId().toString());
+            }}));
             HashMap<String,Storage> hashMap = new HashMap<>();
             hashMap.put(player.getUniqueId().toString(),storage);
             ArrayList<Location> locations = new ArrayList<>();

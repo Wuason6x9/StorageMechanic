@@ -6,6 +6,7 @@ import dev.wuason.storagemechanic.data.player.PlayerData;
 import dev.wuason.storagemechanic.data.player.PlayerDataManager;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
+import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.types.item.config.ItemStorageConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class ItemStorageManager implements Listener {
@@ -63,9 +65,11 @@ public class ItemStorageManager implements Listener {
             ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(e.getItem()));
             if(itemStorageConfig == null) return;
             if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
-            Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID());
+            Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.context.ITEM_STORAGE,new ArrayList<>(){{
+                add(itemStorageConfig.getId());
+                add(e.getPlayer().getUniqueId().toString());
+            }}));
             addStoragePlayerData(e.getPlayer().getUniqueId(),storage.getId(),itemStorageConfig.getId());
-
             setStorageFromItemStack(e.getItem(),storage.getId(),itemStorageConfig.getId(),e.getPlayer().getUniqueId());
             e.setCancelled(true);
             Bukkit.getScheduler().runTask(core,() -> storage.openStorage(e.getPlayer(), 0));

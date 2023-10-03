@@ -2,22 +2,24 @@ package dev.wuason.storagemechanic.storages.types.block.config;
 
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanic;
 
+import java.util.HashMap;
+
 public class BlockStorageConfig {
     private BlockStorageType blockStorageType;
     private String id;
     private BlockStorageProperties blockStorageProperties;
     private BlockStorageClickType blockStorageClickType;
     private String block = null;
-    private BlockMechanic[] blockMechanics;
+    private HashMap<String,BlockStorageMechanicConfig> mechanicConfigHashMap;
     private String storageID;
 
-    public BlockStorageConfig(BlockStorageType blockStorageType, String id, BlockStorageProperties blockStorageProperties, BlockStorageClickType blockStorageClickType, String block, BlockMechanic[] blockMechanics, String storageID) {
+    public BlockStorageConfig(BlockStorageType blockStorageType, String id, BlockStorageProperties blockStorageProperties, BlockStorageClickType blockStorageClickType, String block, String storageID, HashMap<String,BlockStorageMechanicConfig> mechanicConfigHashMap) {
         this.blockStorageType = blockStorageType;
         this.id = id;
         this.blockStorageProperties = blockStorageProperties;
         this.blockStorageClickType = blockStorageClickType;
         this.block = block;
-        this.blockMechanics = blockMechanics;
+        this.mechanicConfigHashMap = mechanicConfigHashMap;
         this.storageID = storageID;
     }
 
@@ -41,8 +43,8 @@ public class BlockStorageConfig {
         return block;
     }
 
-    public BlockMechanic[] getBlockMechanics() {
-        return blockMechanics;
+    public HashMap<String, BlockStorageMechanicConfig> getMechanicConfigHashMap() {
+        return mechanicConfigHashMap;
     }
 
     public String getStorageConfigID() {

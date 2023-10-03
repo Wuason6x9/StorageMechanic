@@ -24,6 +24,21 @@ public class CommandManager {
         command = new CommandAPICommand("StorageMechanic")
                 .withPermission("sm.command")
                 .withAliases("sm","storagem")
+                .withSubcommands(new CommandAPICommand("debug")
+                        .withSubcommands(new CommandAPICommand("enable")
+                                .executes((sender, args) -> {
+                                    Player player = (Player) sender;
+                                    core.getDebug().enableDebugMode(player);
+                                })
+                        )
+                        .withSubcommands(new CommandAPICommand("disable")
+                                .executes((sender, args) -> {
+                                    Player player = (Player) sender;
+                                    core.getDebug().disableDebugMode(player);
+                                })
+                        )
+
+                )
                 .withSubcommands(new CommandAPICommand("reload")
                         .withPermission("sm.command.reload")
                         .executes((sender, args) -> {

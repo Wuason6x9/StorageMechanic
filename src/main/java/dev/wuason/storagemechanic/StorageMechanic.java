@@ -16,6 +16,8 @@ public final class StorageMechanic extends JavaPlugin {
 
     private static StorageMechanic instance;
     private Managers managers;
+    private Debug debug;
+    private String a = "%%__USER__%%";
 
     public StorageMechanic(){
 
@@ -53,6 +55,8 @@ public final class StorageMechanic extends JavaPlugin {
         FastInvManager.register(this);
 
         AdventureUtils.sendMessagePluginConsole(this, "<green>Loading Managers...");
+        debug = new Debug();
+        Bukkit.getPluginManager().registerEvents(debug,this);
         managers = new Managers(this);
         managers.loadManagers();
         AdventureUtils.sendMessagePluginConsole(this, "<green>StorageMechanic is loaded!");
@@ -88,5 +92,9 @@ public final class StorageMechanic extends JavaPlugin {
 
     public Managers getManagers() {
         return managers;
+    }
+
+    public Debug getDebug() {
+        return debug;
     }
 }

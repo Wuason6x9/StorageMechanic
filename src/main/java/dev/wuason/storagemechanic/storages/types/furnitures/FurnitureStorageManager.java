@@ -7,6 +7,7 @@ import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
+import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.ItemsAdderFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.OraxenFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.MythicCrucibleFurnitureManager;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 public class FurnitureStorageManager {
     private boolean itemsAdderLoaded = false;
     private boolean oraxenLoaded = false;
-    private boolean mythicCrucibleLoaded = false;
+    private static boolean mythicCrucibleLoaded = false;
     private StorageMechanic core;
     private ItemsAdderFurnitureEvents iaEvents;
     private OraxenFurnitureEvents orEvents;
@@ -81,7 +82,11 @@ public class FurnitureStorageManager {
         if(!furnitureStorages.containsKey(StorageUtils.getBlockStorageId(furnitureLocation)) && core.getManagers().getFurnitureStorageConfigManager().furnitureStorageConfigExists(furnitureStorageConfigID)){
             FurnitureStorageConfig furnitureStorageConfig = core.getManagers().getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).orElse(null);
 
-            Storage storage = core.getManagers().getStorageManager().createStorage(furnitureStorageConfig.getStorageConfigID());
+            Storage storage = core.getManagers().getStorageManager().createStorage(furnitureStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.context.FURNITURE_STORAGE, new ArrayList<>(){{
+                add(furnitureStorageConfigID);
+                add(id);
+                add(player.getUniqueId().toString());
+            }}));
             HashMap<String,Storage> hashMap = new HashMap<>();
             hashMap.put(player.getUniqueId().toString(),storage);
             ArrayList<Location> locations = new ArrayList<>();
@@ -564,7 +569,7 @@ public class FurnitureStorageManager {
         if(!oraxenLoaded) oraxenLoaded = Bukkit.getPluginManager().getPlugin("Oraxen") != null;
         return oraxenLoaded;
     }
-    public boolean isMythicCrucibleLoaded(){
+    public static boolean isMythicCrucibleLoaded(){
         if(!mythicCrucibleLoaded) mythicCrucibleLoaded = Bukkit.getPluginManager().getPlugin("MythicCrucible") != null;
         return mythicCrucibleLoaded;
     }

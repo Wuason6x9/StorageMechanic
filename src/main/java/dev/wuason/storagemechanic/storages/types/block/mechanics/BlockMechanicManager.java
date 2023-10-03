@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.block.mechanics;
 
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.storages.types.block.mechanics.integrated.hopper.HopperBlockMechanic;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 
@@ -15,6 +16,7 @@ public class BlockMechanicManager {
     public BlockMechanicManager(StorageMechanic core) {
         this.mechanics = new HashMap<>();
         this.core = core;
+        regDef();
     }
 
     public void registerMechanic(BlockMechanic mechanic) {
@@ -22,6 +24,9 @@ public class BlockMechanicManager {
             Bukkit.getPluginManager().registerEvents((Listener) mechanic, core);
         }
         this.mechanics.put(mechanic.getId(), mechanic);
+    }
+    public void regDef(){
+        registerMechanic(new HopperBlockMechanic(core));
     }
 
     public void unregisterMechanic(String id) {

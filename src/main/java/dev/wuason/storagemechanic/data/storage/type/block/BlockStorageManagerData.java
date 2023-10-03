@@ -96,7 +96,9 @@ public class BlockStorageManagerData {
         HashMap<String, Storage> hashMap = new HashMap<>();
         String blockStorageID = blockStorageData.getBlockStorageID();
         String blockStorageConfigID = blockStorageData.getBlockStorageConfigID();
-        blockStorageData.getStoragesID().forEach((s, s2) -> hashMap.put(s,storageManager.getStorage(s2)));
+        blockStorageData.getStoragesID().forEach((s, s2) -> {
+            if(storageManager.storageExists(s2)) hashMap.put(s, storageManager.getStorage(s2));
+        });
 
         ArrayList<Location> locs = new ArrayList<>();
         String[] locsSerializable = blockStorageData.getLocs();

@@ -1,21 +1,25 @@
 package dev.wuason.storagemechanic.storages;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.api.events.storage.CloseStorageEvent;
 import dev.wuason.storagemechanic.api.events.storage.OpenStorageEvent;
 import dev.wuason.storagemechanic.compatibilities.MythicMobs;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
+import dev.wuason.storagemechanic.items.properties.PlaceHolderItemProperties;
 import dev.wuason.storagemechanic.storages.config.*;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import dev.wuason.storagemechanic.storages.types.entity.StorageTriggers;
-import io.lumine.mythic.api.mobs.MobManager;
 import io.lumine.mythic.api.mobs.MythicMob;
+import io.lumine.mythic.api.skills.SkillCaster;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.core.mobs.ActiveMob;
 import io.lumine.mythic.core.mobs.MobExecutor;
+import io.lumine.mythiccrucible.MythicCrucible;
+import io.lumine.mythiccrucible.items.furniture.Furniture;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,9 +29,11 @@ import org.bukkit.entity.Player;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class Storage {
     private Map<Integer, StorageInventory> inventories = new HashMap<>();
@@ -37,28 +43,33 @@ public class Storage {
     private String storageIdConfig;
     private Date date = new Date();
     private StorageMechanic core;
+    private StorageOriginContext storageOriginContext;
+    private HashMap<Integer, StageStorage> currentStages = new HashMap<>();
 
-    public Storage(String storageIdConfig) {
+    public Storage(String storageIdConfig, StorageOriginContext storageOriginContext) {
         this.id = UUID.randomUUID().toString();
         this.storageIdConfig = storageIdConfig;
         core = StorageMechanic.getInstance();
+        this.storageOriginContext = storageOriginContext;
     }
 
-    public Storage(String storageIdConfig, UUID id) {
+    public Storage(String storageIdConfig, UUID id, StorageOriginContext storageOriginContext) {
         this.id = id.toString();
         this.storageIdConfig = storageIdConfig;
         core = StorageMechanic.getInstance();
+        this.storageOriginContext = storageOriginContext;
     }
 
-    public Storage(String id, Map<Integer,ItemStack[]> items, String storageIdConfig, Date date) {
+    public Storage(String id, Map<Integer,ItemStack[]> items, String storageIdConfig, Date date, StorageOriginContext storageOriginContext) {
         this.id = id;
         this.items = items;
         this.storageIdConfig = storageIdConfig;
         this.date = date;
         core = StorageMechanic.getInstance();
+        this.storageOriginContext = storageOriginContext;
     }
 
-    public void closeStorage(int page) {
+    public void closeStorage(int page, Player player) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             if (storageInventory.getInventory().getViewers().size() <= 1) { // <= 1 because the current player is still in the viewer list
@@ -73,20 +84,44 @@ public class Storage {
                 }
 
                 items.put(page, contents);
+                stopAnimationStages(page);
                 inventories.remove(page);
+                if(currentStages.containsKey(page)) currentStages.remove(page);
+                if(getStorageConfig().getStorageProperties().isDropItemsPageOnClose()) dropItemsFromPage(player.getLocation(), page);
 
-
+                //MYTHIC
                 if(getInventories().size()==0){
                     if(MythicMobs.isExistMythic()){
                         UUID uuid = null;
                         try {
                             uuid = UUID.fromString(id);
-                            MobExecutor mobManager = MythicBukkit.inst().getMobManager();
-                            if(mobManager.isActiveMob(uuid)){
-                                ActiveMob activeMob = mobManager.getActiveMob(uuid).get();
-                                MythicMob mythicMob = activeMob.getType();
-                                core.getManagers().getMythicManager().runSkills(mythicMob,activeMob, StorageTriggers.CLOSE_STORAGE, BukkitAdapter.adapt(storageInventory.getInventory().getViewers().get(0).getLocation()),BukkitAdapter.adapt((Player)storageInventory.getInventory().getViewers().get(0)),null);
+
+                            if(storageOriginContext.getContext().equals(StorageOriginContext.context.ENTITY_STORAGE)){
+
+                                String type = storageOriginContext.getData().get(0);
+                                String id = null;
+                                SkillCaster skillCaster = null;
+                                switch (type){
+                                    case "MOB" ->{
+                                        MobExecutor mobManager = MythicBukkit.inst().getMobManager();
+                                        if(mobManager.isActiveMob(uuid)){
+                                            ActiveMob activeMob = mobManager.getActiveMob(uuid).get();
+                                            MythicMob mythicMob = activeMob.getType();
+                                            id = mythicMob.getInternalName();
+                                            skillCaster = activeMob;
+                                        }
+                                    }
+                                    case "FURNITURE" ->{
+                                        Furniture furniture = MythicCrucible.inst().getItemManager().getFurnitureManager().getFurniture(uuid).get();
+                                        skillCaster = furniture;
+                                        id = furniture.getFurnitureData().getItem().getInternalName();
+                                    }
+                                }
+
+                                core.getManagers().getMythicManager().runSkills(id,skillCaster,StorageTriggers.CLOSE_STORAGE, BukkitAdapter.adapt(storageInventory.getInventory().getViewers().get(0).getLocation()),BukkitAdapter.adapt((Player)storageInventory.getInventory().getViewers().get(0)),null);
+
                             }
+
                         }
                         catch (Exception e){
                         }
@@ -148,6 +183,7 @@ public class Storage {
             if(storageConfig.isStorageItemsInterfaceEnabled()){
                 if(storageConfig.getStorageItemsInterfaceConfig().containsKey(page)){
                     for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : storageConfig.getStorageItemsInterfaceConfig().get(page).entrySet()){
+                        if(core.getManagers().getItemInterfaceManager().isItemInterfaceWithPlaceHolderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
                         inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
                     }
                 }
@@ -156,10 +192,83 @@ public class Storage {
         }
         StorageInventory storageInventoryPage = inventories.get(page);
         storageInventoryPage.open(player);
+        if(storageConfig.getRefreshTimeStages() != 0L && storageConfig.getRefreshTimeStages() != -1L) startAnimationStages(page);
+        if(currentStages.containsKey(page)){
+            StageStorage stage = currentStages.get(page);
+            if(stage.getTitle() != null) storageInventoryPage.setTitleInventory(stage.getTitle(), player);
+        }
 
         OpenStorageEvent openStorageEvent = new OpenStorageEvent(player,storageInventoryPage);
         Bukkit.getPluginManager().callEvent(openStorageEvent);
     }
+    public void startAnimationStages(int page){
+        if(currentStages.containsKey(page)) return;
+        StorageConfig storageConfig = getStorageConfig();
+        if(storageConfig.getRefreshTimeStages() == 0L || storageConfig.getRefreshTimeStages() == -1L) return;
+        ArrayList<StageStorage> stages = storageConfig.getStagesOrder();
+        if(stages.size()<1) return;
+        StorageInventory inventory = inventories.get(page);
+        BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(core, () ->{
+            StageStorage stage = null;
+            if(currentStages.containsKey(page)) {
+                stage = currentStages.get(page);
+                if(stages.indexOf(stage) + 1 < stages.size()) stage = stages.get(stages.indexOf(stage)+1);
+                else {
+                    stage = stages.get(0);
+                }
+            }
+            if(!currentStages.containsKey(page)) stage = storageConfig.getStagesOrder().get(0);
+            setStage(stage,page);
+        },0,storageConfig.getRefreshTimeStages());
+        inventory.setAnimationStagesTask(bukkitTask);
+    }
+    public void stopAnimationStages(int page){
+        if(!currentStages.containsKey(page)) return;
+        StorageInventory inventory = inventories.get(page);
+        inventory.getAnimationStagesTask().cancel();
+        inventory.setAnimationStagesTask(null);
+    }
+    public void setStage(String stageId, int page){
+        StorageConfig storageConfig = getStorageConfig();
+        if(!storageConfig.getStagesHashMap().containsKey(stageId)) return;
+        StageStorage stage = storageConfig.getStagesHashMap().get(stageId);
+        if(!inventories.containsKey(page)) return;
+        currentStages.put(page,stage);
+        StorageInventory inventory = inventories.get(page);
+        if(stage.getTitle() != null) inventory.setTitleInventory(stage.getTitle(),null);
+        if(stage.getStorageItemsInterfaceConfig().containsKey(page)){
+            removeItemsInterface(page);
+            for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : stage.getStorageItemsInterfaceConfig().get(page).entrySet()){
+                if(core.getManagers().getItemInterfaceManager().isItemInterfaceWithPlaceHolderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
+                inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
+            }
+        }
+    }
+    public void setStage(StageStorage stage, int page){
+        if(!inventories.containsKey(page)) return;
+        StorageInventory inventory = inventories.get(page);
+        if(stage.getTitle() != null) inventory.setTitleInventory(stage.getTitle(),null);
+        currentStages.put(page,stage);
+        if(stage.getStorageItemsInterfaceConfig().containsKey(page)){
+            removeItemsInterface(page);
+            for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : stage.getStorageItemsInterfaceConfig().get(page).entrySet()){
+                if(core.getManagers().getItemInterfaceManager().isItemInterfaceWithPlaceHolderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
+                inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
+            }
+        }
+    }
+    public void removeItemsInterface(int page){
+        if(!inventories.containsKey(page)) return;
+        StorageInventory storageInventory = inventories.get(page);
+        for(int i=0;i<storageInventory.getInventory().getSize();i++){
+            ItemStack item = storageInventory.getInventory().getItem(i);
+            if(item != null && !item.getType().equals(Material.AIR) && core.getManagers().getItemInterfaceManager().isItemInterface(item)){
+                storageInventory.getInventory().clear(i);
+            }
+        }
+    }
+
+
     public void loadAllItemsDefault(){
         for (int p = 0; p < getTotalPages(); p++) {
             loadItemsDefault(p);
@@ -296,7 +405,6 @@ public class Storage {
 
             int remainingAmount = itemStack.getAmount();
             for (int i = 0; i < contents.length && remainingAmount > 0; i++) {
-                System.out.println(canBePlaced(itemStack,page,i,storageConfig) + " page: " + page + " slot: " + i);
                 if(!canBePlaced(itemStack,page,i,storageConfig)) continue;
                 if (contents[i] == null || contents[i].getAmount() == 0) {
                     contents[i] = itemStack.clone();
@@ -400,9 +508,22 @@ public class Storage {
         return notRemovedItems;
     }
 
-    public void clearSlot(int page, int slot) {
+    public void clearSlotWithRestrictions(int page, int slot) {
+        if(isItemInterfaceSlot(page,slot,getStorageConfig())) return;
         if (inventories.containsKey(page)) {
-            if(isItemInterfaceSlot(page,slot,getStorageConfig())) return;
+            StorageInventory storageInventory = inventories.get(page);
+            Inventory inventory = storageInventory.getInventory();
+            inventory.clear(slot);
+        }
+        else {
+            ItemStack[] contents = items.getOrDefault(page,null);
+            if (contents != null) {
+                contents[slot] = null;
+            }
+        }
+    }
+    public void clearSlotPage(int page, int slot) {
+        if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             Inventory inventory = storageInventory.getInventory();
             inventory.clear(slot);
@@ -428,6 +549,13 @@ public class Storage {
         }
         Bukkit.getScheduler().runTask(StorageMechanic.getInstance(),() -> {
             for(ItemStack item : itemStacks){
+                if(core.getManagers().getItemInterfaceManager().isItemInterfaceWithPlaceHolderItem(item)){
+                    ItemMeta itemMeta = item.getItemMeta();
+                    PersistentDataContainer itemPersistentDataContainer = itemMeta.getPersistentDataContainer();
+                    itemPersistentDataContainer.remove(PlaceHolderItemProperties.NAMESPACED_KEY);
+                    itemPersistentDataContainer.remove(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE);
+                    item.setItemMeta(itemMeta);
+                }
                 world.dropItemNaturally(dropLocation, item);
             }
         });
@@ -455,12 +583,17 @@ public class Storage {
         return objects;
     }
     public boolean canBePlaced(ItemStack item, int page, int slot, StorageConfig storageConfig){
-        System.out.println(isItemInterfaceSlot(page,slot,storageConfig) + " = interface");
-        System.out.println(isBlocked(slot,page,storageConfig) + " = blocked slot");
         return (!isItemInterfaceSlot(page,slot,storageConfig) && !((boolean)isBlocked(slot,page,storageConfig).get(0)) && !isItemInList(item,slot,page,ListType.BLACKLIST,storageConfig) && isItemInList(item,slot,page,ListType.WHITELIST,storageConfig));
     }
     public boolean isItemInterfaceSlot(int page, int slot, StorageConfig storageConfig){
         if(!storageConfig.getStorageItemsInterfaceConfig().containsKey(page)) return false;
+        if(currentStages.containsKey(page)){
+            StageStorage stage = currentStages.get(page);
+            if(stage.getStorageItemsInterfaceConfig().containsKey(page)){
+                HashMap<Integer,StorageItemInterfaceConfig> hashMap = stage.getStorageItemsInterfaceConfig().get(page);
+                return hashMap.containsKey(slot);
+            }
+        }
         HashMap<Integer,StorageItemInterfaceConfig> hashMap = storageConfig.getStorageItemsInterfaceConfig().get(page);
         return hashMap.containsKey(slot);
     }
@@ -782,6 +915,40 @@ public class Storage {
         return allViewers;
     }
 
+    public void setItemInSlotPage(int page, int slot, ItemStack item){
+        if (inventories.containsKey(page)) {
+            StorageInventory storageInventory = inventories.get(page);
+            storageInventory.getInventory().setItem(slot, item);
+        }
+
+        if (items.containsKey(page)) {
+            ItemStack[] contents = items.get(page);
+            contents[slot] = item;
+        }
+    }
+
+    public ItemStack[] getItemsFromPageInventory(int page){
+        if (inventories.containsKey(page)) {
+            StorageInventory storageInventory = inventories.get(page);
+            ItemStack[] contents = storageInventory.getInventory().getContents();
+            return contents;
+        }
+
+        if (items.containsKey(page)) {
+            ItemStack[] contents = items.get(page);
+            return contents;
+        }
+
+        return null;
+    }
+
+    public ItemStack[] getItemsFromPageStorage(int page){
+        if (items.containsKey(page)) {
+            ItemStack[] contents = items.get(page);
+            return contents;
+        }
+        return null;
+    }
     public ItemStack[] getItemsFromPageSlots(int page){
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
@@ -845,6 +1012,61 @@ public class Storage {
         }
 
         return itemsList;
+    }
+
+    public StorageItemDataInfo getFirstItemStack(){
+
+        for(int i=0;i<getTotalPages();i++){
+            if (inventories.containsKey(i)) {
+                StorageInventory storageInventory = inventories.get(i);
+                ItemStack[] contents = storageInventory.getInventory().getContents();
+                for(int k=0;k<contents.length;k++){
+                    ItemStack item = contents[k];
+                    if (item != null && !item.getType().isAir()) {
+
+                        return new StorageItemDataInfo(item,i,k,this);
+
+                    }
+                }
+            }
+
+            if (items.containsKey(i)) {
+                ItemStack[] contents = items.get(i);
+                for(int k=0;k<contents.length;k++){
+                    ItemStack item = contents[k];
+                    if (item != null && !item.getType().isAir()) {
+
+                        return new StorageItemDataInfo(item,i,k,this);
+
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+    public StorageItemDataInfo getFirstItemStackSimilar(ItemStack similar){
+
+        for(int i=0;i<getTotalPages();i++){
+            if (inventories.containsKey(i)) {
+                StorageInventory storageInventory = inventories.get(i);
+                ItemStack[] contents = storageInventory.getInventory().getContents();
+                for(int k=0;k<contents.length;k++){
+                    ItemStack item = contents[k];
+                    if (item != null && !item.getType().isAir() && item.isSimilar(similar)) return new StorageItemDataInfo(item,i,k,this);
+                }
+            }
+
+            if (items.containsKey(i)) {
+                ItemStack[] contents = items.get(i);
+                for(int k=0;k<contents.length;k++){
+                    ItemStack item = contents[k];
+                    if (item != null && !item.getType().isAir() && item.isSimilar(similar)) return new StorageItemDataInfo(item,i,k,this);
+                }
+            }
+        }
+
+        return null;
     }
 
     public List<ItemStack> getAllItems() {
@@ -919,9 +1141,20 @@ public class Storage {
         return date;
     }
 
+    public StorageMechanic getCore() {
+        return core;
+    }
+
+    public StorageOriginContext getStorageOriginContext() {
+        return storageOriginContext;
+    }
+
     public enum ListType{
         WHITELIST,
         BLACKLIST
     }
 
+    public HashMap<Integer, StageStorage> getCurrentStages() {
+        return currentStages;
+    }
 }

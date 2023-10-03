@@ -2,15 +2,14 @@ package dev.wuason.storagemechanic.items;
 
 import dev.wuason.mechanics.Mechanics;
 
+import dev.wuason.mechanics.compatibilities.AdapterManager;
 import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.customblocks.CustomBlock;
 
 import dev.wuason.storagemechanic.inventory.inventories.SearchItem.SearchType;
-import dev.wuason.storagemechanic.items.properties.CleanItemProperties;
-import dev.wuason.storagemechanic.items.properties.Properties;
-import dev.wuason.storagemechanic.items.properties.SearchItemProperties;
+import dev.wuason.storagemechanic.items.properties.*;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -93,6 +92,38 @@ public class ItemInterfaceManager {
                     Properties properties = null;
 
                     switch (itemInterfaceType){
+                        case ACTION -> {
+                            String actionId = sectionItemInterface.getString("properties.action_id");
+                            if(actionId == null || !core.getManagers().getActionConfigManager().getActionConfigHashMap().containsKey(actionId)){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Action id is null or invalid!");
+                                continue;
+                            }
+                            properties = new ActionItemProperties(actionId);
+                        }
+                        case PLACEHOLDER -> {
+                            List<String> whitelistItems = sectionItemInterface.getStringList("properties.whitelist.list");
+                            List<String> blacklistItems = sectionItemInterface.getStringList("properties.blacklist.list");
+                            boolean whitelistEnabled = sectionItemInterface.getBoolean("properties.whitelist.enabled", false);
+                            boolean blacklistEnabled = sectionItemInterface.getBoolean("properties.blacklist.enabled", false);
+                            if(whitelistItems == null) whitelistEnabled = false;
+                            if(blacklistItems == null) blacklistEnabled = false;
+                            AdapterManager adapterManager = Mechanics.getInstance().getManager().getAdapterManager();
+                            //COMPUTE ITEMS
+                            List<String> itemsBlackListComputed = new ArrayList<>();
+                            if(blacklistEnabled){
+                                for(String i : blacklistItems){
+                                    itemsBlackListComputed.add(adapterManager.getAdapterID(adapterManager.getItemStack(i)));
+                                }
+                            }
+                            List<String> itemsWhiteListComputed = new ArrayList<>();
+                            if(whitelistEnabled){
+                                for(String i : whitelistItems){
+                                    itemsWhiteListComputed.add(adapterManager.getAdapterID(adapterManager.getItemStack(i)));
+                                }
+                            }
+                            properties = new PlaceHolderItemProperties(whitelistEnabled,blacklistEnabled,itemsWhiteListComputed,itemsBlackListComputed);
+                        }
                         case CLEAN_ITEM -> {
                             List<String> pagesString = sectionItemInterface.getStringList("properties.pages");
                             List<String> slotsString = sectionItemInterface.getStringList("properties.slots");
@@ -151,9 +182,20 @@ public class ItemInterfaceManager {
         }
         ItemMeta itemMeta = itemStack.getItemMeta();
         PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
-
         if (itemDataContainer.has(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicitem"), PersistentDataType.STRING)) {
             String id = itemDataContainer.get(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicitem"), PersistentDataType.STRING);
+            return getItemInterfaceById(id);
+        }
+        return null;
+    }
+    public ItemInterface getItemInterfaceByItemStackPlaceholder(ItemStack itemStack) {
+        if (itemStack == null || !itemStack.hasItemMeta()) {
+            return null;
+        }
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
+        if (itemDataContainer.has(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE, PersistentDataType.STRING)) {
+            String id = itemDataContainer.get(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE, PersistentDataType.STRING);
             return getItemInterfaceById(id);
         }
         return null;
@@ -186,6 +228,15 @@ public class ItemInterfaceManager {
         PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
 
         return itemDataContainer.has(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicitem"), PersistentDataType.STRING);
+    }
+    public boolean isItemInterfaceWithPlaceHolderItem(ItemStack itemStack) {
+        if (itemStack == null || !itemStack.hasItemMeta()) {
+            return false;
+        }
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
+
+        return itemDataContainer.has(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE, PersistentDataType.STRING);
     }
 
     public List<ItemInterface> getAllItemInterfaces() {

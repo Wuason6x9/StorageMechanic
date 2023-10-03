@@ -1,18 +1,22 @@
 package dev.wuason.storagemechanic.storages.inventory;
 
+import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.config.StorageInventoryTypeConfig;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +27,8 @@ public class StorageInventory implements InventoryHolder {
     private Inventory inventory;
     private String id;
     private Storage storage;
-
     private int page;
+    private BukkitTask animationStagesTask;
 
 
 
@@ -72,6 +76,18 @@ public class StorageInventory implements InventoryHolder {
         }
     }
 
+    public void setTitleInventory(String title, @Nullable Player player){
+        if(player != null){
+            Mechanics.getInstance().getServerNmsVersion().getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(title, player),player);
+            return;
+        }
+        if(inventory != null){
+            for(HumanEntity human : inventory.getViewers()){
+                Mechanics.getInstance().getServerNmsVersion().getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(title, (Player) human),(Player) human);
+            }
+        }
+    }
+
     @NotNull
     @Override
     public Inventory getInventory() {
@@ -96,5 +112,13 @@ public class StorageInventory implements InventoryHolder {
 
     public int getPage() {
         return page;
+    }
+
+    public BukkitTask getAnimationStagesTask() {
+        return animationStagesTask;
+    }
+
+    public void setAnimationStagesTask(BukkitTask animationStagesTask) {
+        this.animationStagesTask = animationStagesTask;
     }
 }

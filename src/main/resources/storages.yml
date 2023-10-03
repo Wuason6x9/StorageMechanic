@@ -5,6 +5,7 @@ storages:
       pages: 10
       inventory_type: chest
       title: "test"
+      max-views: -1 #TOOOO  AAAAAAAAAAAAAAAAAAADDDDDDDD
     sounds:
       enabled: true
       list:
@@ -71,3 +72,14 @@ storages:
           pages: [1,3]
           slots: [0]
           item: item1
+    stages: #TOOOO  AAAAAAAAAAAAAAAAAAADDDDDDDD
+      refresh: 20
+      list:
+        stage_1:
+          title: "test"
+          interfaces:
+            list:
+              iterface1:
+                pages: [ 1,3 ]
+                slots: [ 0 ]
+                item: item1

@@ -6,6 +6,7 @@ import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.storage.type.block.BlockStorageManagerData;
 import dev.wuason.storagemechanic.data.storage.type.furniture.FurnitureStorageManagerData;
 import dev.wuason.storagemechanic.storages.Storage;
+import dev.wuason.storagemechanic.storages.StorageOriginContext;
 
 import java.util.HashMap;
 
@@ -73,14 +74,14 @@ public class StorageManagerData {
     //Serialize
     public Storage storageDataToStorage(StorageData storageData) {
         if(storageData != null){
-            Storage storage = new Storage(storageData.getId(), storageData.getItems(), storageData.getStorageIdConfig(), storageData.getDate());return storage;
+            Storage storage = new Storage(storageData.getId(), storageData.getItems(), storageData.getStorageIdConfig(), storageData.getDate(), new StorageOriginContext(StorageOriginContext.context.valueOf(storageData.getStorageOriginContext()),storageData.getStorageOriginContextData()));return storage;
         }
         return null;
     }
 
     public StorageData storageToStorageData(Storage storage) {
         if(storage != null){
-            return new StorageData(storage.getItems(), storage.getId(), storage.getStorageIdConfig(), storage.getDate());
+            return new StorageData(storage.getItems(), storage.getId(), storage.getStorageIdConfig(), storage.getDate(),storage.getStorageOriginContext().getContext().toString(),storage.getStorageOriginContext().getData());
         }
         return null;
     }

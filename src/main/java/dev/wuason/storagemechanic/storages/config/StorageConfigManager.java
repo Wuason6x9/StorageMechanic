@@ -73,6 +73,13 @@ public class StorageConfigManager {
 
                     if(storageInventoryType.equals(StorageInventoryTypeConfig.CHEST)){if(rows == 0 || rows > 6){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage Config! storage_id: " + key + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: The rows are empty or the number is greater than 6");continue;}}
 
+                    //Storage properties
+
+                    boolean tempStorage = sectionStorage.getBoolean("storage.properties.isTempStorage",false);
+                    boolean dropItemsPageOnClose = sectionStorage.getBoolean("storage.properties.dropItemsPageOnClose",false);;
+
+                    StorageProperties storageProperties = new StorageProperties(tempStorage, dropItemsPageOnClose);
+
                     //SOUND SECTION
 
                     boolean soundsEnabled = sectionStorage.getBoolean("sounds.enabled",false); //VAR
@@ -114,6 +121,7 @@ public class StorageConfigManager {
                     ConfigurationSection sectionBlackListItemsConfigs = sectionStorage.getConfigurationSection("items.blacklist.list");
                     processItems(sectionBlackListItemsConfigs, storageBlackListItemsConfigs, "blackList",key,file);
 
+                    //items interfaces
 
                     boolean interfacesEnabled = sectionStorage.getBoolean("interfaces.enabled",false); //VAR
 
@@ -139,6 +147,48 @@ public class StorageConfigManager {
                         }
                     }
 
+                    //stages
+
+                    HashMap<String, StageStorage> stagesHashMap = new HashMap<>();
+                    ArrayList<StageStorage> stagesOrder = new ArrayList<>();
+                    long refreshTimeStages = sectionStorage.getLong("stages.refresh",0);
+                    ConfigurationSection sectionStages = sectionStorage.getConfigurationSection("stages.list");
+                    if(sectionStages != null){
+                        for(String stageKey : sectionStages.getKeys(false)){
+                            if(stagesHashMap.containsKey(stageKey)){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Stage stage_id: " + stageKey + " Storage Config! storage_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Stage is duplicate!");
+                                continue;
+                            }
+                            ConfigurationSection sectionStage = sectionStages.getConfigurationSection(stageKey);
+                            String titleStage = sectionStage.getString("title");
+                            HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageInterfacesStageConfigs = new HashMap<>(); //VAR
+                            ConfigurationSection sectionStageInterfaces = sectionStage.getConfigurationSection("interfaces.list");
+                            if(sectionStageInterfaces != null){
+                                for(String interfaceStageItemKey : sectionStageInterfaces.getKeys(false)){
+                                    ConfigurationSection sectionInterface = sectionStageInterfaces.getConfigurationSection(interfaceStageItemKey);
+                                    ArrayList<Integer> interfaceItemPages = StorageUtils.configFill(sectionInterface.getStringList("pages"));
+                                    ArrayList<Integer> interfaceItemSlots = StorageUtils.configFill(sectionInterface.getStringList("slots"));
+                                    if(!checkSlots(interfaceItemSlots)){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + "interfaceItem" + " item Config! in Stage_id: " + stageKey + " storage_id: " + key + " " + "interfaceItem" + "Item_id: " + interfaceStageItemKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + "interfaceItem" + " Some slot is wrong the range of slots is: 0 - 63");continue;}
+                                    String interfaceItem = sectionInterface.getString("item",".");
+                                    if(interfaceItem.equals(".")){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage interfaceItem Config! in Stage_id: " + stageKey +  " storage_id: " + key + " interfaceItem_id: " + interfaceStageItemKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: interfaceItem is null or invalid");continue;}
+                                    if(!core.getManagers().getItemInterfaceManager().existsItemInterface(interfaceItem)){AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage interfaceItem Config!  in Stage_id: " + stageKey + " storage_id: " + key + " interfaceItem_id: " + interfaceStageItemKey + " in file: " + file.getName());AdventureUtils.sendMessagePluginConsole(core, "<red>Error: interfaceItem is null or invalid");continue;}
+                                    StorageItemInterfaceConfig storageInterfacesConfig = new StorageItemInterfaceConfig(interfaceStageItemKey,interfaceItem);
+                                    for(int page : interfaceItemPages){
+                                        for(int slot : interfaceItemSlots){
+                                            if(!storageInterfacesStageConfigs.containsKey(page)) storageInterfacesStageConfigs.put(page, new HashMap<>());
+                                            HashMap<Integer, StorageItemInterfaceConfig> map = storageInterfacesStageConfigs.get(page);
+                                            map.put(slot,storageInterfacesConfig);
+                                        }
+                                    }
+                                }
+                            }
+                            StageStorage stageStorage = new StageStorage(storageInterfacesStageConfigs,titleStage,stageKey);
+                            stagesHashMap.put(stageKey,stageStorage);
+                            stagesOrder.add(stageStorage);
+                        }
+                    }
+
                     boolean storageBlockedEnabled = sectionStorage.getBoolean("items.block.enabled",false);
 
                     ArrayList<StorageBlockItemConfig> storageBlockItemConfigs = new ArrayList<>();
@@ -157,7 +207,7 @@ public class StorageConfigManager {
                         }
                     }
 
-                    StorageConfig storageConfig = new StorageConfig((String)key,rows,pages,storageInventoryType,title,storageSoundConfigs,soundsEnabled,storageDefaultItemsConfigs,defaultItemsEnabled,storageWhiteListItemsConfigs,whiteListItemsEnabled,storageBlackListItemsConfigs,blackListItemsEnabled,storageInterfacesConfigs,interfacesEnabled,blackListMessage,whiteListMessage,storageBlockItemConfigs,storageBlockedEnabled);
+                    StorageConfig storageConfig = new StorageConfig((String)key,rows,pages,storageInventoryType,title,storageSoundConfigs,soundsEnabled,storageDefaultItemsConfigs,defaultItemsEnabled,storageWhiteListItemsConfigs,whiteListItemsEnabled,storageBlackListItemsConfigs,blackListItemsEnabled,storageInterfacesConfigs,interfacesEnabled,blackListMessage,whiteListMessage,storageBlockItemConfigs,storageBlockedEnabled,storageProperties,stagesOrder,refreshTimeStages,stagesHashMap);
                     storagesConfig.put(storageConfig.getId(),storageConfig);
                 }
             }

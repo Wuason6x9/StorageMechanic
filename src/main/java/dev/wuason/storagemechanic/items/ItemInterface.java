@@ -15,6 +15,7 @@ public class ItemInterface {
     private ItemInterfaceType itemInterfaceType;
     private String id;
     private Properties properties;
+    public final static NamespacedKey NAMESPACED_KEY = new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicitem");
 
     public ItemInterface(String item, String displayName, List<String> lore, ItemInterfaceType itemInterfaceType, String id, Properties properties) {
 
@@ -23,7 +24,7 @@ public class ItemInterface {
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 
-        itemMeta.getPersistentDataContainer().set(new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicitem"), PersistentDataType.STRING, id);
+        itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, id);
 
         itemStack.setItemMeta(itemMeta);
         this.itemInterfaceType = itemInterfaceType;

@@ -6,6 +6,7 @@ import dev.wuason.storagemechanic.data.player.PlayerData;
 import dev.wuason.storagemechanic.data.player.PlayerDataManager;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
+import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -104,7 +105,11 @@ public class BlockStorage {
         Storage storage = null;
         if(!existStoragePlayer(player)){
             Managers managers = StorageMechanic.getInstance().getManagers();
-            storage = managers.getStorageManager().createStorage(managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).get().getStorageConfigID());
+            storage = managers.getStorageManager().createStorage(managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.context.BLOCK_STORAGE, new ArrayList<>(){{
+                add(blockStorageConfigID);
+                add(id);
+                add(player.getUniqueId().toString());
+            }}));
             storages.put(player.getUniqueId().toString(),storage);
             //Storage Player Data
             PlayerDataManager playerDataManager = managers.getDataManager().getPlayerDataManager();
@@ -144,7 +149,11 @@ public class BlockStorage {
         StorageManager storageManager = managers.getStorageManager();
         BlockStorageConfig blockStorageConfig = managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
 
-        Storage storage = storageManager.createStorage(blockStorageConfig.getStorageConfigID());
+        Storage storage = storageManager.createStorage(blockStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.context.BLOCK_STORAGE, new ArrayList<>(){{
+            add(blockStorageConfigID);
+            add(getId());
+            add(id);
+        }}));
         storages.put(id, storage);
 
         return storage;

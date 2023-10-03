@@ -7,8 +7,12 @@ public class StorageConfig {
     private String id;
     private int rows;
     private int pages;
+    private StorageProperties storageProperties;
     private StorageInventoryTypeConfig inventoryType;
     private String title;
+    private HashMap<String, StageStorage> stagesHashMap = new HashMap<>();
+    private ArrayList<StageStorage> stagesOrder = new ArrayList<>();
+    private long refreshTimeStages = 0L;
     private ArrayList<StorageSoundConfig> storageSounds = new ArrayList<>();
     private boolean storageSoundEnabled = false;
     private ArrayList<StorageItemConfig> storageItemsDefaultConfig = new ArrayList<>();
@@ -25,7 +29,7 @@ public class StorageConfig {
     private String whiteListMessage = null;
     private String blackListMessage = null;
 
-    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled) {
+    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled, StorageProperties storageProperties, ArrayList<StageStorage> stagesOrder, long refreshTimeStages, HashMap<String, StageStorage> stagesHashMap) {
         this.id = id;
         this.rows = rows;
         this.pages = pages;
@@ -45,6 +49,10 @@ public class StorageConfig {
         this.blackListMessage = blackListMessage;
         this.storageBlockedItemsConfig = storageBlockedItemsConfig;
         this.storageBlockItemEnabled = storageBlockItemEnabled;
+        this.storageProperties = storageProperties;
+        this.refreshTimeStages = refreshTimeStages;
+        this.stagesHashMap = stagesHashMap;
+        this.stagesOrder = stagesOrder;
     }
 
     public String getId() {
@@ -123,4 +131,19 @@ public class StorageConfig {
         return storageBlockItemEnabled;
     }
 
+    public StorageProperties getStorageProperties() {
+        return storageProperties;
+    }
+
+    public HashMap<String, StageStorage> getStagesHashMap() {
+        return stagesHashMap;
+    }
+
+    public ArrayList<StageStorage> getStagesOrder() {
+        return stagesOrder;
+    }
+
+    public long getRefreshTimeStages() {
+        return refreshTimeStages;
+    }
 }
