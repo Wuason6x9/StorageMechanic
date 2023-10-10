@@ -1,4 +1,4 @@
-package dev.wuason.storagemechanic.actions.functions.functions;
+package dev.wuason.storagemechanic.actions.functions.functions.vanilla;
 
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;

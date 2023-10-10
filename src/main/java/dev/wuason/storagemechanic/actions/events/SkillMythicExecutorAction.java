@@ -22,7 +22,8 @@ public class SkillMythicExecutorAction extends EventAction {
     public void registerPlaceholders(HashMap<String, Object> currentPlaceholders) {
         currentPlaceholders.put("$caster$".toUpperCase().intern(), skillMetadata.getCaster());
         currentPlaceholders.put("$skill_metadata$".toUpperCase().intern(), skillMetadata);
-        currentPlaceholders.put("$skill_abstract_entity$".toUpperCase().intern(), skillMetadata);
-        currentPlaceholders.put("$activeMob_uuid$".toUpperCase().intern(), skillMetadata.getCaster().getEntity().getUniqueId());
+        currentPlaceholders.put("$skill_abstract_entity$".toUpperCase().intern(), abstractEntity);
+        currentPlaceholders.put("$skill_abstract_entity_uuid$".toUpperCase().intern(), abstractEntity.getUniqueId());
+        currentPlaceholders.put("$caster_entity_uuid$".toUpperCase().intern(), skillMetadata.getCaster().getEntity().getUniqueId());
     }
 }

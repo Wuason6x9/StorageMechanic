@@ -141,7 +141,7 @@ public class CustomBlockManager implements Listener {
             event.setDropItems(false);
 
             if(itemInMainHand == null) return;
-            if(customBlock.getCustomBlockProperties().isDropBlock() && itemInMainHand.getType().toString().toLowerCase().contains("pickaxe")){
+            if(customBlock.getCustomBlockProperties().isDropBlock()){
                 blockLocation.getWorld().dropItem(blockLocation,customBlock.getItemStack());
             }
         }
@@ -161,13 +161,10 @@ public class CustomBlockManager implements Listener {
             NamespacedKey blockKey = new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + "x" + x + "x" + y + "x" + z);
             if (chunkDataContainer.has(blockKey, PersistentDataType.STRING)) {
                 String customBlockId = chunkDataContainer.get(blockKey, PersistentDataType.STRING);
-
+                event.setCancelled(true);
                 CustomBlockInteractEvent customBlockInteractEvent = new CustomBlockInteractEvent(event,getCustomBlockById(customBlockId));
                 Bukkit.getPluginManager().callEvent(customBlockInteractEvent);
-
-                if(customBlockInteractEvent.isCancelled()){
-                    event.setCancelled(true);
-                }
+                event.setCancelled(customBlockInteractEvent.isCancelled());
             }
         }
     }

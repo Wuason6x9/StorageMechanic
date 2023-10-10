@@ -8,6 +8,7 @@ import dev.wuason.storagemechanic.actions.functions.functions.storage.ClearSlotP
 import dev.wuason.storagemechanic.actions.functions.functions.storage.ClearSlotPageStorageR;
 import dev.wuason.storagemechanic.actions.functions.functions.storage.SetItemStorage;
 import dev.wuason.storagemechanic.actions.functions.functions.storage.SetStage;
+import dev.wuason.storagemechanic.actions.functions.functions.vanilla.ExecuteCommand;
 import dev.wuason.storagemechanic.actions.functions.functions.vanilla.PlaySound;
 import dev.wuason.storagemechanic.actions.functions.functions.vars.RefreshLocalVar;
 import dev.wuason.storagemechanic.actions.functions.functions.vars.RemoveGlobalVar;

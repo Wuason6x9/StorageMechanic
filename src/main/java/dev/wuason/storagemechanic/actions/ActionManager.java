@@ -63,6 +63,7 @@ public class ActionManager {
         if(storage != null){
             placeholders.put("$storage$".toUpperCase().intern(), storage);
             placeholders.put("$storage_id$".toUpperCase().intern(), storage.getId().intern());
+            placeholders.put("$storage_config_id$".toUpperCase().intern(), storage.getStorageConfig().getId());
         }
         //INIT DEFAULT VARS
         if(player != null){
@@ -110,6 +111,7 @@ public class ActionManager {
         if(storage != null){
             placeholders.put("$storage$".toUpperCase().intern(), storage);
             placeholders.put("$storage_id$".toUpperCase().intern(), storage.getId().intern());
+            placeholders.put("$storage_config_id$".toUpperCase().intern(), storage.getStorageConfig().getId());
         }
         //INIT DEFAULT VARS
         if(player != null){

@@ -83,6 +83,22 @@ public class HopperActive {
                     int amountSimilar = similar.getItemStack().getAmount();
 
 
+                    int a = maxStackHopperItem - amountHopperItem; // 64 | 53  = 11
+
+                    if( a > transferAmount ){ // 11 > 5 yes
+                        System.out.println("> transfer amount");
+                        int b = a - transferAmount; // sobras de la cantidad que puede llegar a transferir 5 = 6
+                        int c = amountSimilar - transferAmount;
+                        if(c>=0){
+                            hopperItemStack.setAmount(amountHopperItem + transferAmount);
+                            similar.getItemStack().setAmount(c);
+                            continue;
+                        }
+
+
+                    }
+
+
 
                     /*int rest = amountSimilar - transferAmount;
                     if(rest == 0) similar.remove();
