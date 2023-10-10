@@ -1,1 +1,0 @@
-{ "parent": "storagemechanic/renders/gui", "textures": { "layer0": "storagemechanic/icons/blocked_item" }, "display": { "gui": { "scale": [1.15, 1.15, 1.15] } } }
