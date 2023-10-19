@@ -1,12 +1,20 @@
 package dev.wuason.storagemechanic;
 
+import dev.wuason.boostedyaml.YamlDocument;
+import dev.wuason.boostedyaml.dvs.versioning.BasicVersioning;
+import dev.wuason.boostedyaml.settings.dumper.DumperSettings;
+import dev.wuason.boostedyaml.settings.general.GeneralSettings;
+import dev.wuason.boostedyaml.settings.loader.LoaderSettings;
+import dev.wuason.boostedyaml.settings.updater.UpdaterSettings;
 import dev.wuason.fastinv.FastInvManager;
 import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MechanicsUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +25,7 @@ public final class StorageMechanic extends JavaPlugin {
     private static StorageMechanic instance;
     private Managers managers;
     private Debug debug;
+    private YamlDocument yamlDocument;
     private String a = "%%__USER__%%";
 
     public StorageMechanic(){
@@ -64,20 +73,18 @@ public final class StorageMechanic extends JavaPlugin {
 
     }
     public void loadConfig(){
-        File file = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(this).getDirConfig() + "/config.yml");
         try {
-            if(!file.exists()){
-                InputStreamReader inputStreamReader = new InputStreamReader(getResource("config.yml"));
-                getConfig().load(inputStreamReader);
-                getConfig().save(file);
-                return;
-            }
-            getConfig().load(file);
+            File file = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(this).getDirConfig() + "/config.yml");
+            YamlDocument config = YamlDocument.create(file, getResource("config.yml"), GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("config-version")).build());
+            yamlDocument = config;
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (InvalidConfigurationException e) {
-            throw new RuntimeException(e);
         }
+    }
+
+
+    public YamlDocument getConfigDocumentYaml() {
+        return yamlDocument;
     }
 
     @Override

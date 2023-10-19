@@ -1,25 +1,14 @@
 package dev.wuason.storagemechanic.storages;
 
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.api.events.storage.CloseStorageEvent;
 import dev.wuason.storagemechanic.api.events.storage.OpenStorageEvent;
-import dev.wuason.storagemechanic.compatibilities.MythicMobs;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
 import dev.wuason.storagemechanic.items.properties.PlaceHolderItemProperties;
 import dev.wuason.storagemechanic.storages.config.*;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
-import dev.wuason.storagemechanic.storages.types.entity.StorageTriggers;
-import io.lumine.mythic.api.mobs.MythicMob;
-import io.lumine.mythic.api.skills.SkillCaster;
-import io.lumine.mythic.bukkit.BukkitAdapter;
-import io.lumine.mythic.bukkit.MythicBukkit;
-import io.lumine.mythic.core.mobs.ActiveMob;
-import io.lumine.mythic.core.mobs.MobExecutor;
-import io.lumine.mythiccrucible.MythicCrucible;
-import io.lumine.mythiccrucible.items.furniture.Furniture;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -89,42 +78,12 @@ public class Storage {
                 if(currentStages.containsKey(page)) currentStages.remove(page);
                 if(getStorageConfig().getStorageProperties().isDropItemsPageOnClose()) dropItemsFromPage(player.getLocation(), page);
 
+
+
                 //MYTHIC
                 if(getInventories().size()==0){
-                    if(MythicMobs.isExistMythic()){
-                        UUID uuid = null;
-                        try {
-                            uuid = UUID.fromString(id);
-
-                            if(storageOriginContext.getContext().equals(StorageOriginContext.context.ENTITY_STORAGE)){
-
-                                String type = storageOriginContext.getData().get(0);
-                                String id = null;
-                                SkillCaster skillCaster = null;
-                                switch (type){
-                                    case "MOB" ->{
-                                        MobExecutor mobManager = MythicBukkit.inst().getMobManager();
-                                        if(mobManager.isActiveMob(uuid)){
-                                            ActiveMob activeMob = mobManager.getActiveMob(uuid).get();
-                                            MythicMob mythicMob = activeMob.getType();
-                                            id = mythicMob.getInternalName();
-                                            skillCaster = activeMob;
-                                        }
-                                    }
-                                    case "FURNITURE" ->{
-                                        Furniture furniture = MythicCrucible.inst().getItemManager().getFurnitureManager().getFurniture(uuid).get();
-                                        skillCaster = furniture;
-                                        id = furniture.getFurnitureData().getItem().getInternalName();
-                                    }
-                                }
-
-                                core.getManagers().getMythicManager().runSkills(id,skillCaster,StorageTriggers.CLOSE_STORAGE, BukkitAdapter.adapt(storageInventory.getInventory().getViewers().get(0).getLocation()),BukkitAdapter.adapt((Player)storageInventory.getInventory().getViewers().get(0)),null);
-
-                            }
-
-                        }
-                        catch (Exception e){
-                        }
+                    if(core.getManagers().getMythicManager() != null){
+                        core.getManagers().getMythicManager().executeCloseStorageSkill(storageOriginContext,id,storageInventory);
                     }
                 }
 
@@ -1114,6 +1073,60 @@ public class Storage {
                 removeItemStackFromAllPages(itemStack);
             }
         }
+    }
+
+
+    public void removeAmountFromList(List<StorageItemDataInfo> l, int amountToRemove) {
+        if (amountToRemove <= 0) return;
+        Iterator<StorageItemDataInfo> iterator = l.iterator();
+        while (iterator.hasNext()) {
+            StorageItemDataInfo storageIData = iterator.next();
+            int itemAmount = storageIData.getItemStack().getAmount();
+            int remaining = itemAmount - amountToRemove;
+            if (remaining >= 0) {
+                storageIData.getItemStack().setAmount(remaining);
+                break;
+            }
+            iterator.remove();
+            amountToRemove = Math.abs(remaining);
+        }
+    }
+
+
+    public int getTotalAmountFromList(List<StorageItemDataInfo> l){
+        if(l.size()==0) return -1;
+        int totalAmount = 0;
+        for(StorageItemDataInfo storageIData : l){
+            totalAmount += storageIData.getItemStack().getAmount();
+        }
+        return totalAmount;
+    }
+
+    public List<StorageItemDataInfo> getAllItemsSimilarFromAllPages(ItemStack similar){
+        List<StorageItemDataInfo> list = new ArrayList<>();
+        for(int i=0;i<getTotalPages();i++){
+            list.addAll(getAllItemsSimilarFromPage(i, similar));
+        }
+        return list;
+    }
+    public List<StorageItemDataInfo> getAllItemsSimilarFromPage(int page, ItemStack similar){
+        List<StorageItemDataInfo> list = new ArrayList<>();
+        if (inventories.containsKey(page)) {
+            StorageInventory storageInventory = inventories.get(page);
+            ItemStack[] contents = storageInventory.getInventory().getContents();
+            for(int k=0;k<contents.length;k++){
+                ItemStack item = contents[k];
+                if (item != null && !item.getType().isAir() && item.isSimilar(similar)) list.add(new StorageItemDataInfo(item,page,k,this));
+            }
+        }
+        if (items.containsKey(page)) {
+            ItemStack[] contents = items.get(page);
+            for(int k=0;k<contents.length;k++){
+                ItemStack item = contents[k];
+                if (item != null && !item.getType().isAir() && item.isSimilar(similar)) list.add(new StorageItemDataInfo(item,page,k,this));
+            }
+        }
+        return list;
     }
 
     public StorageConfig getStorageConfig(){

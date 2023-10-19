@@ -24,6 +24,7 @@ import dev.wuason.storagemechanic.storages.types.item.config.ItemStorageConfigMa
 import dev.wuason.storagemechanic.systems.TrashSystemManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.scheduler.BukkitTask;
 
 public class Managers {
     private StorageMechanic core;
@@ -50,6 +51,8 @@ public class Managers {
     private ActionConfigManager actionConfigManager;
     private ActionManager actionManager;
 
+    private BukkitTask saveDataTask;
+
 
     public Managers(StorageMechanic core) {
         this.core = core;
@@ -58,7 +61,6 @@ public class Managers {
     public void loadManagers(){
         AdventureUtils.sendMessagePluginConsole(core," Starting Managers!");
         PluginManager pm = Bukkit.getPluginManager();
-
         //NEW MECHANICS
         this.blockMechanicManager = new BlockMechanicManager(core);
         //CONFIGS
@@ -105,8 +107,25 @@ public class Managers {
         pm.registerEvents(itemStorageManager,core);
 
     }
-
+    public void saveAllData(){
+        blockStorageManager.saveAllBlockStorages();
+        furnitureStorageManager.saveAllFurnitureStorages();
+        storageManager.saveAllStorages();
+        dataManager.saveAllData();
+    }
+    public void runDataSaveTask(){
+        saveDataTask = Bukkit.getScheduler().runTaskTimerAsynchronously(core,() ->{
+            AdventureUtils.sendMessagePluginConsole(core,"<red> Starting save data...");
+            saveAllData();
+            AdventureUtils.sendMessagePluginConsole(core,"<green> Data saved!");
+        }, (20 * 60) * 1, (20 * 60) * core.getConfigDocumentYaml().getInt("data.save_all_data_in", 15));
+    }
+    public void stopAndRemoveDataSaveTask(){
+        if(saveDataTask != null) saveDataTask.cancel();
+        saveDataTask = null;
+    }
     public void stop(){
+        saveDataTask.cancel();
         AdventureUtils.sendMessagePluginConsole(core,"<red> Stopping StorageMechanic...");
 
         inventoryManager.stop();

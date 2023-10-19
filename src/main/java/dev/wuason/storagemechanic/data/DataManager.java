@@ -1,5 +1,6 @@
 package dev.wuason.storagemechanic.data;
 
+import dev.wuason.boostedyaml.YamlDocument;
 import dev.wuason.mechanics.data.Data;
 import dev.wuason.mechanics.data.local.LocalDataManager;
 import dev.wuason.mechanics.data.mysql.Column;
@@ -45,7 +46,7 @@ public class DataManager {
 
 
     public void load(){
-        String method = StorageMechanic.getInstance().getConfig().getString("data.method").toUpperCase();
+        String method = StorageMechanic.getInstance().getConfigDocumentYaml().getString("data.method").toUpperCase();
         AdventureUtils.sendMessagePluginConsole(StorageMechanic.getInstance()," <aqua>Method selected: <yellow>" + method);
         try{
             this.method = Method.valueOf(method);
@@ -75,7 +76,7 @@ public class DataManager {
     }
 
     public void startDataBaseData(){
-        FileConfiguration config = StorageMechanic.getInstance().getConfig();
+        YamlDocument config = StorageMechanic.getInstance().getConfigDocumentYaml();
 
         String host = config.getString("data.database_config.config_host.host");
         int port = config.getInt("data.database_config.config_host.port");

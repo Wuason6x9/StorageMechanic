@@ -8,6 +8,7 @@ import dev.wuason.storagemechanic.api.events.block.CustomBlockInteractEvent;
 import dev.wuason.storagemechanic.api.events.block.CustomBlockPlaceEvent;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -18,12 +19,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.RayTraceResult;
 
 
 import java.io.File;
@@ -166,6 +173,24 @@ public class CustomBlockManager implements Listener {
                 Bukkit.getPluginManager().callEvent(customBlockInteractEvent);
                 event.setCancelled(customBlockInteractEvent.isCancelled());
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteractCreative(InventoryCreativeEvent event){
+        Block block = event.getWhoClicked().getTargetBlockExact(6, FluidCollisionMode.NEVER);
+        if(block != null && isCustomBlock(block)){
+            PlayerInventory inventory = event.getWhoClicked().getInventory();
+            CustomBlock customBlock = getCustomBlockById(getCustomBlockIdFromBlock(block));
+            if( !customBlock.getItemStack().getType().equals( event.getCursor().getType() ) ) return;
+            for( int i = 0 ; i < 9 ; i ++ ){
+                if(inventory.getItem(i) != null && inventory.getItem(i).isSimilar(customBlock.getItemStack())){
+                    event.setCancelled(true);
+                    event.getWhoClicked().getInventory().setHeldItemSlot(i);
+                    return;
+                }
+            }
+            event.setCursor(customBlock.getItemStack());
         }
     }
 

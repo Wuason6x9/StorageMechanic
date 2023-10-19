@@ -294,7 +294,7 @@ public class BlockStorageManager implements Listener {
                                 }
                             }
                             if(!allEmpty){
-                                AdventureUtils.playerMessage(core.getConfig().getString("messages.type.blockstorage.isBreakeable"), event.getPlayer());
+                                AdventureUtils.playerMessage(core.getConfigDocumentYaml().getString("messages.type.blockstorage.isBreakeable"), event.getPlayer());
                                 event.setCancelled(true);
                                 return;
                             }
@@ -482,6 +482,12 @@ public class BlockStorageManager implements Listener {
         }
         dataManager.getStorageManagerData().getBlockStorageManagerData().saveBlockStorage(blockStorage);
     }
+    public void saveBlockStorageNoRemove(BlockStorage blockStorage){
+        for(Storage storage : blockStorage.getStorages().values()){
+            core.getManagers().getStorageManager().saveStorageNoRemove(storage);
+        }
+        dataManager.getStorageManagerData().getBlockStorageManagerData().saveBlockStorage(blockStorage);
+    }
     public BlockStorage loadBlockStorage(String id){
         if(!blockStorages.containsKey(id)){
             BlockStorage blockStorage = dataManager.getStorageManagerData().getBlockStorageManagerData().loadBlockStorageData(id);
@@ -499,7 +505,11 @@ public class BlockStorageManager implements Listener {
         return itemStack.getItemMeta().getPersistentDataContainer().get(BLOCK_SHULKER_NAMESPACEDKEY,PersistentDataType.STRING);
     }
 
-
+    public void saveAllBlockStorages(){
+        for(Map.Entry<String,BlockStorage> blockStorageMap : blockStorages.entrySet()){
+            saveBlockStorageNoRemove(blockStorageMap.getValue());
+        }
+    }
     public void stop(){
 
         while(!blockStorages.values().isEmpty()){

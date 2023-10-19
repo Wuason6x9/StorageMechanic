@@ -17,8 +17,6 @@ import java.util.ArrayList;
 public class ConfigManager {
 
     private StorageMechanic core;
-    private File configFile;
-    private YamlConfiguration config;
     private volatile boolean isConfigLoaded = false;
     private final Object lock = new Object();
 
@@ -60,12 +58,12 @@ public class ConfigManager {
     }
 
     public void loadConfig(){
+        core.getManagers().stopAndRemoveDataSaveTask();
+        core.getManagers().runDataSaveTask();
         AdventureUtils.sendMessagePluginConsole(core, "<green>Loading Config...");
         try {
-            core.getConfig().load(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig() + "/config.yml");
+            core.getConfigDocumentYaml().reload();
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidConfigurationException e) {
             throw new RuntimeException(e);
         }
         core.getManagers().getCustomBlockManager().loadCustomBlocks();
@@ -77,22 +75,6 @@ public class ConfigManager {
         core.getManagers().getFurnitureStorageConfigManager().loadFurnitureStorageConfigs();
         core.getManagers().getInventoryConfigManager().loadInventoriesConfig();
 
-        configFile = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/config.yml");
-        if(!configFile.exists()){
-            configFile.getParentFile().mkdirs();
-            try {
-                configFile.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            try {
-                YamlConfiguration.loadConfiguration(new InputStreamReader(core.getResource("config.yml"))).save(configFile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        config = YamlConfiguration.loadConfiguration(configFile);
         setConfigLoaded(true);
     }
 
@@ -115,13 +97,5 @@ public class ConfigManager {
             this.isConfigLoaded = isConfigLoaded;
             lock.notifyAll();
         }
-    }
-
-    public File getConfigFile() {
-        return configFile;
-    }
-
-    public YamlConfiguration getConfig() {
-        return config;
     }
 }

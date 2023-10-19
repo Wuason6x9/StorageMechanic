@@ -1,6 +1,6 @@
 blocks:
   block1:
-    material: stone
+    material: mc:stone
     displayName: '<red>Test block'
     lore:
       - '<green> test lore block'

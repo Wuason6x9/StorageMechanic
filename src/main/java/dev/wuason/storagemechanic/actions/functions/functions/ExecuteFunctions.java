@@ -83,7 +83,12 @@ public class ExecuteFunctions extends Function {
                     Function function = Functions.functionHashMap.get(functionConfigEntry.getFunction().trim().toUpperCase(Locale.ENGLISH));
                     HashMap<String,Object> argsComputed = new HashMap<>();
                     for(Map.Entry<String, String> args : functionConfigEntry.getArgs().entrySet()){
-                        argsComputed.put(args.getKey(),args.getValue());
+                        if(function.getId().equals("executeFunctions".toUpperCase(Locale.ENGLISH).intern())) break;
+                        Object objComputed = ActionsUtils.processArg(args.getValue(), action);
+                        if(!args.getKey().equals("CODE")){
+                            objComputed = ActionsUtils.processArgSearchArg(null,(String) objComputed, action);
+                        }
+                        argsComputed.put(args.getKey(), objComputed);
                     }
                     Object[] argsOrdered = ActionsUtils.orderArgumentsAndGet(argsComputed,function);
                     function.execute(action,player,argsOrdered);
@@ -100,6 +105,8 @@ public class ExecuteFunctions extends Function {
             ArrayList<String> placeholdersRemove = new ArrayList<>();
             for(Map.Entry<String,String> entry : c.getReplacements().entrySet()){
                 String content = ((String) ActionsUtils.processArg(entry.getValue(),action));
+                String[] argStringRaw = ActionConfigUtils.getArg(entry.getValue());
+                content = ((String) ActionsUtils.processArgSearchArg(ArgType.valueOf(argStringRaw[0]), content, action));
                 String[] argString = ActionConfigUtils.getArg(content);
                 Arg arg = ActionConfigUtils.getArg(ArgType.valueOf(argString[0].toUpperCase(Locale.ENGLISH)), argString[1]);
                 Object obj = arg.getObject(action);

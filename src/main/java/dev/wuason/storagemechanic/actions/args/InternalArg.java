@@ -30,7 +30,8 @@ public class InternalArg extends Arg{
             InternalExpr internalExpr = InternalExpr.CLASSES_HASHMAP.get(classMethod).get(internalConfigContent.getMethod());
             Method method = internalExpr.getClass().getMethod(internalExpr.getMethod(), Object[].class);
             Object[] args = orderAndGet(objectHashMap,internalConfigContent.getMethod());
-            return method.invoke(internalExpr, new Object[]{ args });
+            Object obj = method.invoke(internalExpr, new Object[]{ args });
+            return obj;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -44,7 +45,6 @@ public class InternalArg extends Arg{
     public static HashMap<String, Object> getObjectHashMap(Action action, InternalConfigContent internalConfigContent){
         HashMap<String, Object> objectHashMap = new HashMap<>();
         for(Map.Entry<String, String> argEntry : internalConfigContent.getArgs().entrySet()){
-
             String firstVar = getFirstVar(argEntry.getValue());
             if(firstVar == null) {
                 objectHashMap.put(argEntry.getKey(), argEntry.getValue().trim().intern());
@@ -55,7 +55,6 @@ public class InternalArg extends Arg{
                 objectHashMap.put(argEntry.getKey(), placeholderObj);
                 continue;
             }
-            //CODIGO PARA EJECUTAR EXPRESSIONES DENTRO DE EXPRESSION
         }
         return objectHashMap;
     }

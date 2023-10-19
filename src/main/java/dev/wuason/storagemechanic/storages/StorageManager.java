@@ -89,7 +89,6 @@ public class StorageManager implements Listener {
     }
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
-
         if(event.getClickedInventory() == null) return;
         InventoryHolder holder = event.getInventory().getHolder();
         if (holder instanceof StorageInventory) {
@@ -215,7 +214,7 @@ public class StorageManager implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
         if (waitingInput.containsKey(playerId)) {
-            event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_enter"),null));
+            event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getConfigDocumentYaml().getString("messages.storage.search_page_enter"),null));
             event.setCancelled(true);
             try {
                 int pageNumber = Integer.parseInt(event.getMessage());
@@ -225,10 +224,10 @@ public class StorageManager implements Listener {
                     Bukkit.getScheduler().runTask(core,()-> storage.openStorage(event.getPlayer(), (pageNumber - 1)));
                 }
                 else {
-                    event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_invalid"),null));
+                    event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getConfigDocumentYaml().getString("messages.storage.search_page_invalid"),null));
                 }
             } catch (NumberFormatException e) {
-                event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_invalid"),null));
+                event.getPlayer().sendMessage(AdventureUtils.deserializeLegacy(core.getConfigDocumentYaml().getString("messages.storage.search_page_invalid"),null));
             }
             waitingInput.remove(playerId);
             event.setCancelled(true);
@@ -611,7 +610,7 @@ public class StorageManager implements Listener {
             case SEARCH_PAGE -> {
                 Player player = (Player) event.getWhoClicked();
                 player.closeInventory();
-                player.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getConfig().getString("messages.storage.search_page_enter"),null));
+                player.sendMessage(AdventureUtils.deserializeLegacy(core.getConfigDocumentYaml().getString("messages.storage.search_page_enter"),null));
                 UUID playerId = player.getUniqueId();
                 waitingInput.put(playerId, new WaitingInputData(storage, storageInventory.getPage()));
 
@@ -663,6 +662,9 @@ public class StorageManager implements Listener {
         return false;
     }
     //DATA
+    public void saveStorageNoRemove(Storage storage){
+        dataManager.getStorageManagerData().saveStorageData(storage);
+    }
     public void saveStorage(Storage storage, SaveCause saveCause){
         String id = storage.getId();
         if(storage.getStorageConfig().getStorageProperties().isTempStorage()) {
@@ -684,7 +686,11 @@ public class StorageManager implements Listener {
         }
         return null;
     }
-
+    public void saveAllStorages(){
+        for(Storage storage : storageMap.values()){
+            saveStorageNoRemove(storage);
+        }
+    }
     public void stop(){
         while(!storageMap.isEmpty()){
             Storage storage = storageMap.values().stream().toList().get(0);

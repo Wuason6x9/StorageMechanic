@@ -18,8 +18,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class HopperBlockMechanic extends BlockMechanic implements Listener {
-
-    public static final String ID = "HOPPER_MECHANIC";
+    public static final String HOPPER_MECHANIC_KEY = "HOPPER_MECHANIC";
     private StorageMechanic core;
     private HashMap<UUID, HopperActive> hopperActiveHashMap = new HashMap<>();
     private BlockStorageManager blockStorageManager;
@@ -33,39 +32,31 @@ public class HopperBlockMechanic extends BlockMechanic implements Listener {
     }
 
 
+
     @EventHandler
     public void onBlockPlaceHopper(BlockPlaceEvent event){
-        if(!event.canBuild() || !event.getItemInHand().getType().equals(Material.HOPPER)) return;
+        if(event.getItemInHand() != null || !event.canBuild() || !event.getItemInHand().getType().equals(Material.HOPPER)) return;
+
         Block hopperBlock = event.getBlockPlaced();
-        Block blockUp = getUpBlock(hopperBlock);
-        Block blockDown = getUpBlock(hopperBlock);
-        Block blockSide = event.getBlockAgainst();
-        if(getBlockStorageManager().isBlockStorageByBlock(blockSide)){
-
-        }
-        if(getBlockStorageManager().isBlockStorageByBlock(blockDown)){
-
-        }
-        if(getBlockStorageManager().isBlockStorageByBlock(blockUp)){
-            BlockStorage blockStorage = getBlockStorageManager().getBlockStorageByBlock(blockUp);
-            if(!blockStorage.getBlockStorageConfig().getMechanicConfigHashMap().containsKey("hopper_mechanic".toUpperCase())) return;
-            BlockStorageMechanicConfig blockStorageMechanicConfig = blockStorage.getBlockStorageConfig().getMechanicConfigHashMap().get("hopper_mechanic".toUpperCase());
-            if(!blockStorageMechanicConfig.isEnabled()) return;
-            BlockHopperMechanicProperties hopperConfigProperties = ((BlockHopperMechanicProperties)blockStorageMechanicConfig.getBlockMechanicProperties());
-            System.out.println(blockStorageMechanicConfig.isEnabled());
-            System.out.println(hopperConfigProperties.getTick());
-            System.out.println(hopperConfigProperties.getTransferAmount());
-            TransferType transferType = TransferType.STORAGE_TO_HOPPER_DOWN;
-            //HopperInfo hopperInfo = new HopperInfo(hopperBlock.getLocation(),blockUp,blockStorage, event.getPlayer(),transferType,hopperConfigProperties.getTransferAmount(),hopperConfigProperties.getTick());
-
-            HopperActive hopperActive = new HopperActive(blockStorage, transferType, event.getPlayer().getFacing(), hopperBlock, blockUp, this, hopperConfigProperties.getTransferAmount(), hopperConfigProperties.getTick());
-            hopperActiveHashMap.put(hopperActive.getId(),hopperActive);
-            hopperActive.start();
-        }
-
-
-
+        processBlockHopperEvent(event, getUpBlock(hopperBlock), TransferType.STORAGE_TO_HOPPER_DOWN, hopperBlock);
+        processBlockHopperEvent(event, event.getBlockAgainst(), TransferType.HOPPER_TO_STORAGE_SIDE, hopperBlock);
+        processBlockHopperEvent(event, getDownBlock(hopperBlock), TransferType.HOPPER_TO_STORAGE_UP, hopperBlock);
     }
+
+    private void processBlockHopperEvent(BlockPlaceEvent event, Block targetBlock, TransferType transferType, Block hopperBlock) {
+        if(!getBlockStorageManager().isBlockStorageByBlock(targetBlock)) return;
+
+        BlockStorage blockStorage = getBlockStorageManager().getBlockStorageByBlock(targetBlock);
+        BlockStorageMechanicConfig blockStorageMechanicConfig = blockStorage.getBlockStorageConfig().getMechanicConfigHashMap().get(HOPPER_MECHANIC_KEY);
+
+        if(blockStorageMechanicConfig == null || !blockStorageMechanicConfig.isEnabled()) return;
+
+        BlockHopperMechanicProperties hopperConfigProperties = (BlockHopperMechanicProperties) blockStorageMechanicConfig.getBlockMechanicProperties();
+        HopperActive hopperActive = new HopperActive(blockStorage, transferType, event.getPlayer().getFacing(), hopperBlock, targetBlock, this, hopperConfigProperties.getTransferAmount(), hopperConfigProperties.getTick());
+        hopperActiveHashMap.put(hopperActive.getId(), hopperActive);
+        hopperActive.start();
+    }
+
 
     /*public void run(HopperInfo hopperInfo){
         Hopper hopper = (Hopper) hopperBlock.getState();

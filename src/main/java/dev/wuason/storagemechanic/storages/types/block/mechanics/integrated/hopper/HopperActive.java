@@ -7,13 +7,16 @@ import dev.wuason.storagemechanic.storages.types.block.BlockStorage;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockHopperMechanicProperties;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageMechanicConfig;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Hopper;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class HopperActive {
@@ -43,11 +46,43 @@ public class HopperActive {
 
     public void start(){
 
+        if(transferType.equals(TransferType.HOPPER_TO_STORAGE_SIDE) || transferType.equals(TransferType.HOPPER_TO_STORAGE_UP)){
+
+            Hopper hopper = (Hopper) destination.getState();
+            BlockData blockData0 = destination.getBlockData().clone();
+            BlockData blockData1 = origin.getBlockData().clone();
+
+            bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(StorageMechanic.getInstance(),() ->{
+
+                if(!destination.getBlockData().equals(blockData0) || !origin.getBlockData().equals(blockData1)){
+                    System.out.println("Finished! forced!");
+                    finish();
+                    return;
+                }
+
+                boolean r = transferOriginToDestination(hopper);
+
+                if(!r) {
+                    System.out.println("Finished!");
+                    finish();
+                }
+
+            },0L,tick);
+        }
+
         if(transferType.equals(TransferType.STORAGE_TO_HOPPER_DOWN)){
 
             Hopper hopper = (Hopper) destination.getState();
+            BlockData blockData0 = destination.getBlockData().clone();
+            BlockData blockData1 = origin.getBlockData().clone();
 
             bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(StorageMechanic.getInstance(),() ->{
+
+                if(!destination.getBlockData().equals(blockData0) || !origin.getBlockData().equals(blockData1)){
+                    System.out.println("Finished! forced!");
+                    finish();
+                    return;
+                }
 
                 boolean r = transferOriginToDestination(hopper);
 
@@ -61,54 +96,83 @@ public class HopperActive {
     }
 
     public boolean transferOriginToDestination(Hopper hopper){
+        if(transferType.equals(TransferType.HOPPER_TO_STORAGE_SIDE) || transferType.equals(TransferType.HOPPER_TO_STORAGE_UP)){
+            if(hopper.isLocked()) return false;
+
+            Storage storage = blockStorage.getStorages().entrySet().iterator().next().getValue();
+
+            for(int i=0;i<hopper.getInventory().getSize();i++){
+
+                ItemStack itemHopper = hopper.getInventory().getItem(i);
+
+                if(itemHopper == null || itemHopper.getType().equals(Material.AIR)) continue;
+
+                int itemHopperAmount = itemHopper.getAmount();
+
+                int amountToTransfer = Math.min(transferAmount, itemHopperAmount);
+
+                ItemStack itemTransfer = itemHopper.clone();
+                itemTransfer.setAmount(amountToTransfer);
+                itemHopper.setAmount(itemHopperAmount - transferAmount);
+                List<ItemStack> list = storage.addItemStackToAllPagesWithRestrictions(itemTransfer);
+
+                if(list.size()==0) return true;
+
+                ItemStack itemStackReturned = list.get(0);
+
+                if(itemStackReturned.getAmount() == amountToTransfer) {
+                    itemHopper.setAmount(itemHopperAmount);
+                    continue;
+                }
+
+                itemHopper.setAmount(itemHopper.getAmount() + itemStackReturned.getAmount());
+
+                return true;
+
+            }
+
+            return false;
+
+        }
+
         if(transferType.equals(TransferType.STORAGE_TO_HOPPER_DOWN)){
             if(hopper.isLocked()) return false;  // Si está bloqueado, no se hace nada.
 
             Storage storage = blockStorage.getStorages().entrySet().iterator().next().getValue();
 
             // Si el inventario del hopper está lleno
-            if(hopper.getInventory().firstEmpty() == -1){
-                for(int i = 0; i < hopper.getInventory().getSize(); i++){
+            if(hopper.getInventory().firstEmpty() == -1) {
+                for(int i = 0; i < hopper.getInventory().getSize(); i++) {
                     ItemStack hopperItemStack = hopper.getInventory().getItem(i);
+                    if(hopperItemStack == null) continue;  // Agregado para evitar Null
 
-                    int maxStackHopperItem = hopperItemStack.getMaxStackSize();
-                    int amountHopperItem = hopperItemStack.getAmount();
+                    int hopperItemMaxStack = hopperItemStack.getMaxStackSize();
+                    int hopperItemAmount = hopperItemStack.getAmount();
+                    if(hopperItemAmount >= hopperItemMaxStack) continue;  // Slot está completamente lleno
 
-                    // si el item del hopper esta al maximo
-                    if(amountHopperItem >= maxStackHopperItem) continue;
+                    StorageItemDataInfo similar = storage.getFirstItemStackSimilar(hopperItemStack);  // Obtener item similar
+                    if(similar == null) continue;  // No hay item similar
 
-                    StorageItemDataInfo similar = storage.getFirstItemStackSimilar(hopperItemStack);
-                    System.out.println(similar);
-                    if (similar == null) continue;
                     int amountSimilar = similar.getItemStack().getAmount();
+                    int spaceAvailableInHopper = hopperItemMaxStack - hopperItemAmount;
 
+                    // Calcula la cantidad real a transferir
+                    int actualTransferAmount = Math.min(Math.min(transferAmount, spaceAvailableInHopper), amountSimilar);
 
-                    int a = maxStackHopperItem - amountHopperItem; // 64 | 53  = 11
+                    if(actualTransferAmount > 0) {
+                        hopperItemStack.setAmount(hopperItemAmount + actualTransferAmount);
+                        similar.getItemStack().setAmount(amountSimilar - actualTransferAmount);
 
-                    if( a > transferAmount ){ // 11 > 5 yes
-                        System.out.println("> transfer amount");
-                        int b = a - transferAmount; // sobras de la cantidad que puede llegar a transferir 5 = 6
-                        int c = amountSimilar - transferAmount;
-                        if(c>=0){
-                            hopperItemStack.setAmount(amountHopperItem + transferAmount);
-                            similar.getItemStack().setAmount(c);
-                            continue;
+                        if(similar.getItemStack().getAmount() == 0) {
+                            similar.remove();
                         }
 
-
+                        return true;  // Se ha transferido un item, devolver true
                     }
-
-
-
-                    /*int rest = amountSimilar - transferAmount;
-                    if(rest == 0) similar.remove();
-                    else similar.getItemStack().setAmount(rest);
-                    hopperItemStack.setAmount(amountHopperItem + transferAmount);
-                    return true;*/
-
-
                 }
             }
+
+
             else {
                 StorageItemDataInfo storageItem = storage.getFirstItemStack();
                 if(storageItem != null){

@@ -6,6 +6,7 @@ import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.customblocks.CustomBlock;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.utils.StorageUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,6 +26,15 @@ public class CommandManager {
                 .withPermission("sm.command")
                 .withAliases("sm","storagem")
                 .withSubcommands(new CommandAPICommand("debug")
+                        .withSubcommands(new CommandAPICommand("saveAllData")
+                                .executes((sender, args) -> {
+                                    Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
+                                        AdventureUtils.sendMessage(sender, "<red>Saving all data!");
+                                        core.getManagers().saveAllData();
+
+                                    });
+                                })
+                        )
                         .withSubcommands(new CommandAPICommand("enable")
                                 .executes((sender, args) -> {
                                     Player player = (Player) sender;
@@ -88,10 +98,10 @@ public class CommandManager {
                                         ItemStack itemStack = customBlock.getItemStack();
                                         itemStack.setAmount(quantity);
                                         StorageUtils.addItemToInventoryOrDrop(player,itemStack);
-                                        AdventureUtils.playerMessage(core.getConfig().getString("messages.commands.custom_blocks.get.valid_id","you have received: " + id).replace("%id%",id), player);
+                                        AdventureUtils.playerMessage(core.getConfigDocumentYaml().getString("messages.commands.custom_blocks.get.valid_id","you have received: " + id).replace("%id%",id), player);
                                         return;
                                     }
-                                    AdventureUtils.playerMessage(core.getConfig().getString("messages.commands.custom_blocks.get.invalid_id","Invalid ID").replace("%id%",id), player);
+                                    AdventureUtils.playerMessage(core.getConfigDocumentYaml().getString("messages.commands.custom_blocks.get.invalid_id","Invalid ID").replace("%id%",id), player);
                                 })
                         )
                         .withSubcommands(new CommandAPICommand("give")
@@ -124,11 +134,11 @@ public class CommandManager {
                                         for(Player player : players){
                                             StorageUtils.addItemToInventoryOrDrop(player,itemStack);
                                         }
-                                        sender.sendMessage(AdventureUtils.deserializeLegacy(core.getConfig().getString("messages.commands.custom_blocks.get.valid_id","you have received: " + id).replace("%id%",id),null));
+                                        sender.sendMessage(AdventureUtils.deserializeLegacy(core.getConfigDocumentYaml().getString("messages.commands.custom_blocks.get.valid_id","you have received: " + id).replace("%id%",id),null));
                                         return;
                                     }
 
-                                    sender.sendMessage(AdventureUtils.deserializeLegacy(core.getConfig().getString("messages.commands.custom_blocks.get.invalid_id","Invalid ID").replace("%id%",id),null));
+                                    sender.sendMessage(AdventureUtils.deserializeLegacy(core.getConfigDocumentYaml().getString("messages.commands.custom_blocks.get.invalid_id","Invalid ID").replace("%id%",id),null));
                                 })
                         )
                 )
@@ -137,11 +147,6 @@ public class CommandManager {
                         .executes((sender, args) -> {
 
                             core.getManagers().getTrashSystemManager().cleanTrash();
-
-                        })
-                )
-                .withSubcommands(new CommandAPICommand("test")
-                        .executes((commandSender, commandArguments) -> {
 
                         })
                 )

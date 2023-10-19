@@ -6,6 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GetAdapterIdMethod extends InternalExpr {
 

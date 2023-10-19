@@ -1,6 +1,8 @@
 package dev.wuason.storagemechanic.storages.types.entity;
 
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.storages.StorageOriginContext;
+import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
 import io.lumine.mythic.api.adapters.AbstractEntity;
 import io.lumine.mythic.api.adapters.AbstractLocation;
@@ -8,16 +10,20 @@ import io.lumine.mythic.api.mobs.MythicMob;
 import io.lumine.mythic.api.skills.SkillCaster;
 import io.lumine.mythic.api.skills.SkillMetadata;
 import io.lumine.mythic.api.skills.SkillTrigger;
+import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.events.MythicPostReloadedEvent;
 import io.lumine.mythic.core.mobs.ActiveMob;
+import io.lumine.mythic.core.mobs.MobExecutor;
 import io.lumine.mythic.core.skills.SkillMechanic;
 import io.lumine.mythic.core.skills.TriggeredSkill;
 import io.lumine.mythiccrucible.MythicCrucible;
 import io.lumine.mythiccrucible.items.CrucibleItem;
 import io.lumine.mythiccrucible.items.CrucibleItemType;
+import io.lumine.mythiccrucible.items.furniture.Furniture;
 import io.lumine.mythiccrucible.items.furniture.FurnitureItemContext;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -84,6 +90,42 @@ public class MythicManager implements Listener {
 
             });
             return false;
+        }
+    }
+
+    public void executeCloseStorageSkill(StorageOriginContext storageOriginContext, String storageId, StorageInventory storageInventory){
+        UUID uuid = null;
+        try {
+            uuid = UUID.fromString(storageId);
+
+            if(storageOriginContext.getContext().equals(StorageOriginContext.context.ENTITY_STORAGE)){
+
+                String type = storageOriginContext.getData().get(0);
+                String id = null;
+                SkillCaster skillCaster = null;
+                switch (type){
+                    case "MOB" ->{
+                        MobExecutor mobManager = MythicBukkit.inst().getMobManager();
+                        if(mobManager.isActiveMob(uuid)){
+                            ActiveMob activeMob = mobManager.getActiveMob(uuid).get();
+                            MythicMob mythicMob = activeMob.getType();
+                            id = mythicMob.getInternalName();
+                            skillCaster = activeMob;
+                        }
+                    }
+                    case "FURNITURE" ->{
+                        Furniture furniture = MythicCrucible.inst().getItemManager().getFurnitureManager().getFurniture(uuid).get();
+                        skillCaster = furniture;
+                        id = furniture.getFurnitureData().getItem().getInternalName();
+                    }
+                }
+
+                core.getManagers().getMythicManager().runSkills(id,skillCaster,StorageTriggers.CLOSE_STORAGE, BukkitAdapter.adapt(storageInventory.getInventory().getViewers().get(0).getLocation()),BukkitAdapter.adapt((Player)storageInventory.getInventory().getViewers().get(0)),null);
+
+            }
+
+        }
+        catch (Exception e){
         }
     }
 

@@ -9,7 +9,6 @@ website: techmc.es
 softdepend:
   - ItemsAdder
   - Oraxen
-  - ChestSort
   - MythicMobs
   - PlaceholderAPI
   - Mechanics

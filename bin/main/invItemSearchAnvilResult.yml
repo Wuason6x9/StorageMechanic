@@ -1,0 +1,48 @@
+inventory:
+  id: searchItemAnvilResult
+  type: CHEST
+  rows: 6
+  title: 'AAAAAAAAAA'
+  slots:
+    blocked_slots: [1-3,5-7]
+    data_slots: [0-44]
+    items:
+      - "open_anvil:49"
+      - "next_item:53"
+      - "back_item:45"
+      - "blocked_item1:46"
+      - "result_lore:998"
+items:
+  result_lore:
+    type: RESULT_LORE
+    lore:
+      - "<red>Click to get on close!"
+      - "<red>Page: <aqua>%page% <red>slot: <aqua>%slot%"
+  open_anvil:
+    type: OPEN_ANVIL
+    item: mc:stone
+    amount: 1
+    display: 'Open anvil'
+    lore:
+      - 'test'
+  next_item:
+    type: NEXT_ITEM
+    item: mc:stone
+    amount: 1
+    display: 'NEXT'
+    lore:
+      - 'test'
+  back_item:
+    type: BACK_ITEM
+    item: mc:stone
+    amount: 1
+    display: 'BACK'
+    lore:
+      - 'test'
+  blocked_item1:
+    type: BLOCKED_ITEM
+    item: mc:stone
+    amount: 1
+    display: 'test'
+    lore:
+      - 'test'

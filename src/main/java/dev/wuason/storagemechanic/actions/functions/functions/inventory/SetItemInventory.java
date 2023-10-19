@@ -31,7 +31,7 @@ public class SetItemInventory extends Function {
         Object itemObj = null;
         Object slotObj = null;
         Object inventoryObj = null;
-        if(action.getPlaceholders().containsKey(((String) inventoryStr).toUpperCase(Locale.ENGLISH).intern())){
+        if(inventoryStr != null && action.getPlaceholders().containsKey(((String) inventoryStr).toUpperCase(Locale.ENGLISH).intern())){
             inventoryObj = action.getPlaceholders().get(((String) inventoryStr).toUpperCase(Locale.ENGLISH).intern());
         }
         if(action.getPlaceholders().containsKey(((String) itemStr).toUpperCase(Locale.ENGLISH).intern())){

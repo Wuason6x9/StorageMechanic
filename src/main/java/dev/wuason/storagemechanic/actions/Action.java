@@ -8,6 +8,7 @@ import dev.wuason.storagemechanic.actions.config.*;
 import dev.wuason.storagemechanic.actions.events.EventAction;
 import dev.wuason.storagemechanic.actions.functions.Function;
 import dev.wuason.storagemechanic.actions.functions.Functions;
+import dev.wuason.storagemechanic.actions.functions.functions.ExecuteFunctions;
 import dev.wuason.storagemechanic.actions.types.ArgType;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.utils.ActionConfigUtils;
@@ -54,12 +55,20 @@ public class Action {
                 placeholdersRegistered.add(placeholderEntry.getKey());
             }
         }
+        //REGISTER ACTION
+        placeholders.put("$ACTION$",this);
+        interpreter.set("$ACTION$", this);
+        placeholdersRegistered.add("$ACTION$");
+        //Register methods internals
+        registerMethods();
+
         //VARLIST
         for(VarListConfig varListEntry : actionConfig.getVarList()){
             List<Object> objList = new ArrayList<>();
             for(Arg arg : varListEntry.getArrayList()){
                 Arg argCloned = arg.clone();
                 argCloned.setLine((String) ActionsUtils.processArg(argCloned.getLine(),this));
+                arg.setLine((String) ActionsUtils.processArgSearchArg(varListEntry.getArgType(),arg.getLine(),this));
                 Object obj = argCloned.getObject(this);
                 if(obj instanceof ArrayList<?>) {
                     objList.addAll((ArrayList<?>) obj);
@@ -77,7 +86,9 @@ public class Action {
         for(VarConfig varEntry : actionConfig.getVars()){
             //COMPUTE
             Arg arg = varEntry.getArg().clone();
+
             arg.setLine((String) ActionsUtils.processArg(arg.getLine(),this));
+            arg.setLine((String) ActionsUtils.processArgSearchArg(varEntry.getArgType(), arg.getLine(), this));
             Object obj = arg.getObject(this);
             String key = varEntry.getVar().trim().toUpperCase(Locale.ENGLISH);
             if(key.contains("{") && key.contains("}")){
@@ -103,16 +114,6 @@ public class Action {
         }
         active = true;
     }
-
-    public void runSync(){
-        Bukkit.getScheduler().runTask(core, (task) -> {
-            try {
-                run();
-            } catch (EvalError e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
     public void runAsync(){
         Bukkit.getScheduler().runTaskAsynchronously(core, (task) -> {
             try {
@@ -129,7 +130,11 @@ public class Action {
                 Function function = Functions.functionHashMap.get(functionConfigEntry.getFunction().trim().toUpperCase(Locale.ENGLISH));
                 HashMap<String,Object> argsComputed = new HashMap<>();
                 for(Map.Entry<String, String> args : functionConfigEntry.getArgs().entrySet()){
+                    if(function.getId().equals("executeFunctions".toUpperCase(Locale.ENGLISH).intern())) break;
                     Object objComputed = ActionsUtils.processArg(args.getValue(), this);
+                    if(!args.getKey().equals("CODE")){
+                        objComputed = ActionsUtils.processArgSearchArg(null,(String) objComputed, this);
+                    }
                     argsComputed.put(args.getKey(),objComputed);
                 }
                 Object[] argsOrdered = ActionsUtils.orderArgumentsAndGet(argsComputed,function);
@@ -144,7 +149,9 @@ public class Action {
         for(ConditionConfig c : actionConfig.getConditions()){
             ArrayList<String> placeholdersRemove = new ArrayList<>();
             for(Map.Entry<String,String> entry : c.getReplacements().entrySet()){
+                String[] argStringRaw = ActionConfigUtils.getArg(entry.getValue());
                 String content = ((String) ActionsUtils.processArg(entry.getValue(),this));
+                content = (String) ActionsUtils.processArgSearchArg(ArgType.valueOf(argStringRaw[0]),content,this);
                 String[] argString = ActionConfigUtils.getArg(content);
                 Arg arg = ActionConfigUtils.getArg(ArgType.valueOf(argString[0].toUpperCase(Locale.ENGLISH)), argString[1]);
                 Object obj = arg.getObject(this);
@@ -174,6 +181,15 @@ public class Action {
         placeholders = null;
         actionManager.getActionsActive().remove(id);
     }
+
+
+    public void registerMethods() throws EvalError {
+
+        interpreter.eval("import dev.wuason.storagemechanic.utils.ArgUtils; Object runArg(String argType, String value){ return ArgUtils.runArg($ACTION$, argType, value); }");
+
+    }
+
+
 
     public ActionConfig getActionConfig(){
         return core.getManagers().getActionConfigManager().getActionConfigHashMap().get(actionConfigId);

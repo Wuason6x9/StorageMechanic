@@ -134,7 +134,7 @@ public class BlockStorage {
 
     public Storage getStoragePlayer(String id){
         if (id == null) return null;
-        return storages.get(id);
+        return storages.getOrDefault(id,createStoragePlayer(id));
     }
 
     public Storage removeStoragePlayer(String id){

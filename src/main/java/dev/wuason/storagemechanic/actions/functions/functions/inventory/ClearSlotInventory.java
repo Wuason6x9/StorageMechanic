@@ -28,7 +28,7 @@ public class ClearSlotInventory extends Function {
         if(slotStr == null) return;
         Object slotObj = null;
         Object inventoryObj = null;
-        if(action.getPlaceholders().containsKey(((String) inventoryStr).toUpperCase(Locale.ENGLISH).intern())){
+        if(inventoryStr != null && action.getPlaceholders().containsKey(((String) inventoryStr).toUpperCase(Locale.ENGLISH).intern())){
             inventoryObj = action.getPlaceholders().get(((String) inventoryStr).toUpperCase(Locale.ENGLISH).intern());
         }
         if(action.getPlaceholders().containsKey(((String) slotStr).toUpperCase(Locale.ENGLISH).intern())){

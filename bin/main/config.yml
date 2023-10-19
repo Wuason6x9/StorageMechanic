@@ -1,5 +1,7 @@
+config-version: 1
 data:
-  method: LOCAL
+  save_all_data_in: 20 # in minutes
+  method: LOCAL #LOCAL OR DATABASE
   database_config:
     config_host:
       host: 127.0.0.1
@@ -20,5 +22,7 @@ messages:
     search_page_invalid: "<red>Please enter a valid page!"
     search_page_enter: "<red>Please enter a valid page!"
   type:
+    furniturestorage:
+      isBreakeable: "<red>You can't destroy this block while it has an item inside!"
     blockstorage:
       isBreakeable: "<red>You can't destroy this block while it has an item inside!"

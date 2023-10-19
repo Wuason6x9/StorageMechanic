@@ -68,7 +68,11 @@ public class ActionsUtils {
             }
         }
 
-        //<>
+        return arg.trim().intern();
+    }
+
+    public static Object processArgSearchArg(ArgType atype, String arg, Action action) throws EvalError {
+        if(atype != null && atype.equals(ArgType.JAVA)) return arg;
         List<String> placeholdersFound3 = findNestedPatterns(arg);
         for (String p : placeholdersFound3) {
             if (!p.contains("=")) continue;
@@ -88,7 +92,8 @@ public class ActionsUtils {
             }
             arg = arg.replace(a, varGen);
         }
-        return arg.trim().intern();
+
+        return arg;
     }
 
     public static List<String> findNestedPatterns(String input) {
@@ -100,7 +105,6 @@ public class ActionsUtils {
     private static void findNestedPatterns(String input, int start, int level, List<String> results) {
         int openCount = 0;
         int lastOpenIndex = -1;
-
         for (int i = start; i < input.length(); i++) {
             if (input.charAt(i) == '<') {
                 openCount++;

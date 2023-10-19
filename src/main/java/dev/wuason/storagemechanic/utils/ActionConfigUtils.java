@@ -104,7 +104,7 @@ public class ActionConfigUtils {
 
     public static HashMap<String,String> getArgs(String content){
         HashMap<String,String> hashMap = new HashMap<>();
-        String[] s = content.split(" /(?![^\\[\\]]*\\])(?![^{}]*\\})");
+        String[] s = content.split(" /(?![^\\[\\]]*\\])(?![^{}]*\\})(?![^()]*\\))");
         for(String split : s){
             int charResult = split.indexOf("=");
             String keyArg = split.substring(0,charResult).replaceAll("\\s*","").toUpperCase(Locale.ENGLISH).intern();

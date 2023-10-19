@@ -8,6 +8,7 @@ import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
+import dev.wuason.storagemechanic.storages.types.block.BlockStorage;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.ItemsAdderFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.OraxenFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.MythicCrucibleFurnitureManager;
@@ -67,10 +68,10 @@ public class FurnitureStorageManager {
             orEvents = new OraxenFurnitureEvents(this);
             pm.registerEvents(orEvents,core);
         }
-        if(isMythicCrucibleLoaded()){
+        /*if(isMythicCrucibleLoaded()){
             mythicCrucibleFurnitureManager = new MythicCrucibleFurnitureManager(this, core);
             pm.registerEvents(mythicCrucibleFurnitureManager,core);
-        }
+        }*/
 
     }
 
@@ -371,7 +372,7 @@ public class FurnitureStorageManager {
                             }
                         }
                         if(!allEmpty){
-                            AdventureUtils.playerMessage(core.getConfig().getString("messages.type.furniturestorage.isBreakeable"), player);
+                            AdventureUtils.playerMessage(core.getConfigDocumentYaml().getString("messages.type.furniturestorage.isBreakeable"), player);
                             eventCancel.setCancelled(true);
                             return;
                         }
@@ -458,6 +459,18 @@ public class FurnitureStorageManager {
             core.getManagers().getStorageManager().saveStorage(storage,saveCause);
         }
         dataManager.getStorageManagerData().getFurnitureStorageManagerData().saveFurnitureStorage(furnitureStorage);
+    }
+    public void saveFurnitureStorageNoRemove(FurnitureStorage furnitureStorage){
+        for(Storage storage : furnitureStorage.getStorages().values()){
+            core.getManagers().getStorageManager().saveStorageNoRemove(storage);
+        }
+        dataManager.getStorageManagerData().getFurnitureStorageManagerData().saveFurnitureStorage(furnitureStorage);
+    }
+
+    public void saveAllFurnitureStorages(){
+        for(Map.Entry<String, FurnitureStorage> blockStorageMap : furnitureStorages.entrySet()){
+            saveFurnitureStorageNoRemove(blockStorageMap.getValue());
+        }
     }
 
     public FurnitureStorage loadFurnitureStorage(String id){
