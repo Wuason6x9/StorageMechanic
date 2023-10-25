@@ -4,7 +4,6 @@ import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageItemDataInfo;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorage;
-import dev.wuason.storagemechanic.storages.types.block.config.BlockHopperMechanicProperties;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageMechanicConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -24,19 +23,19 @@ public class HopperActive {
     private TransferType transferType;
     private BlockFace blockFaceOrigin;
     private BukkitTask bukkitTask;
-    private Block destination;
-    private Block origin;
+    private Block hopperBlock;
+    private Block storageBlock;
     private HopperBlockMechanic hopperBlockMechanic;
     private UUID id;
     private int transferAmount = 1;
     private long tick = 8L;
 
-    public HopperActive(BlockStorage blockStorage, TransferType transferType, BlockFace blockFaceOrigin, Block destination, Block origin, HopperBlockMechanic hopperBlockMechanic, int transferAmount, long tick) {
+    public HopperActive(BlockStorage blockStorage, TransferType transferType, BlockFace blockFaceOrigin, Block hopperBlock, Block storageBlock, HopperBlockMechanic hopperBlockMechanic, int transferAmount, long tick) {
         this.blockStorage = blockStorage;
         this.transferType = transferType;
         this.blockFaceOrigin = blockFaceOrigin;
-        this.destination = destination;
-        this.origin = origin;
+        this.hopperBlock = hopperBlock;
+        this.storageBlock = storageBlock;
         this.hopperBlockMechanic = hopperBlockMechanic;
         id = UUID.randomUUID();
         this.transferAmount = transferAmount;
@@ -46,21 +45,21 @@ public class HopperActive {
 
     public void start(){
 
-        if(transferType.equals(TransferType.HOPPER_TO_STORAGE_SIDE) || transferType.equals(TransferType.HOPPER_TO_STORAGE_UP)){
+        if(transferType.equals(TransferType.HOPPER_TO_STORAGE)){
 
-            Hopper hopper = (Hopper) destination.getState();
-            BlockData blockData0 = destination.getBlockData().clone();
-            BlockData blockData1 = origin.getBlockData().clone();
+            Hopper hopper = (Hopper) hopperBlock.getState();
+            BlockData blockData0 = hopperBlock.getBlockData().clone();
+            BlockData blockData1 = storageBlock.getBlockData().clone();
 
             bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(StorageMechanic.getInstance(),() ->{
 
-                if(!destination.getBlockData().equals(blockData0) || !origin.getBlockData().equals(blockData1)){
+                if(!hopperBlock.getBlockData().equals(blockData0) || !storageBlock.getBlockData().equals(blockData1)){
                     System.out.println("Finished! forced!");
                     finish();
                     return;
                 }
 
-                boolean r = transferOriginToDestination(hopper);
+                boolean r = transfer(hopper);
 
                 if(!r) {
                     System.out.println("Finished!");
@@ -70,21 +69,21 @@ public class HopperActive {
             },0L,tick);
         }
 
-        if(transferType.equals(TransferType.STORAGE_TO_HOPPER_DOWN)){
+        if(transferType.equals(TransferType.STORAGE_TO_HOPPER)){
 
-            Hopper hopper = (Hopper) destination.getState();
-            BlockData blockData0 = destination.getBlockData().clone();
-            BlockData blockData1 = origin.getBlockData().clone();
+            Hopper hopper = (Hopper) hopperBlock.getState();
+            BlockData blockData0 = hopperBlock.getBlockData().clone();
+            BlockData blockData1 = storageBlock.getBlockData().clone();
 
             bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(StorageMechanic.getInstance(),() ->{
 
-                if(!destination.getBlockData().equals(blockData0) || !origin.getBlockData().equals(blockData1)){
+                if(!hopperBlock.getBlockData().equals(blockData0) || !storageBlock.getBlockData().equals(blockData1)){
                     System.out.println("Finished! forced!");
                     finish();
                     return;
                 }
 
-                boolean r = transferOriginToDestination(hopper);
+                boolean r = transfer(hopper);
 
                 if(!r) {
                     System.out.println("Finished!");
@@ -95,8 +94,8 @@ public class HopperActive {
         }
     }
 
-    public boolean transferOriginToDestination(Hopper hopper){
-        if(transferType.equals(TransferType.HOPPER_TO_STORAGE_SIDE) || transferType.equals(TransferType.HOPPER_TO_STORAGE_UP)){
+    public boolean transfer(Hopper hopper){
+        if(transferType.equals(TransferType.HOPPER_TO_STORAGE)){
             if(hopper.isLocked()) return false;
 
             Storage storage = blockStorage.getStorages().entrySet().iterator().next().getValue();
@@ -135,7 +134,7 @@ public class HopperActive {
 
         }
 
-        if(transferType.equals(TransferType.STORAGE_TO_HOPPER_DOWN)){
+        if(transferType.equals(TransferType.STORAGE_TO_HOPPER)){
             if(hopper.isLocked()) return false;  // Si está bloqueado, no se hace nada.
 
             Storage storage = blockStorage.getStorages().entrySet().iterator().next().getValue();
@@ -176,6 +175,7 @@ public class HopperActive {
             else {
                 StorageItemDataInfo storageItem = storage.getFirstItemStack();
                 if(storageItem != null){
+                    System.out.println(storageItem.getItemStack());
                     ItemStack storageStack = storageItem.getItemStack();
                     int transferableAmount = Math.min(transferAmount, storageStack.getAmount());
 
@@ -221,12 +221,12 @@ public class HopperActive {
         return bukkitTask;
     }
 
-    public Block getDestination() {
-        return destination;
+    public Block getHopperBlock() {
+        return hopperBlock;
     }
 
-    public Block getOrigin() {
-        return origin;
+    public Block getStorageBlock() {
+        return storageBlock;
     }
 
     public HopperBlockMechanic getHopperBlockMechanic() {

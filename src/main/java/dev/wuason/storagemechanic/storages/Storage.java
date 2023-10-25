@@ -974,22 +974,20 @@ public class Storage {
     }
 
     public StorageItemDataInfo getFirstItemStack(){
-
         for(int i=0;i<getTotalPages();i++){
             if (inventories.containsKey(i)) {
                 StorageInventory storageInventory = inventories.get(i);
                 ItemStack[] contents = storageInventory.getInventory().getContents();
                 for(int k=0;k<contents.length;k++){
                     ItemStack item = contents[k];
-                    if (item != null && !item.getType().isAir()) {
+                    if (item != null && !item.getType().isAir() && !core.getManagers().getItemInterfaceManager().isItemInterface(item)) {
 
                         return new StorageItemDataInfo(item,i,k,this);
 
                     }
                 }
             }
-
-            if (items.containsKey(i)) {
+            else if (items.containsKey(i)) {
                 ItemStack[] contents = items.get(i);
                 for(int k=0;k<contents.length;k++){
                     ItemStack item = contents[k];
@@ -1001,7 +999,6 @@ public class Storage {
                 }
             }
         }
-
         return null;
     }
     public StorageItemDataInfo getFirstItemStackSimilar(ItemStack similar){
@@ -1016,7 +1013,7 @@ public class Storage {
                 }
             }
 
-            if (items.containsKey(i)) {
+            else if (items.containsKey(i)) {
                 ItemStack[] contents = items.get(i);
                 for(int k=0;k<contents.length;k++){
                     ItemStack item = contents[k];

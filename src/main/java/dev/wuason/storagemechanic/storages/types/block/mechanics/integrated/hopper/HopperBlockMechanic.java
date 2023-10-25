@@ -9,12 +9,17 @@ import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageMechan
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanic;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Hopper;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.Hopper;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class HopperBlockMechanic extends BlockMechanic implements Listener {
@@ -22,8 +27,9 @@ public class HopperBlockMechanic extends BlockMechanic implements Listener {
     private StorageMechanic core;
     private HashMap<UUID, HopperActive> hopperActiveHashMap = new HashMap<>();
     private BlockStorageManager blockStorageManager;
+    private static BlockFace[] FACES = {BlockFace.SOUTH,BlockFace.WEST,BlockFace.NORTH,BlockFace.EAST};
     public HopperBlockMechanic(StorageMechanic core) {
-        super(ID);
+        super(HOPPER_MECHANIC_KEY);
         this.core = core;
     }
 
@@ -33,29 +39,81 @@ public class HopperBlockMechanic extends BlockMechanic implements Listener {
 
 
 
+
+
+    public void onBlockStoragePlace(Block block, Player player, String[] data){
+        String blockStorageID = data[0];
+        String blockStorageConfigID = data[1];
+        core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).ifPresent(config -> {
+            BlockStorageMechanicConfig blockStorageMechanicConfig = config.getMechanicConfigHashMap().get(HOPPER_MECHANIC_KEY);
+            if(blockStorageMechanicConfig == null || !blockStorageMechanicConfig.isEnabled()) return;
+
+            Block blockUp = getUpBlock(block);
+            Block blockDown = getDownBlock(block);
+
+            if( blockUp != null && blockUp.getType().equals(Material.HOPPER) && ((Hopper)blockUp.getBlockData()).getFacing().equals(BlockFace.DOWN)){
+                BlockStorage blockStorage = getBlockStorageManager().getBlockStorage(blockStorageID);
+                HopperActive hopperActive = new HopperActive(blockStorage, TransferType.HOPPER_TO_STORAGE, player.getFacing(), blockUp, block, this, ((BlockHopperMechanicProperties) blockStorageMechanicConfig.getBlockMechanicProperties()).getTransferAmount(), ((BlockHopperMechanicProperties) blockStorageMechanicConfig.getBlockMechanicProperties()).getTick() );
+                hopperActiveHashMap.put(hopperActive.getId(), hopperActive);
+                hopperActive.start();
+            }
+
+            if(blockDown != null && blockDown.getType().equals(Material.HOPPER)){
+                BlockStorage blockStorage = getBlockStorageManager().getBlockStorage(blockStorageID);
+                HopperActive hopperActive = new HopperActive(blockStorage, TransferType.STORAGE_TO_HOPPER, player.getFacing(), blockDown, block, this, ((BlockHopperMechanicProperties) blockStorageMechanicConfig.getBlockMechanicProperties()).getTransferAmount(), ((BlockHopperMechanicProperties) blockStorageMechanicConfig.getBlockMechanicProperties()).getTick() );
+                hopperActiveHashMap.put(hopperActive.getId(), hopperActive);
+                hopperActive.start();
+            }
+
+            for(BlockFace face : FACES){
+                Block b = block.getRelative(face);
+                if(b != null && b.getType().equals(Material.HOPPER) && ((Hopper)blockUp.getBlockData()).getFacing().equals( face.getOppositeFace() )){
+
+                    BlockStorage blockStorage = getBlockStorageManager().getBlockStorage(blockStorageID);
+                    HopperActive hopperActive = new HopperActive(blockStorage, TransferType.HOPPER_TO_STORAGE, player.getFacing(), b, block, this, ((BlockHopperMechanicProperties) blockStorageMechanicConfig.getBlockMechanicProperties()).getTransferAmount(), ((BlockHopperMechanicProperties) blockStorageMechanicConfig.getBlockMechanicProperties()).getTick() );
+                    hopperActiveHashMap.put(hopperActive.getId(), hopperActive);
+                    hopperActive.start();
+
+                }
+            }
+        });
+
+    }
+
     @EventHandler
     public void onBlockPlaceHopper(BlockPlaceEvent event){
-        if(event.getItemInHand() != null || !event.canBuild() || !event.getItemInHand().getType().equals(Material.HOPPER)) return;
+        if(event.getItemInHand() == null || !event.canBuild() || !event.getItemInHand().getType().equals(Material.HOPPER)) return;
 
         Block hopperBlock = event.getBlockPlaced();
-        processBlockHopperEvent(event, getUpBlock(hopperBlock), TransferType.STORAGE_TO_HOPPER_DOWN, hopperBlock);
-        processBlockHopperEvent(event, event.getBlockAgainst(), TransferType.HOPPER_TO_STORAGE_SIDE, hopperBlock);
-        processBlockHopperEvent(event, getDownBlock(hopperBlock), TransferType.HOPPER_TO_STORAGE_UP, hopperBlock);
+        processBlockHopperEvent(event, getUpBlock(hopperBlock), TransferType.STORAGE_TO_HOPPER, hopperBlock);
+        if((hopperBlock.getY() - event.getBlockAgainst().getY()) != -1 && (hopperBlock.getY() - event.getBlockAgainst().getY()) != 1){
+            System.out.println("test");
+            processBlockHopperEvent(event, event.getBlockAgainst(), TransferType.HOPPER_TO_STORAGE, hopperBlock);
+        }
+        processBlockHopperEvent(event, getDownBlock(hopperBlock), TransferType.HOPPER_TO_STORAGE, hopperBlock);
     }
 
     private void processBlockHopperEvent(BlockPlaceEvent event, Block targetBlock, TransferType transferType, Block hopperBlock) {
+        System.out.println("test1");
         if(!getBlockStorageManager().isBlockStorageByBlock(targetBlock)) return;
+        System.out.println("test2");
 
         BlockStorage blockStorage = getBlockStorageManager().getBlockStorageByBlock(targetBlock);
+        System.out.println(blockStorage.getId());
         BlockStorageMechanicConfig blockStorageMechanicConfig = blockStorage.getBlockStorageConfig().getMechanicConfigHashMap().get(HOPPER_MECHANIC_KEY);
-
+        System.out.println(blockStorageMechanicConfig);
+        System.out.println(blockStorageMechanicConfig.isEnabled());
         if(blockStorageMechanicConfig == null || !blockStorageMechanicConfig.isEnabled()) return;
+        System.out.println(blockStorage.getId());
 
         BlockHopperMechanicProperties hopperConfigProperties = (BlockHopperMechanicProperties) blockStorageMechanicConfig.getBlockMechanicProperties();
         HopperActive hopperActive = new HopperActive(blockStorage, transferType, event.getPlayer().getFacing(), hopperBlock, targetBlock, this, hopperConfigProperties.getTransferAmount(), hopperConfigProperties.getTick());
         hopperActiveHashMap.put(hopperActive.getId(), hopperActive);
         hopperActive.start();
     }
+
+
+
 
 
     /*public void run(HopperInfo hopperInfo){
@@ -78,7 +136,19 @@ public class HopperBlockMechanic extends BlockMechanic implements Listener {
     }
 
     public Block getUpBlock(Block block){
-        return block.getLocation().add(0,1,0).getBlock();
+        return block.getRelative(BlockFace.UP);
+    }
+    public Block getDownBlock(Block block){
+        return block.getRelative(BlockFace.DOWN);
+    }
+
+    public List<Block> getBlocksSide(Block block){
+        List<Block> list = new ArrayList<>();
+        for(BlockFace face : FACES){
+            Block b = block.getRelative(face);
+            if(b != null && !b.getType().equals(Material.AIR)) list.add(block);
+        }
+        return list;
     }
 
     public StorageMechanic getCore() {

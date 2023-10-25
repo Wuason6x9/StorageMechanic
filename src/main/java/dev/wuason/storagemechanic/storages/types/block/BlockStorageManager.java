@@ -13,6 +13,7 @@ import dev.wuason.storagemechanic.storages.types.block.compatibilities.OraxenEve
 import dev.wuason.storagemechanic.storages.types.block.compatibilities.mythic.MythicCrucibleBlockEvents;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfig;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
+import dev.wuason.storagemechanic.storages.types.block.mechanics.integrated.hopper.HopperBlockMechanic;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -251,6 +252,9 @@ public class BlockStorageManager implements Listener {
 
             persistentDataContainerBlock.set(namespacedKey,PersistentDataType.STRING, blockStorageID + ":" + blockStorageConfigID + ":" + ownerUUID);
 
+            //others
+            HopperBlockMechanic hopperBlockMechanic = (HopperBlockMechanic) core.getManagers().getBlockMechanicManager().getMechanic(HopperBlockMechanic.HOPPER_MECHANIC_KEY);
+            hopperBlockMechanic.onBlockStoragePlace(block,player,data);
         }
 
     }
@@ -384,7 +388,7 @@ public class BlockStorageManager implements Listener {
                                     NamespacedKey namespacedShulker = new NamespacedKey(core,"BlockStorageShulker_" + x + "_" + y + "_" + z);
                                     if(persistentDataContainer.has(namespacedShulker,PersistentDataType.STRING)){
                                         String[] blockStorageShulkerData = persistentDataContainer.get(namespacedShulker,PersistentDataType.STRING).split(":");
-                                        blockStorage = loadBlockStorage(blockStorageShulkerData[0]);
+                                        blockStorage = getBlockStorage(blockStorageShulkerData[0]);
                                         persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, blockStorageShulkerData[0] + ":" + blockStorageShulkerData[1] + ":" + blockStorageShulkerData[2]);
                                         persistentDataContainer.remove(namespacedShulker);
                                     }

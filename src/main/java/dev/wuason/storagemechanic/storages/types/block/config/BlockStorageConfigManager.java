@@ -108,11 +108,11 @@ public class BlockStorageConfigManager {
                             };
                             BlockMechanic blockMechanic = blockMechanicManager.getMechanic(((String)mechanicKey).toUpperCase(Locale.ENGLISH));
                             boolean enabled = sectionBlockStorage.getBoolean("mechanics." + mechanicKey + ".enabled", false);
-                            if(!blockStorageType.equals(BlockStorageType.CHEST)) enabled = false;
+                            if(!blockStorageType.equals(BlockStorageType.CHEST) && !blockStorageType.equals(BlockStorageType.SHULKER)) enabled = false;
                             BlockMechanicProperties blockMechanicProperties = null;
 
                             switch (blockMechanic.getId()){
-                                case HopperBlockMechanic.ID -> {
+                                case HopperBlockMechanic.HOPPER_MECHANIC_KEY -> {
 
                                     long tick = sectionBlockStorage.getLong("mechanics." + mechanicKey + ".properties.transfer_tick", 8);
                                     int transferAmount = sectionBlockStorage.getInt("mechanics." + mechanicKey + ".properties.transfer_amount", 1);
