@@ -5,6 +5,7 @@ import dev.wuason.commandapi.arguments.*;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.customblocks.CustomBlock;
 import dev.wuason.storagemechanic.storages.Storage;
+import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -26,6 +27,23 @@ public class CommandManager {
                 .withPermission("sm.command")
                 .withAliases("sm","storagem")
                 .withSubcommands(new CommandAPICommand("debug")
+                        .withSubcommands(new CommandAPICommand("ActiveHopperHashMap")
+                                .executes((sender, args) -> {
+                                    AdventureUtils.sendMessage(sender, "<blue>" + BlockMechanicManager.HOPPER_BLOCK_MECHANIC.getHopperActiveHashMap().toString());
+                                    AdventureUtils.sendMessage(sender, "<red>--------------------------------------------------");
+                                    AdventureUtils.sendMessage(sender, "<green>" + BlockMechanicManager.HOPPER_BLOCK_MECHANIC.getHopperUUIDCurrentActiveHashMap().toString());
+                                    AdventureUtils.sendMessage(sender, "<red>--------------------------------------------------");
+                                    AdventureUtils.sendMessage(sender, "<blue>Size: " + BlockMechanicManager.HOPPER_BLOCK_MECHANIC.getHopperActiveHashMap().size());
+                                    AdventureUtils.sendMessage(sender, "<gold>Size: " + BlockMechanicManager.HOPPER_BLOCK_MECHANIC.getHopperUUIDCurrentActiveHashMap().size());
+                                })
+                        )
+                        .withSubcommands(new CommandAPICommand("getActiveBlockStorages")
+                                .executes((sender, args) -> {
+                                    AdventureUtils.sendMessage(sender, "<blue>" + core.getManagers().getBlockStorageManager().getAllBlockStorages());
+                                    AdventureUtils.sendMessage(sender, "<red>--------------------------------------------------");
+                                    AdventureUtils.sendMessage(sender, "<blue>Size: " + core.getManagers().getBlockStorageManager().getAllBlockStorages().size());
+                                })
+                        )
                         .withSubcommands(new CommandAPICommand("saveAllData")
                                 .executes((sender, args) -> {
                                     Bukkit.getScheduler().runTaskAsynchronously(core, () -> {

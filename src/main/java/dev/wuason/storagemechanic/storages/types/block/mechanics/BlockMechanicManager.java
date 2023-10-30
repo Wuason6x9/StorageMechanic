@@ -12,6 +12,7 @@ public class BlockMechanicManager {
 
     private Map<String, BlockMechanic> mechanics;
     private StorageMechanic core;
+    public static HopperBlockMechanic HOPPER_BLOCK_MECHANIC;
 
     public BlockMechanicManager(StorageMechanic core) {
         this.mechanics = new HashMap<>();
@@ -26,7 +27,9 @@ public class BlockMechanicManager {
         this.mechanics.put(mechanic.getId(), mechanic);
     }
     public void regDef(){
-        registerMechanic(new HopperBlockMechanic(core));
+        HOPPER_BLOCK_MECHANIC = new HopperBlockMechanic(core);
+
+        registerMechanic(HOPPER_BLOCK_MECHANIC);
     }
 
     public void unregisterMechanic(String id) {

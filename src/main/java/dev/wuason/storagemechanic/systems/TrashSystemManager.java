@@ -221,7 +221,6 @@ public class TrashSystemManager implements Listener {
             for(Map.Entry<PlayerData, String> entry : trashData.entrySet()){
                 StorageManager storageManager = core.getManagers().getStorageManager();
                 entry.getKey().getStorages().remove(entry.getValue());
-                System.out.println(entry.getValue());
                 storageManager.removeStorage(entry.getValue());
                 if(!Bukkit.getOfflinePlayer(entry.getKey().getUuid()).isOnline()){
                     dataManager.getPlayerDataManager().savePlayerData(entry.getKey().getUuid());

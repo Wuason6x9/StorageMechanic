@@ -1,11 +1,13 @@
 package dev.wuason.storagemechanic.storages.types.block.mechanics.integrated.hopper;
 
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.api.events.hopper.HopperItemMove;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageItemDataInfo;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorage;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageMechanicConfig;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -29,6 +31,7 @@ public class HopperActive {
     private UUID id;
     private int transferAmount = 1;
     private long tick = 8L;
+    private String dataLine;
 
     public HopperActive(BlockStorage blockStorage, TransferType transferType, BlockFace blockFaceOrigin, Block hopperBlock, Block storageBlock, HopperBlockMechanic hopperBlockMechanic, int transferAmount, long tick) {
         this.blockStorage = blockStorage;
@@ -40,7 +43,11 @@ public class HopperActive {
         id = UUID.randomUUID();
         this.transferAmount = transferAmount;
         this.tick = tick;
+        this.dataLine = hopperBlockMechanic.getDataLine(hopperBlock.getLocation(),storageBlock.getLocation(),transferType,blockStorage.getId());
+    }
 
+    public String getDataLine(){
+        return dataLine;
     }
 
     public void start(){
@@ -50,11 +57,12 @@ public class HopperActive {
             Hopper hopper = (Hopper) hopperBlock.getState();
             BlockData blockData0 = hopperBlock.getBlockData().clone();
             BlockData blockData1 = storageBlock.getBlockData().clone();
+            Chunk chunk0 = hopperBlock.getChunk();
+            Chunk chunk1 = storageBlock.getChunk();
 
             bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(StorageMechanic.getInstance(),() ->{
 
-                if(!hopperBlock.getBlockData().equals(blockData0) || !storageBlock.getBlockData().equals(blockData1)){
-                    System.out.println("Finished! forced!");
+                if(!chunk0.isLoaded() || !chunk1.isLoaded() || !hopperBlock.getBlockData().equals(blockData0) || !storageBlock.getBlockData().equals(blockData1)){
                     finish();
                     return;
                 }
@@ -62,9 +70,11 @@ public class HopperActive {
                 boolean r = transfer(hopper);
 
                 if(!r) {
-                    System.out.println("Finished!");
                     finish();
+                    return;
                 }
+
+                eventItemMove(hopper);
 
             },0L,tick);
         }
@@ -74,11 +84,12 @@ public class HopperActive {
             Hopper hopper = (Hopper) hopperBlock.getState();
             BlockData blockData0 = hopperBlock.getBlockData().clone();
             BlockData blockData1 = storageBlock.getBlockData().clone();
+            Chunk chunk0 = hopperBlock.getChunk();
+            Chunk chunk1 = storageBlock.getChunk();
 
             bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(StorageMechanic.getInstance(),() ->{
 
-                if(!hopperBlock.getBlockData().equals(blockData0) || !storageBlock.getBlockData().equals(blockData1)){
-                    System.out.println("Finished! forced!");
+                if( !chunk0.isLoaded() || !chunk1.isLoaded() || !hopperBlock.getBlockData().equals(blockData0) || !storageBlock.getBlockData().equals(blockData1)){
                     finish();
                     return;
                 }
@@ -86,12 +97,19 @@ public class HopperActive {
                 boolean r = transfer(hopper);
 
                 if(!r) {
-                    System.out.println("Finished!");
                     finish();
+                    return;
                 }
+
+                eventItemMove(hopper);
 
             },0L,tick);
         }
+    }
+
+    public void eventItemMove(Hopper hopper){
+        Bukkit.getPluginManager().callEvent(new HopperItemMove(transferType,hopperBlock,storageBlock,blockStorage,hopper));
+        hopperBlockMechanic.onItemMoveMechanic(hopperBlock,storageBlock,hopper,blockStorage,transferType);
     }
 
     public boolean transfer(Hopper hopper){
@@ -112,10 +130,12 @@ public class HopperActive {
 
                 ItemStack itemTransfer = itemHopper.clone();
                 itemTransfer.setAmount(amountToTransfer);
-                itemHopper.setAmount(itemHopperAmount - transferAmount);
                 List<ItemStack> list = storage.addItemStackToAllPagesWithRestrictions(itemTransfer);
 
-                if(list.size()==0) return true;
+                if(list.size()==0) {
+                    itemHopper.setAmount(itemHopperAmount - transferAmount);
+                    return true;
+                }
 
                 ItemStack itemStackReturned = list.get(0);
 
@@ -123,6 +143,8 @@ public class HopperActive {
                     itemHopper.setAmount(itemHopperAmount);
                     continue;
                 }
+
+                itemHopper.setAmount(itemHopperAmount - transferAmount);
 
                 itemHopper.setAmount(itemHopper.getAmount() + itemStackReturned.getAmount());
 
@@ -175,12 +197,13 @@ public class HopperActive {
             else {
                 StorageItemDataInfo storageItem = storage.getFirstItemStack();
                 if(storageItem != null){
-                    System.out.println(storageItem.getItemStack());
                     ItemStack storageStack = storageItem.getItemStack();
                     int transferableAmount = Math.min(transferAmount, storageStack.getAmount());
 
+                    ItemStack cloned = storageStack.clone();
+                    cloned.setAmount(transferableAmount);
                     // Intenta agregar al hopper
-                    HashMap<Integer, ItemStack> notFit = hopper.getInventory().addItem(new ItemStack(storageStack.getType(), transferableAmount));
+                    HashMap<Integer, ItemStack> notFit = hopper.getInventory().addItem(cloned);
 
                     // Si todos los ítems fueron añadidos exitosamente al hopper
                     if (notFit.isEmpty()) {

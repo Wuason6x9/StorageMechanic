@@ -160,8 +160,13 @@ public class BlockStorageConfigManager {
 
     // Método para buscar una configuración de almacenamiento de bloques por su ID.
     public Optional<BlockStorageConfig> findBlockStorageConfigById(String id) {
-        return Optional.of(blockStorageConfigs.getOrDefault(id,null));
+        return Optional.of(blockStorageConfigs.get(id));
     }
+    public BlockStorageConfig getBlockStorageConfig(String id) {
+        return blockStorageConfigs.get(id);
+    }
+
+
 
     public BlockStorageConfig findBlockStorageConfigByItemID(String id) {
         Map.Entry<String,BlockStorageConfig> entry = blockStorageConfigsAdapter.getOrDefault(id,null);
@@ -172,5 +177,10 @@ public class BlockStorageConfigManager {
     public boolean blockStorageConfigExists(String id) {
         return blockStorageConfigs.containsKey(id);
     }
-
+    public HashMap<String,BlockStorageConfig> getBlockStorageConfigHashMap(){
+        return this.blockStorageConfigs;
+    }
+    public HashMap<String, Map.Entry<String, BlockStorageConfig>> getBlockStorageConfigsAdapter() {
+        return blockStorageConfigsAdapter;
+    }
 }

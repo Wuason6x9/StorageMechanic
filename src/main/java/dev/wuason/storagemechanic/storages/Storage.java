@@ -1024,6 +1024,29 @@ public class Storage {
 
         return null;
     }
+    public int firstSlotEmptyPage(int page){
+        if (inventories.containsKey(page)) {
+            StorageInventory storageInventory = inventories.get(page);
+            return storageInventory.getInventory().firstEmpty();
+        }
+        else if (items.containsKey(page)) {
+            ItemStack[] contents = items.get(page);
+            for(int k=0;k<contents.length;k++){
+                ItemStack item = contents[k];
+                if(item == null || item.getType().equals(Material.AIR)) return k;
+            }
+            return -1;
+        }
+        return -1;
+    }
+    public int firstSlotEmpty(){
+        for(int i=0;i<getTotalPages();i++){
+            int num = firstSlotEmptyPage(i);
+            if(num == -1) continue;
+            return num;
+        }
+        return -1;
+    }
 
     public List<ItemStack> getAllItems() {
         List<ItemStack> allItems = new ArrayList<>();

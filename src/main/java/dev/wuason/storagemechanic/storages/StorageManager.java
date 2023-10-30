@@ -19,6 +19,8 @@ import dev.wuason.storagemechanic.items.properties.SearchItemProperties;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.config.StorageSoundConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
+import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
+import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -34,10 +36,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -150,6 +149,11 @@ public class StorageManager implements Listener {
                     ClickItemCheckList(storage, storageInventory, event, storageConfig);
                 }
             }
+            //Hopper event
+            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.context.BLOCK_STORAGE)){
+                List<String> list = storage.getStorageOriginContext().getData();
+                BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
+            }
             //Events
             core.getManagers().getActionManager().callActionsEvent(EventEnum.CLICK_STORAGE_ITEM,storage,(Player) event.getWhoClicked(), event , storageInventory);
             ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event,storageInventory);
@@ -167,6 +171,12 @@ public class StorageManager implements Listener {
 
             //events
             core.getManagers().getActionManager().callActionsEvent(EventEnum.OPEN_STORAGE_PAGE,storage, (Player) event.getPlayer(), event, storageInventory);
+
+            //Hopper event
+            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.context.BLOCK_STORAGE)){
+                List<String> list = storage.getStorageOriginContext().getData();
+                BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
+            }
 
             //SOUNDS
             if(storageConfig.isStorageSoundEnabled()){
@@ -196,6 +206,12 @@ public class StorageManager implements Listener {
 
             //SAVE STORAGE
             storage.closeStorage(storageInventory.getPage(), (Player) event.getPlayer());
+
+            //Hopper event
+            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.context.BLOCK_STORAGE)){
+                List<String> list = storage.getStorageOriginContext().getData();
+                BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
+            }
 
             //SOUNDS
             if(storageConfig.isStorageSoundEnabled()){

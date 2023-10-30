@@ -66,10 +66,10 @@ public class StorageUtils {
         }
     }
 
-    public static String getBlockStorageId(Location loc){
+    public static String getStoragePhysicalId(Location loc){
         return loc.getWorld().getUID() + "_" + loc.getBlockX() + "_" + loc.getY() + "_" + loc.getBlockZ();
     }
-    public static Location getBlockStorageLocation(String id){
+    public static Location getStoragePhysicalLocation(String id){
         String[] loc = id.split("_");
         return new Location(Bukkit.getWorld(UUID.fromString(loc[0])),Double.parseDouble(loc[1]),Double.parseDouble(loc[2]),Double.parseDouble(loc[3]));
     }

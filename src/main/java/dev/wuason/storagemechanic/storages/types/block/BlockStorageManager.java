@@ -26,7 +26,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -74,7 +73,7 @@ public class BlockStorageManager implements Listener {
     }
 
     public BlockStorage createBlockStorage(String blockStorageConfigID, Location blockLocation, Player player,String id){
-        if(!blockStorages.containsKey(StorageUtils.getBlockStorageId(blockLocation)) && core.getManagers().getBlockStorageConfigManager().blockStorageConfigExists(blockStorageConfigID)){
+        if(!blockStorages.containsKey(StorageUtils.getStoragePhysicalId(blockLocation)) && core.getManagers().getBlockStorageConfigManager().blockStorageConfigExists(blockStorageConfigID)){
             BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
 
             Storage storage = core.getManagers().getStorageManager().createStorage(blockStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.context.BLOCK_STORAGE, new ArrayList<>(){{
@@ -170,7 +169,7 @@ public class BlockStorageManager implements Listener {
 
         for(NamespacedKey namespacedKey : persistentDataContainer.getKeys()){
 
-            if(namespacedKey.getKey().contains("blockstorage_")){
+            if(namespacedKey.getKey().contains("blockstorage_") || namespacedKey.getKey().contains("blockstorageshulker_")){
 
                 String[] blockStorageData = persistentDataContainer.get(namespacedKey,PersistentDataType.STRING).split(":");
 
@@ -251,10 +250,14 @@ public class BlockStorageManager implements Listener {
             NamespacedKey namespacedKey = new NamespacedKey(core,"BlockStorageShulker_" + x + "_" + y + "_" + z);
 
             persistentDataContainerBlock.set(namespacedKey,PersistentDataType.STRING, blockStorageID + ":" + blockStorageConfigID + ":" + ownerUUID);
+            //set the new location
+            BlockStorage blockStorage = getBlockStorage(blockStorageID);
+            blockStorage.addLocation(block.getLocation());
 
             //others
+            BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).get();
             HopperBlockMechanic hopperBlockMechanic = (HopperBlockMechanic) core.getManagers().getBlockMechanicManager().getMechanic(HopperBlockMechanic.HOPPER_MECHANIC_KEY);
-            hopperBlockMechanic.onBlockStoragePlace(block,player,data);
+            hopperBlockMechanic.onBlockStoragePlace(block,player,blockStorage,blockStorageConfig);
         }
 
     }
@@ -274,13 +277,15 @@ public class BlockStorageManager implements Listener {
 
                 switch (blockStorageConfig.getBlockStorageType()){
                     case ENDER_CHEST -> {
-
+                        //Eliminar localizacion
+                        blockStorage.removeLocation(block.getLocation());
                         //ELIMINAR DE MEMORIA Y DE PERSISTENCIA
                         removeBlockStoragePersistence(block);
 
                     }
                     case SHULKER -> { //GUARDAR EN DATA ✅
                         removeBlockStoragePersistence(block);
+                        blockStorage.removeLocation(block.getLocation());
                         ItemStack item = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(blockStorageConfig.getBlock());
                         ItemMeta itemMeta = item.getItemMeta();
                         itemMeta.getPersistentDataContainer().set(new NamespacedKey(core,"blockStorageShulker"),PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorageConfig.getId() + ":" + blockStorage.getOwnerUUID());
@@ -393,7 +398,7 @@ public class BlockStorageManager implements Listener {
                                         persistentDataContainer.remove(namespacedShulker);
                                     }
                                     else {
-                                        blockStorage = createBlockStorage(blockStorageConfig.getId(),block.getLocation(),player,StorageUtils.getBlockStorageId(block.getLocation()));
+                                        blockStorage = createBlockStorage(blockStorageConfig.getId(),block.getLocation(),player,StorageUtils.getStoragePhysicalId(block.getLocation()));
                                         persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorage.getBlockStorageConfigID() + ":" + blockStorage.getOwnerUUID());
                                     }
                                 }
@@ -409,7 +414,7 @@ public class BlockStorageManager implements Listener {
                                     persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorage.getBlockStorageConfigID() + ":" + blockStorage.getOwnerUUID());
                                 }
                                 default -> {
-                                    blockStorage = createBlockStorage(blockStorageConfig.getId(),block.getLocation(),player,StorageUtils.getBlockStorageId(block.getLocation()));
+                                    blockStorage = createBlockStorage(blockStorageConfig.getId(),block.getLocation(),player,StorageUtils.getStoragePhysicalId(block.getLocation()));
                                     persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorage.getBlockStorageConfigID() + ":" + blockStorage.getOwnerUUID());
                                 }
                             }
@@ -587,10 +592,31 @@ public class BlockStorageManager implements Listener {
     public BlockStorage getBlockStorageByBlock(Block block){
         return getBlockStorage(getBlockStorageIDByBlock(block));
     }
+    public List<NamespacedKey> getAllBlockStorages(Chunk chunk){
+        List<NamespacedKey> list = new ArrayList<>();
+        for(NamespacedKey namespacedKey : chunk.getPersistentDataContainer().getKeys()){
+            if(namespacedKey.getKey().contains("blockstorage_") || namespacedKey.getKey().contains("blockstorageshulker_")){
+                list.add(namespacedKey);
+            }
+        }
+        return list;
+    }
+    public Block getBlockByNameSpace(NamespacedKey namespacedKey, Chunk chunk){
+        String[] data = namespacedKey.getKey().split("_");
+        return new Location(chunk.getWorld(), Integer.parseInt(data[1]), Integer.parseInt(data[2]), Integer.parseInt(data[3])).getBlock();
+    }
 
     public BlockMechanicManager getBlockMechanicManager() {
         return blockMechanicManager;
     }
 
+    public BlockStorage getBlockStorageByNameSpace(NamespacedKey namespacedKey, Chunk chunk){
+        if(chunk.getPersistentDataContainer().has(namespacedKey, PersistentDataType.STRING)) return getBlockStorage(chunk.getPersistentDataContainer().get(namespacedKey ,PersistentDataType.STRING).split(":")[0] );
+        return null;
+    }
+    public BlockStorageConfig getBlockStorageConfigByNameSpace(NamespacedKey namespacedKey, Chunk chunk){
+        if(chunk.getPersistentDataContainer().has(namespacedKey, PersistentDataType.STRING)) return core.getManagers().getBlockStorageConfigManager().getBlockStorageConfig(chunk.getPersistentDataContainer().get(namespacedKey ,PersistentDataType.STRING).split(":")[1] );
+        return null;
+    }
 
 }

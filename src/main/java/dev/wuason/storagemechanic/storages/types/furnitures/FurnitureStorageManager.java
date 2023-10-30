@@ -8,7 +8,6 @@ import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
-import dev.wuason.storagemechanic.storages.types.block.BlockStorage;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.ItemsAdderFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.OraxenFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.MythicCrucibleFurnitureManager;
@@ -80,7 +79,7 @@ public class FurnitureStorageManager {
 
 
     public FurnitureStorage createFurnitureStorage(String furnitureStorageConfigID, Location furnitureLocation, Player player, String id){
-        if(!furnitureStorages.containsKey(StorageUtils.getBlockStorageId(furnitureLocation)) && core.getManagers().getFurnitureStorageConfigManager().furnitureStorageConfigExists(furnitureStorageConfigID)){
+        if(!furnitureStorages.containsKey(StorageUtils.getStoragePhysicalId(furnitureLocation)) && core.getManagers().getFurnitureStorageConfigManager().furnitureStorageConfigExists(furnitureStorageConfigID)){
             FurnitureStorageConfig furnitureStorageConfig = core.getManagers().getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).orElse(null);
 
             Storage storage = core.getManagers().getStorageManager().createStorage(furnitureStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.context.FURNITURE_STORAGE, new ArrayList<>(){{
@@ -172,7 +171,7 @@ public class FurnitureStorageManager {
 
         for(NamespacedKey namespacedKey : persistentDataContainer.getKeys()){
 
-            if(namespacedKey.getKey().contains(KEY_STORAGE + "_")){
+            if(namespacedKey.getKey().contains(KEY_STORAGE + "_") || namespacedKey.getKey().contains(KEY_SHULKER + "_")){
 
                 String[] furnitureStorageData = persistentDataContainer.get(namespacedKey, PersistentDataType.STRING).split(":");
 
@@ -278,7 +277,7 @@ public class FurnitureStorageManager {
                             persistentDataContainer.remove(namespacedShulker);
                         }
                         else {
-                            furnitureStorage = createFurnitureStorage(furnitureStorageConfig.getId(),entity.getLocation(),player,StorageUtils.getBlockStorageId(entity.getLocation()));
+                            furnitureStorage = createFurnitureStorage(furnitureStorageConfig.getId(),entity.getLocation(),player,StorageUtils.getStoragePhysicalId(entity.getLocation()));
                             persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, furnitureStorage.getId() + ":" + furnitureStorage.getFurnitureStorageConfigID() + ":" + furnitureStorage.getOwnerUUID());
                         }
                     }
@@ -294,7 +293,7 @@ public class FurnitureStorageManager {
                         persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, furnitureStorage.getId() + ":" + furnitureStorage.getFurnitureStorageConfigID() + ":" + furnitureStorage.getOwnerUUID());
                     }
                     default -> {
-                        furnitureStorage = createFurnitureStorage(furnitureStorageConfig.getId(),location,player,StorageUtils.getBlockStorageId(location));
+                        furnitureStorage = createFurnitureStorage(furnitureStorageConfig.getId(),location,player,StorageUtils.getStoragePhysicalId(location));
                         persistentDataContainer.set(namespacedKey,PersistentDataType.STRING, furnitureStorage.getId() + ":" + furnitureStorage.getFurnitureStorageConfigID() + ":" + furnitureStorage.getOwnerUUID());
                     }
                 }

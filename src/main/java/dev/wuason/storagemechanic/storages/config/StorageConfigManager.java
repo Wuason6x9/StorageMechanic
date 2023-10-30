@@ -16,7 +16,7 @@ public class StorageConfigManager {
 
     private StorageMechanic core;
 
-    private HashMap<String,StorageConfig> storagesConfig;
+    private HashMap<String,StorageConfig> storagesConfig = new HashMap<>();
 
     public StorageConfigManager(StorageMechanic core) {
         this.core = core;
