@@ -77,13 +77,18 @@ public class StorageInventory implements InventoryHolder {
     }
 
     public void setTitleInventory(String title, @Nullable Player player){
+        Map<String, String> replacements = new HashMap<>(){{
+            put("%MAX_PAGES%", "" + storage.getStorageConfig().getPages());
+            put("%ACTUAL_PAGE%", "" + (page + 1));
+            put("%STORAGE_ID%", storage.getId());
+        }};
         if(player != null){
-            Mechanics.getInstance().getServerNmsVersion().getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(title, player),player);
+            Mechanics.getInstance().getServerNmsVersion().getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(Utils.replaceVariables(title,replacements), player),player);
             return;
         }
         if(inventory != null){
             for(HumanEntity human : inventory.getViewers()){
-                Mechanics.getInstance().getServerNmsVersion().getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(title, (Player) human),(Player) human);
+                Mechanics.getInstance().getServerNmsVersion().getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(Utils.replaceVariables(title,replacements), (Player) human),(Player) human);
             }
         }
     }
