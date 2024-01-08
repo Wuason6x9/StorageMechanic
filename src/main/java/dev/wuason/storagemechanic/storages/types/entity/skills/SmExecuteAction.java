@@ -4,6 +4,7 @@ import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.actions.Action;
 import dev.wuason.storagemechanic.actions.events.EventAction;
 import dev.wuason.storagemechanic.actions.events.SkillMythicExecutorAction;
+import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
@@ -36,7 +37,7 @@ public class SmExecuteAction implements ITargetedEntitySkill {
         StorageManager storageManager = core.getManagers().getStorageManager();
         SkillCaster caster = skillMetadata.getCaster();
         String id = "";
-        if(FurnitureStorageManager.isMythicCrucibleLoaded()){
+        if(Compatibilities.isMythicCrucibleLoaded()){
             if(caster instanceof Furniture) {
                 id = ((Furniture) caster).getEntity().getUniqueId().toString();
             }

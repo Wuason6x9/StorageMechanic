@@ -3,15 +3,19 @@ package dev.wuason.storagemechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.actions.ActionManager;
 import dev.wuason.storagemechanic.actions.config.ActionConfigManager;
-import dev.wuason.storagemechanic.compatibilities.MythicMobs;
+import dev.wuason.storagemechanic.compatibilities.Compatibilities;
+import dev.wuason.storagemechanic.customblocks.CustomBlock;
 import dev.wuason.storagemechanic.customblocks.CustomBlockManager;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.inventory.InventoriesManager;
 import dev.wuason.storagemechanic.inventory.config.InventoryConfigManager;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
+import dev.wuason.storagemechanic.recipes.RecipesManager;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfigManager;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventoryManager;
+import dev.wuason.storagemechanic.storages.types.api.PlaceHolderApiStorageApi;
+import dev.wuason.storagemechanic.storages.types.api.StorageApiManager;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorageManager;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfigManager;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
@@ -23,6 +27,12 @@ import dev.wuason.storagemechanic.storages.types.item.ItemStorageManager;
 import dev.wuason.storagemechanic.storages.types.item.config.ItemStorageConfigManager;
 import dev.wuason.storagemechanic.systems.TrashSystemManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.RecipeChoice;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -50,7 +60,8 @@ public class Managers {
     private BlockMechanicManager blockMechanicManager;
     private ActionConfigManager actionConfigManager;
     private ActionManager actionManager;
-
+    private StorageApiManager storageApiManager;
+    private RecipesManager recipesManager;
     private BukkitTask saveDataTask;
 
 
@@ -59,40 +70,42 @@ public class Managers {
     }
 
     public void loadManagers(){
-        AdventureUtils.sendMessagePluginConsole(core," Starting Managers!");
-        PluginManager pm = Bukkit.getPluginManager();
+
+        core.getDataFolder().mkdirs();
+
         //NEW MECHANICS
         this.blockMechanicManager = new BlockMechanicManager(core);
+
         //CONFIGS
-        customBlockManager = new CustomBlockManager(core); //1
-        actionConfigManager = new ActionConfigManager(core);
-        itemInterfaceManager = new ItemInterfaceManager(core);//2
-        storageConfigManager = new StorageConfigManager(core);//3
-        blockStorageConfigManager = new BlockStorageConfigManager(core); //4
-        itemStorageConfigManager = new ItemStorageConfigManager(core); //5
-        furnitureStorageConfigManager = new FurnitureStorageConfigManager(core); // 6
-        inventoryConfigManager = new InventoryConfigManager(core);
+        loadConfigManagers();
 
-        configManager = new ConfigManager(core); //7
+        //PlaceHolderApi
+        placeHolderApiHook();
+        //DEBUGS
 
-        Bukkit.getScheduler().runTaskAsynchronously(core,() -> configManager.load());
-
-        dataManager = new DataManager(core); //6
+        //MANAGERS
+        //********* DATA *********
+        dataManager = new DataManager(core);
+        //********* COMMANDS *********
         commandManager = new CommandManager(core);
         commandManager.loadCommand();
+        //********* STORAGES *********
         storageInventoryManager = new StorageInventoryManager();
         storageManager = new StorageManager(core, dataManager, this);
         blockStorageManager = new BlockStorageManager(core, dataManager,blockMechanicManager);
         itemStorageManager = new ItemStorageManager(core);
-        if(MythicMobs.isExistMythic()){
+        if(Compatibilities.isMythicMobsLoaded()){
             AdventureUtils.sendMessagePluginConsole(core," <yellow>MythicMobs hooked!");
             mythicManager = new MythicManager(core);
-            pm.registerEvents(mythicManager,core);
         }
         furnitureStorageManager = new FurnitureStorageManager(core, dataManager);
+        storageApiManager = new StorageApiManager(core);
+        //********* INVENTORIES *********
         inventoryManager = new InventoriesManager(core,storageManager);
+        //********* ACTIONS *********
         actionManager = new ActionManager(core);
 
+        //********* ANTI TRASH *********
 
         trashSystemManager = new TrashSystemManager(core,dataManager,blockStorageConfigManager,furnitureStorageConfigManager); //7
         try {
@@ -101,12 +114,36 @@ public class Managers {
             e.printStackTrace();
         }
 
+        //********* REGISTER EVENTS *********
+        registerEvents();
+
+    }
+    public void loadConfigManagers(){
+        customBlockManager = new CustomBlockManager(core); //1
+        actionConfigManager = new ActionConfigManager(core);
+        itemInterfaceManager = new ItemInterfaceManager(core);//2
+        storageConfigManager = new StorageConfigManager(core);//3
+        blockStorageConfigManager = new BlockStorageConfigManager(core); //4
+        itemStorageConfigManager = new ItemStorageConfigManager(core); //5
+        furnitureStorageConfigManager = new FurnitureStorageConfigManager(core); // 6
+        inventoryConfigManager = new InventoryConfigManager(core); //7
+        recipesManager = new RecipesManager(core); //8
+        configManager = new ConfigManager(core); //9
+        configManager.load(); //Load config
+    }
+
+    public void registerEvents(){
+        PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(customBlockManager, core);
         pm.registerEvents(storageManager,core);
         pm.registerEvents(blockStorageManager,core);
         pm.registerEvents(itemStorageManager,core);
-
+        pm.registerEvents(storageApiManager,core);
+        if(Compatibilities.isMythicMobsLoaded()){
+            pm.registerEvents(mythicManager,core);
+        }
     }
+
     public void saveAllData(){
         blockStorageManager.saveAllBlockStorages();
         furnitureStorageManager.saveAllFurnitureStorages();
@@ -115,15 +152,30 @@ public class Managers {
     }
     public void runDataSaveTask(){
         saveDataTask = Bukkit.getScheduler().runTaskTimerAsynchronously(core,() ->{
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Starting save data...");
+            if(configManager.getMainConfig().getBoolean("logs.show_save_logs", true)){
+                AdventureUtils.sendMessagePluginConsole(core,"<red> Starting save data...");
+            }
+            storageManager.antiTrashTask();
             saveAllData();
-            AdventureUtils.sendMessagePluginConsole(core,"<green> Data saved!");
-        }, (20 * 60) * 1, (20 * 60) * core.getConfigDocumentYaml().getInt("data.save_all_data_in", 15));
+            if(configManager.getMainConfig().getBoolean("logs.show_save_logs", true)){
+                AdventureUtils.sendMessagePluginConsole(core,"<green> Data saved!");
+            }
+        }, (20 * 60) * 1, (20 * 60) * configManager.getMainConfig().getInt("data.save_all_data_in", 15));
     }
     public void stopAndRemoveDataSaveTask(){
         if(saveDataTask != null) saveDataTask.cancel();
         saveDataTask = null;
     }
+
+    public void placeHolderApiHook(){
+        //PlaceHolderApi
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            //message to console placeholder hooked
+            AdventureUtils.sendMessagePluginConsole(core,"<yellow>PlaceholderAPI hooked!");
+            new PlaceHolderApiStorageApi(core).register();
+        }
+    }
+
     public void stop(){
         saveDataTask.cancel();
         AdventureUtils.sendMessagePluginConsole(core,"<red> Stopping StorageMechanic...");
@@ -138,6 +190,9 @@ public class Managers {
         //FURNITURESTORAGE
         AdventureUtils.sendMessagePluginConsole(core,"<red> Stopping FurnitureManager...");
         furnitureStorageManager.stop();
+        //StorageApi
+        AdventureUtils.sendMessagePluginConsole(core,"<red> Stopping StorageApiManager...");
+        storageApiManager.stop();
         //storages
         AdventureUtils.sendMessagePluginConsole(core,"<red> Stopping StorageManager...");
         storageManager.stop();
@@ -227,5 +282,13 @@ public class Managers {
 
     public ActionManager getActionManager() {
         return actionManager;
+    }
+
+    public StorageApiManager getStorageApiManager() {
+        return storageApiManager;
+    }
+
+    public RecipesManager getRecipesManager() {
+        return recipesManager;
     }
 }

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'dev.wuason'
-version = '1.0.1.7'
+version = '1.0.1.9'
 
 repositories {
     mavenCentral()
@@ -38,7 +38,7 @@ repositories {
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
     compileOnly 'com.github.oraxen:oraxen:1.158.1'
-    compileOnly 'com.github.LoneDev6:API-ItemsAdder:3.4.1-r4'
+    compileOnly 'com.github.LoneDev6:API-ItemsAdder:3.6.1'
     compileOnly 'me.clip:placeholderapi:2.11.3'
     compileOnly 'io.lumine:Mythic-Dist:5.4.0-20230725.223827-54'
     compileOnly 'io.lumine:MythicCrucible:1.7.0-20230723.171823-33'

@@ -1,9 +1,11 @@
 package dev.wuason.storagemechanic.storages.types.furnitures;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
-import dev.wuason.protectionlib.ProtectionLib;
+import dev.wuason.libs.protectionlib.ProtectionLib;
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
@@ -32,9 +34,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class FurnitureStorageManager {
-    private boolean itemsAdderLoaded = false;
-    private boolean oraxenLoaded = false;
-    private static boolean mythicCrucibleLoaded = false;
     private StorageMechanic core;
     private ItemsAdderFurnitureEvents iaEvents;
     private OraxenFurnitureEvents orEvents;
@@ -59,11 +58,11 @@ public class FurnitureStorageManager {
 
     public void load(){
         PluginManager pm = Bukkit.getPluginManager();
-        if(isItemsAdderLoaded()){
+        if(Compatibilities.isItemsAdderLoaded()){
             iaEvents = new ItemsAdderFurnitureEvents(this);
             pm.registerEvents(iaEvents,core);
         }
-        if(isOraxenLoaded()){
+        if(Compatibilities.isOraxenLoaded()){
             orEvents = new OraxenFurnitureEvents(this);
             pm.registerEvents(orEvents,core);
         }
@@ -354,7 +353,7 @@ public class FurnitureStorageManager {
                 }
                 case SHULKER -> { //GUARDAR EN DATA ✅
                     removeFurnitureStoragePersistence(entity.getLocation());
-                    ItemStack item = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(furnitureStorageConfig.getFurniture());
+                    ItemStack item = Adapter.getInstance().getItemStack(furnitureStorageConfig.getFurniture());
                     ItemMeta itemMeta = item.getItemMeta();
                     itemMeta.getPersistentDataContainer().set(FURNITURE_SHULKER_NAMESPACEDKEY,PersistentDataType.STRING, furnitureStorage.getId() + ":" + furnitureStorageConfig.getId() + ":" + furnitureStorage.getOwnerUUID());
                     item.setItemMeta(itemMeta);
@@ -371,7 +370,7 @@ public class FurnitureStorageManager {
                             }
                         }
                         if(!allEmpty){
-                            AdventureUtils.playerMessage(core.getConfigDocumentYaml().getString("messages.type.furniturestorage.isBreakeable"), player);
+                            AdventureUtils.playerMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.type.furniturestorage.isBreakeable"), player);
                             eventCancel.setCancelled(true);
                             return;
                         }
@@ -569,21 +568,6 @@ public class FurnitureStorageManager {
 
     public FurnitureStorage getFurnitureStorageByLoc(Location location){
         return getFurnitureStorage(getFurnitureStorageIDByLoc(location));
-    }
-
-
-
-    public boolean isItemsAdderLoaded(){
-        if(!itemsAdderLoaded) itemsAdderLoaded = Bukkit.getPluginManager().getPlugin("ItemsAdder") != null;
-        return itemsAdderLoaded;
-    }
-    public boolean isOraxenLoaded(){
-        if(!oraxenLoaded) oraxenLoaded = Bukkit.getPluginManager().getPlugin("Oraxen") != null;
-        return oraxenLoaded;
-    }
-    public static boolean isMythicCrucibleLoaded(){
-        if(!mythicCrucibleLoaded) mythicCrucibleLoaded = Bukkit.getPluginManager().getPlugin("MythicCrucible") != null;
-        return mythicCrucibleLoaded;
     }
 
     public StorageMechanic getCore() {

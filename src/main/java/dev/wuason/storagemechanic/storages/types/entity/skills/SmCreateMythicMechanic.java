@@ -1,9 +1,9 @@
 package dev.wuason.storagemechanic.storages.types.entity.skills;
 
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
-import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
 import io.lumine.mythic.api.adapters.AbstractEntity;
 import io.lumine.mythic.api.config.MythicLineConfig;
 import io.lumine.mythic.api.skills.ITargetedEntitySkill;
@@ -35,7 +35,7 @@ public class SmCreateMythicMechanic implements ITargetedEntitySkill {
         String idTriggerSkill = null;
         String type = null;
 
-        if(FurnitureStorageManager.isMythicCrucibleLoaded()){
+        if(Compatibilities.isMythicCrucibleLoaded()){
             if(skillMetadata.getCaster() instanceof Furniture) {
                 location = BukkitAdapter.adapt(((Furniture) caster).getLocation());
                 id = ((Furniture) caster).getEntity().getUniqueId().toString();

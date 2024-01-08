@@ -1,49 +1,57 @@
 package dev.wuason.storagemechanic.items;
 
-import dev.wuason.mechanics.utils.Utils;
+import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.items.properties.Properties;
+import dev.wuason.storagemechanic.storages.Storage;
+import dev.wuason.storagemechanic.storages.StorageManager;
+import dev.wuason.storagemechanic.storages.config.StorageConfig;
+import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.NamespacedKey;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class ItemInterface {
-    private ItemStack itemStack;
-    private ItemInterfaceType itemInterfaceType;
-    private String id;
-    private Properties properties;
-    public final static NamespacedKey NAMESPACED_KEY = new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicitem");
+public abstract class ItemInterface {
+    private final ItemStack itemStack;
+    private List<Object> data = new ArrayList<>();
+    private final String id;
+    private final String name;
 
-    public ItemInterface(String item, String displayName, List<String> lore, ItemInterfaceType itemInterfaceType, String id, Properties properties) {
-
-        this.properties = properties;
-        itemStack = Utils.createItemStackByAdapter(item, displayName, lore, 1);
-
-        ItemMeta itemMeta = itemStack.getItemMeta();
-
-        itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, id);
-
-        itemStack.setItemMeta(itemMeta);
-        this.itemInterfaceType = itemInterfaceType;
+    public ItemInterface(String item, String displayName, List<String> lore, String id, String name) {
+        itemStack = new ItemBuilderMechanic(item,1).setNameWithMiniMessage(displayName).setLore(lore).addPersistentData(ItemInterfaceManager.NAMESPACED_KEY,id).build();
         this.id = id;
+        this.name = name;
     }
 
     public ItemStack getItemStack() {
-        return itemStack.clone();
-    }
-
-    public ItemInterfaceType getItemInterfaceType() {
-        return itemInterfaceType;
+        return ItemBuilderMechanic.copyOf(itemStack).addPersistentData(ItemInterfaceManager.NAMESPACED_KEY, id).build();
     }
 
     public String getId() {
         return id;
     }
 
-    public Properties getProperties() {
-        return properties;
+    public void setData(List<Object> data) {
+        this.data = data;
     }
+
+    public List<Object> getData() {
+        return data;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void addData(Object data) {
+        this.data.add(data);
+    }
+
+    public void removeData(Object data) {
+        this.data.remove(data);
+    }
+    public abstract void execute(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager);
 }

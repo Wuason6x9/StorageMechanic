@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.item.config;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageClickType;
@@ -29,7 +30,7 @@ public class ItemStorageConfigManager {
 
         itemStorageConfigs = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/types/");
+        File base = new File(core.getDataFolder() + "/types/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -69,7 +70,7 @@ public class ItemStorageConfigManager {
 
                     //ITEM ID
                     String itemId = sectionItemStorage.getString("item",".");
-                    if(itemId.equals(".") || !Mechanics.getInstance().getManager().getAdapterManager().existAdapterID(itemId)){
+                    if(itemId.equals(".") || !Adapter.getInstance().existAdapterID(itemId)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item storage Config! itemstorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Item is null or invalid");
                         continue;
@@ -85,7 +86,9 @@ public class ItemStorageConfigManager {
 
                     //PROPERTIES
                     boolean storageable = sectionItemStorage.getBoolean("properties.isStorageable",false);
-                    ItemStoragePropertiesConfig itemStoragePropertiesConfig = new ItemStoragePropertiesConfig(storageable);
+                    boolean damageable = sectionItemStorage.getBoolean("properties.isDamageable",false);
+                    boolean dropAllItemsOnDeath = sectionItemStorage.getBoolean("properties.dropAllItemsOnDeath",true);
+                    ItemStoragePropertiesConfig itemStoragePropertiesConfig = new ItemStoragePropertiesConfig(storageable,damageable,dropAllItemsOnDeath);
 
                     ItemStorageConfig itemStorageConfig = new ItemStorageConfig((String)key,itemId,itemStorageClickType,storage,itemStoragePropertiesConfig);
                     itemStorageConfigs.put((String)key,itemStorageConfig);

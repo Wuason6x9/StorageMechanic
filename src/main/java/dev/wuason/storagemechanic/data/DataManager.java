@@ -1,6 +1,6 @@
 package dev.wuason.storagemechanic.data;
 
-import dev.wuason.boostedyaml.YamlDocument;
+import dev.wuason.libs.boostedyaml.YamlDocument;
 import dev.wuason.mechanics.data.Data;
 import dev.wuason.mechanics.data.local.LocalDataManager;
 import dev.wuason.mechanics.data.mysql.Column;
@@ -11,10 +11,10 @@ import dev.wuason.storagemechanic.data.player.PlayerData;
 import dev.wuason.storagemechanic.data.player.PlayerDataManager;
 import dev.wuason.storagemechanic.data.storage.StorageData;
 import dev.wuason.storagemechanic.data.storage.StorageManagerData;
+import dev.wuason.storagemechanic.data.storage.type.api.StorageApiData;
 import dev.wuason.storagemechanic.data.storage.type.block.BlockStorageData;
 import dev.wuason.storagemechanic.data.storage.type.furniture.FurnitureStorageData;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class DataManager {
     private LocalDataManager localDataManager;
     private SqlManager sqlManager;
 
-    final public Class<?>[] DATA_CLASES = {PlayerData.class, StorageData.class, BlockStorageData.class, FurnitureStorageData.class};
+    final public Class<?>[] DATA_CLASES = {PlayerData.class, StorageData.class, BlockStorageData.class, FurnitureStorageData.class, StorageApiData.class};
     final public List<Column> COLUMNS = Arrays.asList(
             new Column("id","INT AUTO_INCREMENT PRIMARY KEY"),
             new Column("data_id", "VARCHAR(255)"),
@@ -46,7 +46,7 @@ public class DataManager {
 
 
     public void load(){
-        String method = StorageMechanic.getInstance().getConfigDocumentYaml().getString("data.method").toUpperCase();
+        String method = StorageMechanic.getInstance().getManagers().getConfigManager().getMainConfig().getString("data.method").toUpperCase();
         AdventureUtils.sendMessagePluginConsole(StorageMechanic.getInstance()," <aqua>Method selected: <yellow>" + method);
         try{
             this.method = Method.valueOf(method);
@@ -76,7 +76,7 @@ public class DataManager {
     }
 
     public void startDataBaseData(){
-        YamlDocument config = StorageMechanic.getInstance().getConfigDocumentYaml();
+        YamlDocument config = StorageMechanic.getInstance().getManagers().getConfigManager().getMainConfig();
 
         String host = config.getString("data.database_config.config_host.host");
         int port = config.getInt("data.database_config.config_host.port");
@@ -157,11 +157,22 @@ public class DataManager {
             }
         }
     }
+    public String[] getAllDataIds(String dataType){
+        switch (method){
+            case DATABASE -> {
+                return sqlManager.getAllData(dataType,SqlManager.DATA_ID_NAME_COLUMN).toArray(new String[0]);
+            }
+            case LOCAL -> {
+                return localDataManager.getAllDataIds(dataType);
+            }
+        }
+        return null;
+    }
     public Data[] getAllData(String dataType){
         if(!existDataType(dataType)) return null;
         switch (method){
             case DATABASE -> {
-                List<String> d = sqlManager.getAllData(dataType,sqlManager.DATA_ID_NAME_COLUMN);
+                List<String> d = sqlManager.getAllData(dataType,SqlManager.DATA_ID_NAME_COLUMN);
                 ArrayList<Data> datas = new ArrayList<>();
                 for(String id : d){
                     datas.add(sqlManager.getData(dataType,id));

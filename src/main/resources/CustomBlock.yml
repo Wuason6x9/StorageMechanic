@@ -1,8 +1,0 @@
-blocks:
-  block1:
-    material: mc:stone
-    displayName: '<red>Test block'
-    lore:
-      - '<green> test lore block'
-    properties:
-      drop_block: true

@@ -1,12 +1,14 @@
 package dev.wuason.storagemechanic.storages;
 
-import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
+import dev.wuason.mechanics.items.ItemBuilderMechanic;
+import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.api.events.storage.CloseStorageEvent;
 import dev.wuason.storagemechanic.api.events.storage.OpenStorageEvent;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
-import dev.wuason.storagemechanic.items.properties.PlaceHolderItemProperties;
+import dev.wuason.storagemechanic.items.items.PlaceholderItemInterface;
 import dev.wuason.storagemechanic.storages.config.*;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.Bukkit;
@@ -31,9 +33,12 @@ public class Storage {
     private String id;
     private String storageIdConfig;
     private Date date = new Date();
+    private Date lastOpen = new Date();
+    private Date lastAccess = new Date();
     private StorageMechanic core;
     private StorageOriginContext storageOriginContext;
     private HashMap<Integer, StageStorage> currentStages = new HashMap<>();
+    private boolean isTempStorage = false;
 
     public Storage(String storageIdConfig, StorageOriginContext storageOriginContext) {
         this.id = UUID.randomUUID().toString();
@@ -49,13 +54,14 @@ public class Storage {
         this.storageOriginContext = storageOriginContext;
     }
 
-    public Storage(String id, Map<Integer,ItemStack[]> items, String storageIdConfig, Date date, StorageOriginContext storageOriginContext) {
+    public Storage(String id, Map<Integer,ItemStack[]> items, String storageIdConfig, Date date, StorageOriginContext storageOriginContext, Date lastOpen) {
         this.id = id;
         this.items = items;
         this.storageIdConfig = storageIdConfig;
         this.date = date;
         core = StorageMechanic.getInstance();
         this.storageOriginContext = storageOriginContext;
+        this.lastOpen = lastOpen != null ? lastOpen : new Date();
     }
 
     public void closeStorage(int page, Player player) {
@@ -67,7 +73,7 @@ public class Storage {
 
                 for (int i = 0; i < contents.length; i++) {
                     ItemStack item = contents[i];
-                    if (item != null && itemInterfaceManager.isItemInterface(item)) {
+                    if (item != null && (itemInterfaceManager.isItemInterface(item) && !PlaceholderItemInterface.isPlaceholderItem(item))) {
                         contents[i] = null;
                     }
                 }
@@ -102,9 +108,18 @@ public class Storage {
         }
     }
 
-    public void openStorage(Player player, int page) {
+    public boolean openStorage(Player player, int page) {
 
         StorageConfig storageConfig = getStorageConfig();
+
+        if(storageConfig.getMaxViewers() != -1){
+            if(getAllViewers().size() >= storageConfig.getMaxViewers()){
+                AdventureUtils.sendMessage(player, core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.storage.max_views"));
+                return false;
+            }
+        }
+
+        lastOpen = new Date();
 
         if (!items.containsKey(page)) {
             int slots = storageConfig.getInventoryType().getSize();
@@ -121,7 +136,7 @@ public class Storage {
                     for(String item : itemDefault.getItemsList()){
                         for(int s : itemDefault.getPagesToSlots().get(page)){
                             if(!MathUtils.chance(itemDefault.getChance())) continue;
-                            ItemStack itemStack = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(item);
+                            ItemStack itemStack = Adapter.getInstance().getItemStack(item);
                             itemStack.setAmount(MathUtils.randomNumberString(itemDefault.getAmount()));
                             itemsInv[s] = itemStack;
 
@@ -142,7 +157,7 @@ public class Storage {
             if(storageConfig.isStorageItemsInterfaceEnabled()){
                 if(storageConfig.getStorageItemsInterfaceConfig().containsKey(page)){
                     for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : storageConfig.getStorageItemsInterfaceConfig().get(page).entrySet()){
-                        if(core.getManagers().getItemInterfaceManager().isItemInterfaceWithPlaceHolderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
+                        if(PlaceholderItemInterface.isPlaceholderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
                         inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
                     }
                 }
@@ -159,6 +174,8 @@ public class Storage {
 
         OpenStorageEvent openStorageEvent = new OpenStorageEvent(player,storageInventoryPage);
         Bukkit.getPluginManager().callEvent(openStorageEvent);
+
+        return true;
     }
     public void startAnimationStages(int page){
         if(currentStages.containsKey(page)) return;
@@ -191,17 +208,7 @@ public class Storage {
         StorageConfig storageConfig = getStorageConfig();
         if(!storageConfig.getStagesHashMap().containsKey(stageId)) return;
         StageStorage stage = storageConfig.getStagesHashMap().get(stageId);
-        if(!inventories.containsKey(page)) return;
-        currentStages.put(page,stage);
-        StorageInventory inventory = inventories.get(page);
-        if(stage.getTitle() != null) inventory.setTitleInventory(stage.getTitle(),null);
-        if(stage.getStorageItemsInterfaceConfig().containsKey(page)){
-            removeItemsInterface(page);
-            for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : stage.getStorageItemsInterfaceConfig().get(page).entrySet()){
-                if(core.getManagers().getItemInterfaceManager().isItemInterfaceWithPlaceHolderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
-                inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
-            }
-        }
+        setStage(stage,page);
     }
     public void setStage(StageStorage stage, int page){
         if(!inventories.containsKey(page)) return;
@@ -211,7 +218,7 @@ public class Storage {
         if(stage.getStorageItemsInterfaceConfig().containsKey(page)){
             removeItemsInterface(page);
             for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : stage.getStorageItemsInterfaceConfig().get(page).entrySet()){
-                if(core.getManagers().getItemInterfaceManager().isItemInterfaceWithPlaceHolderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
+                if(PlaceholderItemInterface.isPlaceholderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
                 inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
             }
         }
@@ -508,12 +515,12 @@ public class Storage {
         }
         Bukkit.getScheduler().runTask(StorageMechanic.getInstance(),() -> {
             for(ItemStack item : itemStacks){
-                if(core.getManagers().getItemInterfaceManager().isItemInterfaceWithPlaceHolderItem(item)){
-                    ItemMeta itemMeta = item.getItemMeta();
-                    PersistentDataContainer itemPersistentDataContainer = itemMeta.getPersistentDataContainer();
-                    itemPersistentDataContainer.remove(PlaceHolderItemProperties.NAMESPACED_KEY);
-                    itemPersistentDataContainer.remove(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE);
-                    item.setItemMeta(itemMeta);
+                if(PlaceholderItemInterface.isPlaceholderItem(item)){
+                    new ItemBuilderMechanic(item).meta( meta -> {
+                        PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
+                        itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
+                        itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
+                    }).build();
                 }
                 world.dropItemNaturally(dropLocation, item);
             }
@@ -557,7 +564,7 @@ public class Storage {
         return hashMap.containsKey(slot);
     }
     public boolean isItemInList(ItemStack itemStack, int slot, int page, ListType listType, StorageConfig storageConfig){
-        String itemId = Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(itemStack);
+        String itemId = Adapter.getInstance().getAdapterID(itemStack);
         switch (listType){
 
             case BLACKLIST -> {
@@ -1170,7 +1177,7 @@ public class Storage {
         return storageIdConfig;
     }
 
-    public Date getDate() {
+    public Date getCreationDate() {
         return date;
     }
 
@@ -1182,12 +1189,24 @@ public class Storage {
         return storageOriginContext;
     }
 
-    public enum ListType{
+    public enum ListType {
         WHITELIST,
         BLACKLIST
     }
 
     public HashMap<Integer, StageStorage> getCurrentStages() {
         return currentStages;
+    }
+
+    public Date getLastOpen() {
+        return lastOpen;
+    }
+
+    public void setLastAccess(Date lastAccess) {
+        this.lastAccess = lastAccess;
+    }
+
+    public Date getLastAccess() {
+        return lastAccess;
     }
 }

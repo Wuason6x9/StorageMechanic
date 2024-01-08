@@ -1,11 +1,12 @@
 storages:
   storage1: #Storage ID
+    config:
+      max_views: -1
     storage:
       rows: 6
       pages: 10
       inventory_type: chest
       title: "test"
-      max-views: -1 #TOOOO  AAAAAAAAAAAAAAAAAAADDDDDDDD
     sounds:
       enabled: true
       list:

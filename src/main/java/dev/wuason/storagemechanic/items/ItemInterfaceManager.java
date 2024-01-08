@@ -1,15 +1,9 @@
 package dev.wuason.storagemechanic.items;
-
-import dev.wuason.mechanics.Mechanics;
-
-import dev.wuason.mechanics.compatibilities.AdapterManager;
-import dev.wuason.mechanics.items.ItemBuilderMechanic;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.customblocks.CustomBlock;
-
 import dev.wuason.storagemechanic.inventory.inventories.SearchItem.SearchType;
-import dev.wuason.storagemechanic.items.properties.*;
+import dev.wuason.storagemechanic.items.items.*;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -20,16 +14,23 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class ItemInterfaceManager {
-
     private StorageMechanic core;
-
-    private ArrayList<ItemInterface> itemsInterface;
+    private HashMap<String, ItemInterface> itemInterfaceHashMap = new HashMap<>();
+    public final static NamespacedKey NAMESPACED_KEY = new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicitem");
+    public static final List<String> ITEMS_REGISTERED_LIST = new ArrayList<>(){{
+        add("NEXT_PAGE");
+        add("BACK_PAGE");
+        add("SEARCH_PAGE");
+        //add("SORT_ITEMS");
+        add("BLOCKED_ITEM");
+        add("SEARCH_ITEM");
+        add("CLEAN_ITEM");
+        add("PLACEHOLDER");
+        add("ACTION");
+    }};
 
     public ItemInterfaceManager(StorageMechanic core) {
         this.core = core;
@@ -39,9 +40,9 @@ public class ItemInterfaceManager {
 
     public void loadItemsInterface(){
 
-        itemsInterface = new ArrayList<>();
+        itemInterfaceHashMap = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/itemInterfaces/");
+        File base = new File(core.getDataFolder() + "/itemInterfaces/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -59,21 +60,15 @@ public class ItemInterfaceManager {
             ConfigurationSection sectionItemsInterfaces = config.getConfigurationSection("Items");
 
             if(sectionItemsInterfaces != null){
-                for(Object key : sectionItemsInterfaces.getKeys(false).toArray()){
+                for(String key : sectionItemsInterfaces.getKeys(false)){
 
                     ConfigurationSection sectionItemInterface = sectionItemsInterfaces.getConfigurationSection((String)key);
-                    ItemInterfaceType itemInterfaceType = null;
-                    try {
-                        itemInterfaceType = itemInterfaceType.valueOf(sectionItemInterface.getString("itemType").toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is null");
-                        continue;
-                    }
 
-                    if(itemInterfaceType == null){
+                    String itemType = sectionItemInterface.getString("itemType", ".").toUpperCase(Locale.ENGLISH);
+
+                    if(!ITEMS_REGISTERED_LIST.contains(itemType)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is null");
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is invalid or null");
                         continue;
                     }
 
@@ -84,31 +79,51 @@ public class ItemInterfaceManager {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
                     }
-                    if(!Mechanics.getInstance().getManager().getAdapterManager().existAdapterID(item)){
+                    if(!Adapter.getInstance().existAdapterID(item)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
                     }
-                    Properties properties = null;
 
-                    switch (itemInterfaceType){
-                        case ACTION -> {
+                    String displayName = sectionItemInterface.getString("displayName");
+                    List<String> lore = sectionItemInterface.getStringList("lore");
+
+                    switch (itemType){
+                        case "NEXT_PAGE" -> {
+                            itemInterfaceHashMap.put(key, new NextPageItemInterface(item, displayName, lore, key));
+                            continue;
+                        }
+                        case "BACK_PAGE" -> {
+                            itemInterfaceHashMap.put(key, new BackPageItemInterface(item, displayName, lore, key));
+                            continue;
+                        }
+                        case "SEARCH_PAGE" -> {
+                            double maxDistance = sectionItemInterface.getDouble("properties.maxDistance", 5.0);
+                            itemInterfaceHashMap.put(key, new SearchPageItemInterface(item, displayName, lore, maxDistance, key));
+                            continue;
+                        }
+                        case "ACTION" -> {
                             String actionId = sectionItemInterface.getString("properties.action_id");
                             if(actionId == null || !core.getManagers().getActionConfigManager().getActionConfigHashMap().containsKey(actionId)){
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Action id is null or invalid!");
                                 continue;
                             }
-                            properties = new ActionItemProperties(actionId);
+                            itemInterfaceHashMap.put(key, new ActionItemInterface(item, displayName, lore, actionId, key));
+                            continue;
                         }
-                        case PLACEHOLDER -> {
+                        case "BLOCKED_ITEM" -> {
+                            itemInterfaceHashMap.put(key, new BlockedItemInterface(item, displayName, lore, key));
+                            continue;
+                        }
+                        case "PLACEHOLDER" -> {
                             List<String> whitelistItems = sectionItemInterface.getStringList("properties.whitelist.list");
                             List<String> blacklistItems = sectionItemInterface.getStringList("properties.blacklist.list");
                             boolean whitelistEnabled = sectionItemInterface.getBoolean("properties.whitelist.enabled", false);
                             boolean blacklistEnabled = sectionItemInterface.getBoolean("properties.blacklist.enabled", false);
                             if(whitelistItems == null) whitelistEnabled = false;
                             if(blacklistItems == null) blacklistEnabled = false;
-                            AdapterManager adapterManager = Mechanics.getInstance().getManager().getAdapterManager();
+                            Adapter adapterManager = Adapter.getInstance();
                             //COMPUTE ITEMS
                             List<String> itemsBlackListComputed = new ArrayList<>();
                             if(blacklistEnabled){
@@ -122,102 +137,26 @@ public class ItemInterfaceManager {
                                     itemsWhiteListComputed.add(adapterManager.getAdapterID(adapterManager.getItemStack(i)));
                                 }
                             }
-                            properties = new PlaceHolderItemProperties(whitelistEnabled,blacklistEnabled,itemsWhiteListComputed,itemsBlackListComputed);
+                            itemInterfaceHashMap.put(key, new PlaceholderItemInterface(item, displayName, lore, whitelistEnabled, blacklistEnabled, itemsWhiteListComputed, itemsBlackListComputed, key));
+                            continue;
                         }
-                        case CLEAN_ITEM -> {
-                            List<String> pagesString = sectionItemInterface.getStringList("properties.pages");
-                            List<String> slotsString = sectionItemInterface.getStringList("properties.slots");
-                            if(slotsString == null || pagesString == null){
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: CLEAN_ITEM slots or pages is invalid!");
-                                continue;
-                            }
-                            properties = new CleanItemProperties(StorageUtils.configFill(pagesString),StorageUtils.configFill(slotsString));
-                        }
-                        case SEARCH_ITEM -> {
-                            String invId = sectionItemInterface.getString("properties.inv_id","searchItem");
-                            String invResultId = sectionItemInterface.getString("properties.inv_result_id","searchItemResult");
-                            String type = sectionItemInterface.getString("properties.type","name");
-                            SearchType searchType = null;
-                            try {
-                                searchType = SearchType.valueOf(type.toUpperCase(Locale.ENGLISH));
-                            }
-                            catch (Exception e){
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: SearchType is invalid");
-                                continue;
-                            }
-                            properties = new SearchItemProperties(invId,invResultId,searchType);
-                        }
+
                     }
-
-                    String displayName = sectionItemInterface.getString("displayName");
-
-                    List<String> lore = sectionItemInterface.getStringList("lore");
-
-                    ItemInterface itemInterface = new ItemInterface(item,displayName,lore,itemInterfaceType,(String)key,properties);
-
-                    itemsInterface.add(itemInterface);
 
                 }
             }
         }
 
-        AdventureUtils.sendMessagePluginConsole(core, "<aqua> Items Interface loaded: <yellow>" + itemsInterface.size());
+        AdventureUtils.sendMessagePluginConsole(core, "<aqua> Items Interface loaded: <yellow>" + itemInterfaceHashMap.size());
 
     }
 
     public ItemInterface getItemInterfaceById(String id) {
-        for (ItemInterface itemInterface : itemsInterface) {
-            if (itemInterface.getId().equals(id)) {
-                return itemInterface;
-            }
-        }
-        return null;
-    }
-
-    public ItemInterface getItemInterfaceByItemStack(ItemStack itemStack) {
-        if (itemStack == null || !itemStack.hasItemMeta()) {
-            return null;
-        }
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
-        if (itemDataContainer.has(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicitem"), PersistentDataType.STRING)) {
-            String id = itemDataContainer.get(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicitem"), PersistentDataType.STRING);
-            return getItemInterfaceById(id);
-        }
-        return null;
-    }
-    public ItemInterface getItemInterfaceByItemStackPlaceholder(ItemStack itemStack) {
-        if (itemStack == null || !itemStack.hasItemMeta()) {
-            return null;
-        }
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
-        if (itemDataContainer.has(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE, PersistentDataType.STRING)) {
-            String id = itemDataContainer.get(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE, PersistentDataType.STRING);
-            return getItemInterfaceById(id);
-        }
-        return null;
-    }
-
-    public List<ItemInterface> getItemInterfacesByType(ItemInterfaceType type) {
-        List<ItemInterface> filteredItems = new ArrayList<>();
-        for (ItemInterface itemInterface : itemsInterface) {
-            if (itemInterface.getItemInterfaceType() == type) {
-                filteredItems.add(itemInterface);
-            }
-        }
-        return filteredItems;
+        return itemInterfaceHashMap.get(id);
     }
 
     public boolean existsItemInterface(String id) {
-        for (ItemInterface itemInterface : itemsInterface) {
-            if (itemInterface.getId().equals(id)) {
-                return true;
-            }
-        }
-        return false;
+        return itemInterfaceHashMap.containsKey(id);
     }
 
     public boolean isItemInterface(ItemStack itemStack) {
@@ -226,21 +165,16 @@ public class ItemInterfaceManager {
         }
         ItemMeta itemMeta = itemStack.getItemMeta();
         PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
-
-        return itemDataContainer.has(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicitem"), PersistentDataType.STRING);
+        return itemDataContainer.has(NAMESPACED_KEY, PersistentDataType.STRING);
     }
-    public boolean isItemInterfaceWithPlaceHolderItem(ItemStack itemStack) {
-        if (itemStack == null || !itemStack.hasItemMeta()) {
-            return false;
-        }
+
+    public ItemInterface getItemInterfaceByItemStack(ItemStack itemStack) {
+        if (itemStack == null || !itemStack.hasItemMeta()) return null;
         ItemMeta itemMeta = itemStack.getItemMeta();
         PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
-
-        return itemDataContainer.has(PlaceHolderItemProperties.NAMESPACED_KEY_INTERFACE, PersistentDataType.STRING);
-    }
-
-    public List<ItemInterface> getAllItemInterfaces() {
-        return new ArrayList<>(itemsInterface);
+        if (!itemDataContainer.has(NAMESPACED_KEY, PersistentDataType.STRING)) return null;
+        String id = itemDataContainer.get(NAMESPACED_KEY, PersistentDataType.STRING);
+        return getItemInterfaceById(id);
     }
 
 }

@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.actions.functions.functions.storage;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.storagemechanic.actions.Action;
 import dev.wuason.storagemechanic.actions.functions.Function;
 import dev.wuason.storagemechanic.storages.Storage;
@@ -42,7 +43,7 @@ public class SetItemStorage extends Function {
             pageObj = action.getPlaceholders().get(((String) pageStr).toUpperCase(Locale.ENGLISH).intern());
         }
         if(itemObj == null){
-            itemObj = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(((String) itemStr).intern());
+            itemObj = Adapter.getInstance().getItemStack(((String) itemStr).intern());
         }
         if(slotObj == null){
             slotObj = Integer.parseInt(((String) slotStr).replace(" ", ""));

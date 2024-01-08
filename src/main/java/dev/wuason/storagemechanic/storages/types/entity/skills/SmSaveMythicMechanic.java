@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.entity.skills;
 
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
@@ -24,7 +25,7 @@ public class SmSaveMythicMechanic implements ITargetedEntitySkill {
     public SkillResult castAtEntity(SkillMetadata skillMetadata, AbstractEntity abstractEntity) {
         SkillCaster caster = skillMetadata.getCaster();
         String id = "";
-        if(FurnitureStorageManager.isMythicCrucibleLoaded()){
+        if(Compatibilities.isMythicCrucibleLoaded()){
             if(caster instanceof Furniture) {
                 id = ((Furniture) caster).getEntity().getUniqueId().toString();
             }

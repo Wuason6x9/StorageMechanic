@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.actions.expressions.internal.methods.adapter;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.storagemechanic.actions.expressions.internal.InternalExpr;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -19,10 +20,10 @@ public class GetAdapterIdMethod extends InternalExpr {
 
     public Object getAdapterId(Object... objs){
         if(objs[0] instanceof ItemStack){
-            return Mechanics.getInstance().getManager().getAdapterManager().getAdapterID((ItemStack) objs[0]);
+            return Adapter.getInstance().getAdapterID((ItemStack) objs[0]);
         }
         else if (objs[0] instanceof Block) {
-            return Mechanics.getInstance().getManager().getAdapterManager().getAdapterID((Block) objs[0]);
+            return Adapter.getInstance().getAdapterID((Block) objs[0]);
         }
         return null;
     }

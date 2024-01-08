@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.config;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -23,7 +24,7 @@ public class StorageItemConfig {
         //BUILD ITEMS
         items = new ItemStack[itemsList.size()];
         for(int i=0;i<itemsList.size();i++){
-            items[i] = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(itemsList.get(i));
+            items[i] = Adapter.getInstance().getItemStack(itemsList.get(i));
         }
         for(Integer i : pages){
             pagesToSlots.put(i,hashSet);

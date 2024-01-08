@@ -1,13 +1,11 @@
 package dev.wuason.storagemechanic.actions.functions.functions;
 
-import dev.wuason.bsh.EvalError;
-import dev.wuason.mechanics.Mechanics;
+import dev.wuason.libs.bsh.EvalError;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.actions.Action;
 import dev.wuason.storagemechanic.actions.args.Arg;
-import dev.wuason.storagemechanic.actions.config.ActionConfig;
 import dev.wuason.storagemechanic.actions.config.ConditionConfig;
 import dev.wuason.storagemechanic.actions.config.FunctionConfig;
 import dev.wuason.storagemechanic.actions.functions.Function;

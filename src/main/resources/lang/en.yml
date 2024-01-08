@@ -1,0 +1,88 @@
+config-version: 1 #DON'T CHANGE THIS
+messages:
+  commands:
+    custom_blocks:
+      get:
+        valid_id: "<green> you have received: %id%"
+        invalid_id: "<red>Invalid ID"
+  storage:
+    search_page_invalid: "<red>Please enter a valid page!"
+    search_page_enter: "<red>Please enter a valid page!"
+    max_views: "<red>The limit of people in the storage has been reached! "
+  type:
+    furniturestorage:
+      isBreakeable: "<red>You can't destroy this block while it has an item inside!"
+    blockstorage:
+      isBreakeable: "<red>You can't destroy this block while it has an item inside!"
+api:
+  panel:
+    title: "Storages API <red>(%page%/%max_page%)"
+    next_page: "<red>Next page >>"
+    previous_page: "<red><< Previous page"
+    item_name: "<gold>id: <aqua>%storage_api_id%"
+    item_lore:
+      - "<red>Left click to open storage!"
+      - "<red>Right click to save storage!"
+      - "<dark_red>Shift + Right click to delete storage!"
+      - "<red>Shift + Left click to update!"
+      - ""
+      - "<red>Loaded Storage: <aqua>%loaded_storage%"
+      - "<red>Loaded Storage Api: <aqua>%loaded_storage_api%"
+      - "<red>Total items: <aqua>%total_items%"
+      - "<red>Creation date: <aqua>%creation_date%"
+      - "<red>Last open: <aqua>%last_open%"
+      - "<red>Storage config id: <aqua>%storage_config_id%"
+      - "<red>Storage origin context: <aqua>%storage_origin_context%"
+      - "<red>Storage max pages: <aqua>%storage_max_pages%"
+      - "<red>Storage viewers: <aqua>%storage_viewers%"
+      - "<red>Storage id: <aqua>%storage_id%"
+info:
+  player:
+    title: "Storages of %player% <red>(%page%/%max_page%)"
+    next_page: "<red>Next page >>"
+    previous_page: "<red><< Previous page"
+    item_name: "<red>id: <aqua>%storage_id%"
+    lore:
+      - "<red>Left click to open storage!"
+      - "<red>Right click to save storage!"
+      - "<dark_red>Shift + Right click to delete storage!"
+      - "<red>Shift + Left click to update!"
+      - ""
+      - "<red>Loaded: <aqua>%loaded%"
+      - "<red>Total items: <aqua>%total_items%"
+      - "<red>Creation date: <aqua>%creation_date%"
+      - "<red>Last open: <aqua>%last_open%"
+      - "<red>Storage config id: <aqua>%storage_config_id%"
+      - "<red>Storage origin context: <aqua>%storage_origin_context%"
+      - "<red>Storage max pages: <aqua>%storage_max_pages%"
+      - "<red>Storage viewers: <aqua>%storage_viewers%"
+  players:
+    title: Select player / Info Storage
+    storages:
+      refresh_item_name: "<red>Refresh"
+      next_page: "<red>Next page >>"
+      previous_page: "<red><< Previous page"
+      item_name: "<red>id: <aqua>%storage_id%"
+      item_lore:
+        - "<red>Left click to open storage!"
+        - "<red>Right click to save storage!"
+        - "<dark_red>Shift + Right click to delete storage!"
+        - ""
+        - "<red>Loaded: <aqua>%loaded%"
+        - "<red>Total items: <aqua>%total_items%"
+        - "<red>Creation date: <aqua>%creation_date%"
+        - "<red>Last open: <aqua>%last_open%"
+        - "<red>Storage config id: <aqua>%storage_config_id%"
+        - "<red>Storage origin context: <aqua>%storage_origin_context%"
+        - "<red>Storage max pages: <aqua>%storage_max_pages%"
+        - "<red>Storage viewers: <aqua>%storage_viewers%"
+    players:
+      refresh_item_name: "<red>Refresh"
+      remove_selection_item_name: "<red>Remove selection"
+      next_page: "<red>Next page >>"
+      previous_page: "<red><< Previous page"
+      item_name: "<rainbow>%player%"
+      item_lore:
+        - "<red>Storages: <aqua>%total_storages%"
+        - "<red>Block Storages: <aqua>%total_block_storages%"
+        - "<red>Furniture Storages: <aqua>%total_furniture_storages%"

@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.actions.types;
 
 import dev.wuason.storagemechanic.storages.Storage;
+import dev.wuason.storagemechanic.storages.types.api.StorageApi;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorage;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorage;
 import dev.wuason.storagemechanic.storages.types.item.config.ItemStorageConfig;
@@ -10,7 +11,7 @@ public enum Executator {
     BLOCK_STORAGE(BlockStorage.class),
     STORAGE(Storage.class),
     FURNITURE_STORAGE(FurnitureStorage.class),
-    API(null), //CAMBIAR
+    API(StorageApi.class),
     ENTITY_STORAGE(null),
     ITEM_STORAGE(ItemStorageConfig.class);
 

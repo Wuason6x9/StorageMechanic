@@ -20,7 +20,7 @@ public class StorageOriginContext implements Serializable {
         return data;
     }
 
-    public enum context implements Serializable{
+    public enum context implements Serializable {
         BLOCK_STORAGE,
         FURNITURE_STORAGE,
         ENTITY_STORAGE,

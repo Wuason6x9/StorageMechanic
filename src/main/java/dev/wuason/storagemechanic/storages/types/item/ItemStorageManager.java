@@ -1,6 +1,9 @@
 package dev.wuason.storagemechanic.storages.types.item;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
+import dev.wuason.mechanics.utils.StorageUtils;
+import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.player.PlayerData;
 import dev.wuason.storagemechanic.data.player.PlayerDataManager;
@@ -8,12 +11,19 @@ import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.types.item.config.ItemStorageConfig;
+import dev.wuason.storagemechanic.storages.types.item.config.ItemStorageConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -58,21 +68,29 @@ public class ItemStorageManager implements Listener {
                 }
                 ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().getItemStorageConfigs().get(src[0]);
                 if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
+                if(e.getPlayer().isSneaking()) return;
                 e.setCancelled(true);
                 Bukkit.getScheduler().runTask(core,() -> storage.openStorage(e.getPlayer(),0));
                 return;
             }
-            ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(e.getItem()));
+            ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Adapter.getInstance().getAdapterID(e.getItem()));
             if(itemStorageConfig == null) return;
             if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
+            if(e.getPlayer().isSneaking()) return;
             Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.context.ITEM_STORAGE,new ArrayList<>(){{
                 add(itemStorageConfig.getId());
                 add(e.getPlayer().getUniqueId().toString());
             }}));
             addStoragePlayerData(e.getPlayer().getUniqueId(),storage.getId(),itemStorageConfig.getId());
-            setStorageFromItemStack(e.getItem(),storage.getId(),itemStorageConfig.getId(),e.getPlayer().getUniqueId());
+            ItemStack itemStack = e.getItem().clone();
+            e.getItem().setAmount(e.getItem().getAmount() - 1);
+            itemStack.setAmount(1);
+            setStorageFromItemStack(itemStack,storage.getId(),itemStorageConfig.getId(),e.getPlayer().getUniqueId());
             e.setCancelled(true);
-            Bukkit.getScheduler().runTask(core,() -> storage.openStorage(e.getPlayer(), 0));
+            Bukkit.getScheduler().runTask(core,() -> {
+                StorageUtils.addItemToInventoryOrDrop(e.getPlayer(), itemStack);
+                storage.openStorage(e.getPlayer(), 0);
+            });
         }
 
     }
@@ -119,4 +137,53 @@ public class ItemStorageManager implements Listener {
             }
         }
     }
+
+    @EventHandler
+    public void onItemRemove(ItemDespawnEvent event){
+        if(isItemStorage(event.getEntity().getItemStack())){
+            String[] src = getDataFromItemStack(event.getEntity().getItemStack()).split(":");
+            event.setCancelled(false);
+            StorageManager storageManager = core.getManagers().getStorageManager();
+
+            if(storageManager.storageExists(src[1])){
+                removeStoragePlayerData(UUID.fromString(src[2]), src[1]);
+                storageManager.removeStorage(src[1]);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onItemRemove(EntityDamageEvent event){
+        if(event.getEntity() instanceof Item && isItemStorage(((Item) event.getEntity()).getItemStack())){
+            Item item = (Item) event.getEntity();
+            if(item.getItemStack() == null) return;
+            String[] src = getDataFromItemStack(item.getItemStack()).split(":");
+            String itemStorageConfigID = src[0];
+            String storageId = src[1];
+            ItemStorageConfigManager itemStorageConfigManager = core.getManagers().getItemStorageConfigManager();
+            StorageManager storageManager = core.getManagers().getStorageManager();
+            if(!itemStorageConfigManager.existItemStorageConfig(itemStorageConfigID) || !storageManager.storageExists(storageId)) return;
+            UUID owner = UUID.fromString(src[2]);
+            removeStoragePlayerData(owner, storageId);
+            if(itemStorageConfigManager.getItemStorageConfig(itemStorageConfigID).getItemStoragePropertiesConfig().isDropAllItemsOnDeath()){
+                Storage storage = storageManager.getStorage(storageId);
+                storage.dropAllItems(item.getLocation());
+            }
+            storageManager.removeStorage(storageId);
+            item.remove();
+        }
+    }
+
+    @EventHandler
+    public void onItemDrop(PlayerDropItemEvent event){
+        if(isItemStorage(event.getItemDrop().getItemStack())){
+            ItemStorageConfigManager itemStorageConfigManager = core.getManagers().getItemStorageConfigManager();
+            ItemStorageConfig itemStorageConfig = itemStorageConfigManager.getItemStorageConfig(getDataFromItemStack(event.getItemDrop().getItemStack()).split(":")[0]);
+            if(itemStorageConfig == null) return;
+            if(!itemStorageConfig.getItemStoragePropertiesConfig().isDamageable()){
+                event.getItemDrop().setInvulnerable(true);
+            }
+        }
+    }
+
 }

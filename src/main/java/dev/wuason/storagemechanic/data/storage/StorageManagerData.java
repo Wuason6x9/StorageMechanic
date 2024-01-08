@@ -3,12 +3,11 @@ package dev.wuason.storagemechanic.data.storage;
 import dev.wuason.mechanics.data.Data;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.DataManager;
+import dev.wuason.storagemechanic.data.storage.type.api.StorageApiManagerData;
 import dev.wuason.storagemechanic.data.storage.type.block.BlockStorageManagerData;
 import dev.wuason.storagemechanic.data.storage.type.furniture.FurnitureStorageManagerData;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
-
-import java.util.HashMap;
 
 public class StorageManagerData {
 
@@ -17,11 +16,13 @@ public class StorageManagerData {
 
     private BlockStorageManagerData blockStorageManagerData;
     private FurnitureStorageManagerData furnitureStorageManagerData;
+    private StorageApiManagerData storageApiManager;
 
     public StorageManagerData(DataManager dataManager, StorageMechanic core){
         this.dataManager = dataManager;
         blockStorageManagerData = new BlockStorageManagerData(dataManager,core);
         furnitureStorageManagerData = new FurnitureStorageManagerData(dataManager,core);
+        storageApiManager = new StorageApiManagerData(dataManager,core);
     }
 
 
@@ -74,14 +75,14 @@ public class StorageManagerData {
     //Serialize
     public Storage storageDataToStorage(StorageData storageData) {
         if(storageData != null){
-            Storage storage = new Storage(storageData.getId(), storageData.getItems(), storageData.getStorageIdConfig(), storageData.getDate(), new StorageOriginContext(StorageOriginContext.context.valueOf(storageData.getStorageOriginContext()),storageData.getStorageOriginContextData()));return storage;
+            Storage storage = new Storage(storageData.getId(), storageData.getItems(), storageData.getStorageIdConfig(), storageData.getDate(), new StorageOriginContext(StorageOriginContext.context.valueOf(storageData.getStorageOriginContext()),storageData.getStorageOriginContextData()), storageData.getLastOpenDate());return storage;
         }
         return null;
     }
 
     public StorageData storageToStorageData(Storage storage) {
         if(storage != null){
-            return new StorageData(storage.getItems(), storage.getId(), storage.getStorageIdConfig(), storage.getDate(),storage.getStorageOriginContext().getContext().toString(),storage.getStorageOriginContext().getData());
+            return new StorageData(storage.getItems(), storage.getId(), storage.getStorageIdConfig(), storage.getCreationDate(),storage.getStorageOriginContext().getContext().toString(),storage.getStorageOriginContext().getData(),storage.getLastOpen());
         }
         return null;
     }
@@ -96,5 +97,9 @@ public class StorageManagerData {
 
     public FurnitureStorageManagerData getFurnitureStorageManagerData() {
         return furnitureStorageManagerData;
+    }
+
+    public StorageApiManagerData getStorageApiManager() {
+        return storageApiManager;
     }
 }

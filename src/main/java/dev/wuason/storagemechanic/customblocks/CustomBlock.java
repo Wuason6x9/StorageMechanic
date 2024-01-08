@@ -2,6 +2,7 @@ package dev.wuason.storagemechanic.customblocks;
 
 import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
+import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import org.bukkit.Material;
@@ -33,7 +34,13 @@ public class CustomBlock {
     }
 
     public ItemStack getItemStack() {
-        return itemStack.clone();
+        ItemStack clone  = itemStack.clone();
+        if(!getCustomBlockProperties().isStackable()){
+            ItemMeta itemMeta = clone.getItemMeta();
+            itemMeta.getPersistentDataContainer().set(new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicbrandom"), PersistentDataType.INTEGER, MathUtils.randomNumber(0,100000));
+            clone.setItemMeta(itemMeta);
+        }
+        return clone;
     }
 
     public String getId() {

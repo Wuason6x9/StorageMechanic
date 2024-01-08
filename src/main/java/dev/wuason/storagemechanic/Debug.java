@@ -1,5 +1,6 @@
 package dev.wuason.storagemechanic;
 
+import dev.wuason.libs.invmechaniclib.types.InvCustom;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -44,5 +45,6 @@ public class Debug implements Listener {
         debugToPlayer("Slot: " + e.getSlot(), player);
         debugToPlayer("SlotType: " + e.getSlotType(), player);
         debugToPlayer("SlotRaw: " + e.getRawSlot(), player);
+        debugToPlayer("Holder: " + e.getInventory().getHolder(), player);
     }
 }

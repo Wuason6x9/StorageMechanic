@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.entity;
 
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
@@ -17,11 +18,7 @@ import io.lumine.mythic.core.mobs.ActiveMob;
 import io.lumine.mythic.core.mobs.MobExecutor;
 import io.lumine.mythic.core.skills.SkillMechanic;
 import io.lumine.mythic.core.skills.TriggeredSkill;
-import io.lumine.mythiccrucible.MythicCrucible;
-import io.lumine.mythiccrucible.items.CrucibleItem;
-import io.lumine.mythiccrucible.items.CrucibleItemType;
-import io.lumine.mythiccrucible.items.furniture.Furniture;
-import io.lumine.mythiccrucible.items.furniture.FurnitureItemContext;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,6 +31,7 @@ public class MythicManager implements Listener {
     private EntityMythicManager entityMythicManager;
     private StorageTriggers storageTriggers;
     private StorageMechanic core;
+    MythicCrucibleImpl mythicCrucibleImpl = null;
     private HashMap<String, HashMap<SkillTrigger, Queue<SkillMechanic>>> triggerSkills = new HashMap<>();
     public MythicManager(StorageMechanic core) {
         this.core = core;
@@ -44,6 +42,9 @@ public class MythicManager implements Listener {
         storageTriggers = new StorageTriggers();
         entityMythicManager = new EntityMythicManager(core);
         Bukkit.getPluginManager().registerEvents(entityMythicManager,core);
+        if(Compatibilities.isMythicCrucibleLoaded()){
+            mythicCrucibleImpl = new MythicCrucibleImpl();
+        }
     }
 
     @EventHandler
@@ -59,23 +60,10 @@ public class MythicManager implements Listener {
                     map.put(trigger,skillMechanics);
                 }
             }
-            triggerSkills.put(mythicMob.toString(), map);
+            triggerSkills.put(mythicMob.getInternalName(), map);
         }
-        if(FurnitureStorageManager.isMythicCrucibleLoaded()){
-            Collection<CrucibleItem> items = MythicCrucible.inst().getItemManager().getItems();
-            for(CrucibleItem crucibleItem : items){
-                if(crucibleItem.getType().equals(CrucibleItemType.FURNITURE)){
-                    FurnitureItemContext furnitureItemContext = crucibleItem.getFurnitureData();
-                    HashMap<SkillTrigger, Queue<SkillMechanic>> map = new HashMap<>();
-                    for(SkillTrigger trigger : StorageTriggers.getTriggers()){
-                        Queue<SkillMechanic> skillMechanics = furnitureItemContext.getSkills(trigger);
-                        if(skillMechanics != null && !skillMechanics.isEmpty()){
-                            map.put(trigger,skillMechanics);
-                        }
-                    }
-                    triggerSkills.put(crucibleItem.getInternalName(), map);
-                }
-            }
+        if(mythicCrucibleImpl != null){
+            mythicCrucibleImpl.a(triggerSkills);
         }
 
     }
@@ -114,9 +102,12 @@ public class MythicManager implements Listener {
                         }
                     }
                     case "FURNITURE" ->{
-                        Furniture furniture = MythicCrucible.inst().getItemManager().getFurnitureManager().getFurniture(uuid).get();
-                        skillCaster = furniture;
-                        id = furniture.getFurnitureData().getItem().getInternalName();
+                        if(mythicCrucibleImpl != null){
+                            Object[] objects = mythicCrucibleImpl.b(uuid);
+                            skillCaster = (SkillCaster) objects[0];
+                            id = (String) objects[1];
+                        }
+
                     }
                 }
 

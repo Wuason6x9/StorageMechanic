@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.customblocks;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.api.events.block.CustomBlockDestroyEvent;
@@ -49,7 +50,7 @@ public class CustomBlockManager implements Listener {
 
         customBlocks = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/CustomBlocks/");
+        File base = new File(core.getDataFolder().getPath() + "/CustomBlocks/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -76,7 +77,8 @@ public class CustomBlockManager implements Listener {
 
                     List<String> lore = customBlockSection.getStringList("lore");
                     boolean dropBlock = customBlockSection.getBoolean("properties.drop_block",true);
-                    CustomBlockProperties customBlockProperties = new CustomBlockProperties(dropBlock);
+                    boolean stackable = customBlockSection.getBoolean("properties.stackable",true);
+                    CustomBlockProperties customBlockProperties = new CustomBlockProperties(dropBlock, stackable);
                     CustomBlock customBlock = new CustomBlock((String)key,material,displayName,lore,customBlockProperties);
 
                     customBlocks.put(customBlock.getId(), customBlock);
@@ -94,6 +96,7 @@ public class CustomBlockManager implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         ItemStack itemInHand = event.getItemInHand();
         ItemMeta itemMeta = itemInHand.getItemMeta();
+        if(itemInHand == null || itemMeta == null) return;
         PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
 
         if (itemDataContainer.has(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb"), PersistentDataType.STRING)) {

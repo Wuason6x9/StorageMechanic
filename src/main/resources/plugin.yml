@@ -2,10 +2,12 @@ name: StorageMechanic
 version: '${version}'
 main: dev.wuason.storagemechanic.StorageMechanic
 api-version: 1.18
-load: POSTWORLD
+load: STARTUP
 authors: [ Wuason ]
-description: wuason.mechanic.storagemechanic
+description: StorageMechanics is a plugin that allows you to create custom storage blocks.
 website: techmc.es
+depend:
+  - Mechanics
 softdepend:
   - ItemsAdder
   - Oraxen

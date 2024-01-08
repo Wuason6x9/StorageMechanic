@@ -1,9 +1,8 @@
 package dev.wuason.storagemechanic.actions.args;
 
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.compatibilities.AdapterManager;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.storagemechanic.actions.Action;
-import dev.wuason.storagemechanic.actions.types.ArgType;
 
 public class AdapterArg extends Arg{
 
@@ -13,7 +12,7 @@ public class AdapterArg extends Arg{
 
     @Override
     public Object getObject(Action action) {
-        AdapterManager adapterManager = Mechanics.getInstance().getManager().getAdapterManager();
+        Adapter adapterManager = Adapter.getInstance();
         return adapterManager.computeAdapterId(getLine().trim());
     }
 

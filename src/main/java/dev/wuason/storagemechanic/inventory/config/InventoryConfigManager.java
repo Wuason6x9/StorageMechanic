@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.inventory.config;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.utils.StorageUtils;
@@ -25,7 +26,7 @@ public class InventoryConfigManager {
 
         inventories = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/inventories/");
+        File base = new File(core.getDataFolder() + "/inventories/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -75,7 +76,7 @@ public class InventoryConfigManager {
                     String itemId = key;
 
                     String item = itemConfigurationSection.getString("item","mc:stone");
-                    if(!Mechanics.getInstance().getManager().getAdapterManager().existAdapterID(item)){
+                    if(!Adapter.getInstance().existAdapterID(item)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item in Inventory Config! item_id: " + itemId + " Inventory_id: " + id + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: The Item Adapter is invalid! itemAdapter: " + item);
                         continue;

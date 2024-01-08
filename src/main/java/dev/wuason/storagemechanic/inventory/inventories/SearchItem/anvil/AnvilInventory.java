@@ -15,6 +15,7 @@ import dev.wuason.storagemechanic.inventory.inventories.SearchItem.SearchType;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -113,6 +114,12 @@ public class AnvilInventory {
         inventoryAnvilManager.getAnvilInventoriesOpened().remove(anvilGui.getInventory());
         anvilGui.close();
         anvilGui.getPlayer().getInventory().clear();
+        for(int i=0;i<9;i++){
+            ItemStack itemStack = anvilGui.getPlayer().getInventory().getItem(i);
+            if(itemStack == null || itemStack.equals(Material.AIR)){
+                anvilGui.getPlayer().getInventory().setHeldItemSlot(i);
+            }
+        }
         setItems();
         anvilGui.open();
         inventoryAnvilManager.getAnvilInventoriesOpened().put(anvilGui.getInventory(),this);

@@ -1,10 +1,9 @@
 package dev.wuason.storagemechanic.actions.functions.functions.vanilla;
 
-import dev.wuason.kyori.adventure.audience.Audience;
-import dev.wuason.kyori.adventure.key.Key;
-import dev.wuason.kyori.adventure.sound.Sound;
+import dev.wuason.libs.kyori.adventure.audience.Audience;
+import dev.wuason.libs.kyori.adventure.key.Key;
+import dev.wuason.libs.kyori.adventure.sound.Sound;
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.actions.Action;
 import dev.wuason.storagemechanic.actions.functions.Function;
 import org.bukkit.Bukkit;
@@ -12,7 +11,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.UUID;
 
 public class PlaySound extends Function {
     public static ArrayList<String> ARGS = new ArrayList<>(){{

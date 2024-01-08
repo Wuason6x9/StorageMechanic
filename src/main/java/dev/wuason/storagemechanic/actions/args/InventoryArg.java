@@ -1,6 +1,6 @@
 package dev.wuason.storagemechanic.actions.args;
 
-import dev.wuason.bsh.EvalError;
+import dev.wuason.libs.bsh.EvalError;
 import dev.wuason.storagemechanic.actions.Action;
 
 public class InventoryArg extends Arg{

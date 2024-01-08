@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.actions.functions.functions.inventory;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.storagemechanic.actions.Action;
 import dev.wuason.storagemechanic.actions.functions.Function;
 import org.bukkit.entity.Player;
@@ -44,7 +45,7 @@ public class SetItemInventory extends Function {
             inventoryObj = action.getPlaceholders().get("$currentBukkitInventoryStorage$".toUpperCase().intern());
         }
         if(itemObj == null){
-            itemObj = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(((String) itemStr).intern());
+            itemObj = Adapter.getInstance().getItemStack(((String) itemStr).intern());
         }
         if(slotObj == null){
             slotObj = Integer.parseInt(((String) slotStr).replace(" ", ""));

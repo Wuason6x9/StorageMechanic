@@ -1,8 +1,9 @@
 package dev.wuason.storagemechanic.storages.types.block;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
-import dev.wuason.protectionlib.ProtectionLib;
+import dev.wuason.libs.protectionlib.ProtectionLib;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
@@ -231,7 +232,7 @@ public class BlockStorageManager implements Listener {
 
 
     public void onBlockPlace(Block block, Player player,ItemStack itemHand){
-
+        if(itemHand.getItemMeta() == null) return;
         PersistentDataContainer persistentDataContainerItem = itemHand.getItemMeta().getPersistentDataContainer();
         if(persistentDataContainerItem.has(new NamespacedKey(core,"blockStorageShulker"), PersistentDataType.STRING)){
 
@@ -286,7 +287,7 @@ public class BlockStorageManager implements Listener {
                     case SHULKER -> { //GUARDAR EN DATA ✅
                         removeBlockStoragePersistence(block);
                         blockStorage.removeLocation(block.getLocation());
-                        ItemStack item = Mechanics.getInstance().getManager().getAdapterManager().getItemStack(blockStorageConfig.getBlock());
+                        ItemStack item = Adapter.getInstance().getItemStack(blockStorageConfig.getBlock());
                         ItemMeta itemMeta = item.getItemMeta();
                         itemMeta.getPersistentDataContainer().set(new NamespacedKey(core,"blockStorageShulker"),PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorageConfig.getId() + ":" + blockStorage.getOwnerUUID());
                         item.setItemMeta(itemMeta);
@@ -303,7 +304,7 @@ public class BlockStorageManager implements Listener {
                                 }
                             }
                             if(!allEmpty){
-                                AdventureUtils.playerMessage(core.getConfigDocumentYaml().getString("messages.type.blockstorage.isBreakeable"), event.getPlayer());
+                                AdventureUtils.playerMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.type.blockstorage.isBreakeable"), event.getPlayer());
                                 event.setCancelled(true);
                                 return;
                             }
@@ -333,7 +334,7 @@ public class BlockStorageManager implements Listener {
         if(event.getPlayer().isSneaking()) return;
         if(event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND)) return;
         if(event.getAction().toString().contains("AIR") || event.getAction().equals(Action.PHYSICAL)) return;
-        String adapterID = Mechanics.getInstance().getManager().getAdapterManager().getAdapterID(event.getClickedBlock());
+        String adapterID = Adapter.getInstance().getAdapterID(event.getClickedBlock());
         if(adapterID.contains("or:") && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         onBlockInteract(event.getClickedBlock(),event.getItem(),event.getPlayer(),event,event.getAction(),adapterID);
     }

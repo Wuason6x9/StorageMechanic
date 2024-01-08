@@ -25,6 +25,7 @@ public class ItemsAdderFurnitureEvents implements Listener {
 
     @EventHandler
     public void onFurnitureInteract(FurnitureInteractEvent event){
+        if(event.getPlayer()==null) return;
         String adapterId = ADAPTER_TYPE + event.getNamespacedID();
         EventCancel eventCancel = new EventCancel();
         furnitureStorageManager.onFurnitureInteract(adapterId, event.getPlayer(),event.getBukkitEntity(),event.getPlayer().getInventory().getItemInMainHand(),eventCancel);
@@ -35,6 +36,7 @@ public class ItemsAdderFurnitureEvents implements Listener {
     }
     @EventHandler
     public void onFurniturePlace(FurniturePlaceSuccessEvent event){
+        if(event.getPlayer()==null) return;
         String adapterId = ADAPTER_TYPE + event.getNamespacedID();
         EventCancel eventCancel = new EventCancel();
         furnitureStorageManager.onFurniturePlace(adapterId, event.getPlayer(),event.getBukkitEntity(),event.getPlayer().getInventory().getItemInMainHand(),eventCancel);
@@ -44,6 +46,7 @@ public class ItemsAdderFurnitureEvents implements Listener {
     }
     @EventHandler
     public void onFurnitureBreak(FurnitureBreakEvent event){
+        if (event.getPlayer() == null) return;
         String adapterId = ADAPTER_TYPE + event.getNamespacedID();
         EventCancel eventCancel = new EventCancel();
         furnitureStorageManager.onFurnitureBreak(adapterId, event.getPlayer(),event.getBukkitEntity(),event.getPlayer().getInventory().getItemInMainHand(),eventCancel);

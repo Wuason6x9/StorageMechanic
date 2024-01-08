@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.furnitures.config;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.utils.StorageUtils;
@@ -26,7 +27,7 @@ public class FurnitureStorageConfigManager {
         furnitureStorageConfigs = new HashMap<>();
         furnitureStorageConfigsAdapter = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/types/");
+        File base = new File(core.getDataFolder() + "/types/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -72,7 +73,7 @@ public class FurnitureStorageConfigManager {
 
                     String furniture = sectionFurnitureStorage.getString("furniture",".");
 
-                    if(furniture.equals(".") || !Mechanics.getInstance().getManager().getAdapterManager().existAdapterID(furniture)){
+                    if(furniture.equals(".") || !Adapter.getInstance().existAdapterID(furniture)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Furniture storage Config! FurnitureStorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Furniture is null or invalid");
                         continue;

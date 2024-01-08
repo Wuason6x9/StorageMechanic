@@ -13,7 +13,6 @@ public class StorageItemInterfaceConfig {
     public StorageItemInterfaceConfig(String id, String item) {
         this.id = id;
         this.item = item;
-
         itemInterface = StorageMechanic.getInstance().getManagers().getItemInterfaceManager().getItemInterfaceById(item);
     }
 

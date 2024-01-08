@@ -37,6 +37,6 @@ public class ClickStorageItemInterfaceAction extends EventAction {
 
         currentPlaceholders.put("$clickedItemInterface$".toUpperCase().intern(), itemInterface);
         currentPlaceholders.put("$clickedItemInterface_Id$".toUpperCase().intern(), itemInterface.getId().intern().intern());
-        currentPlaceholders.put("$clickedItemInterface_type$".toUpperCase().intern(), itemInterface.getItemInterfaceType().toString().intern());
+        currentPlaceholders.put("$clickedItemInterface_type$".toUpperCase().intern(), itemInterface.getName().intern());
     }
 }

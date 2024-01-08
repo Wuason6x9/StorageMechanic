@@ -7,22 +7,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class StorageData implements Serializable {
+public class  StorageData implements Serializable {
     private static final long serialVersionUID = 1101L;
-    private Map<Integer, ItemStack[]> items;
-    private String id;
-    private String storageIdConfig;
-    private Date date;
-    private String storageOriginContext;
-    private String[] storageOriginContextData;
+    private final Map<Integer, ItemStack[]> items;
+    private final String id;
+    private final String storageIdConfig;
+    private final Date date;
+    private final String storageOriginContext;
+    private final String[] storageOriginContextData;
+    private final Date lastOpenDate;
 
-    public StorageData(Map<Integer, ItemStack[]> items, String id, String storageIdConfig, Date date, String storageOriginContext, List<String> storageOriginContextData) {
+    public StorageData(Map<Integer, ItemStack[]> items, String id, String storageIdConfig, Date date, String storageOriginContext, List<String> storageOriginContextData, Date lastOpenDate) {
         this.items = items;
         this.id = id;
         this.storageIdConfig = storageIdConfig;
         this.date = date;
         this.storageOriginContext = storageOriginContext;
         this.storageOriginContextData = storageOriginContextData.toArray(new String[0]);
+        this.lastOpenDate = lastOpenDate;
     }
 
     public Map<Integer, ItemStack[]> getItems() {
@@ -46,5 +48,8 @@ public class StorageData implements Serializable {
     }
     public List<String> getStorageOriginContextData() {
         return List.of(storageOriginContextData);
+    }
+    public Date getLastOpenDate() {
+        return lastOpenDate;
     }
 }

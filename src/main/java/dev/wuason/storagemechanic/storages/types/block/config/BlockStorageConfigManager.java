@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.block.config;
 
 import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanic;
@@ -29,7 +30,7 @@ public class BlockStorageConfigManager {
         blockStorageConfigs = new HashMap<>();
         blockStorageConfigsAdapter = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/types/");
+        File base = new File(core.getDataFolder() + "/types/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -81,7 +82,7 @@ public class BlockStorageConfigManager {
 
                     String block = sectionBlockStorage.getString("block",".");
 
-                    if(block.equals(".") || !Mechanics.getInstance().getManager().getAdapterManager().existAdapterID(block)){
+                    if(block.equals(".") || !Adapter.getInstance().existAdapterID(block)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Block storage Config! blockstorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Block is null or invalid");
                         continue;

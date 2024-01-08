@@ -58,6 +58,10 @@ public class ActionManager {
                 placeholders.put("$item_storage_owner$".toUpperCase().intern(), Bukkit.getOfflinePlayer(UUID.fromString((String) storageOriginContext.getData().get(1))));
                 placeholders.put("$item_storage_owner_name$".toUpperCase().intern(), Bukkit.getOfflinePlayer(UUID.fromString((String) storageOriginContext.getData().get(1))).getName().intern());
             }
+            case API -> {
+                placeholders.put("$api_id$".toUpperCase().intern(), ((String) storageOriginContext.getData().get(0)).intern());
+                placeholders.put("$api_type$".toUpperCase().intern(), ((String) storageOriginContext.getData().get(2)).intern());
+            }
         }
         //INIT DEFAULT VARS
         if(storage != null){
@@ -106,6 +110,10 @@ public class ActionManager {
                 placeholders.put("$item_storage_config_id$".toUpperCase().intern(), ((String) storageOriginContext.getData().get(0)).intern() );
                 placeholders.put("$item_storage_owner$".toUpperCase().intern(), Bukkit.getOfflinePlayer(UUID.fromString((String) storageOriginContext.getData().get(1))));
                 placeholders.put("$item_storage_owner_name$".toUpperCase().intern(), Bukkit.getOfflinePlayer(UUID.fromString((String) storageOriginContext.getData().get(1))).getName().intern());
+            }
+            case API -> {
+                placeholders.put("$api_id$".toUpperCase().intern(), ((String) storageOriginContext.getData().get(0)).intern());
+                placeholders.put("$api_type$".toUpperCase().intern(), ((String) storageOriginContext.getData().get(2)).intern());
             }
         }
         if(storage != null){
@@ -165,6 +173,9 @@ public class ActionManager {
             throw new RuntimeException(e);
         }
         for(String configId : configs){
+            ActionConfig actionConfig = actionConfigManager.getActionConfigHashMap().get(configId);
+            if(actionConfig == null) continue;
+            if(!actionConfig.getExecutator().equals(Executator.valueOf(storage.getStorageOriginContext().getContext().name())) && !actionConfig.getExecutator().equals(Executator.STORAGE)) continue;
             createAction(storage, configId, player,eventAction).execute();
         }
 

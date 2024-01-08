@@ -36,7 +36,7 @@ public class ActionConfigManager {
         loadEvents();
         actionConfigHashMap = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/Actions/");
+        File base = new File(core.getDataFolder() + "/Actions/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {

@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.entity.skills;
 
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
@@ -34,7 +35,7 @@ public class SmCollectMythicMechanic implements ITargetedEntitySkill {
 
         SkillCaster caster = skillMetadata.getCaster();
         String id = "";
-        if(FurnitureStorageManager.isMythicCrucibleLoaded()){
+        if(Compatibilities.isMythicCrucibleLoaded()){
             if(caster instanceof Furniture) {
                 id = ((Furniture) caster).getEntity().getUniqueId().toString();
             }

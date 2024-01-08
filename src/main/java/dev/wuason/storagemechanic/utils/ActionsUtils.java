@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.utils;
 
 
-import dev.wuason.bsh.EvalError;
+import dev.wuason.libs.bsh.EvalError;
 import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.storagemechanic.Debug;
 import dev.wuason.storagemechanic.actions.Action;

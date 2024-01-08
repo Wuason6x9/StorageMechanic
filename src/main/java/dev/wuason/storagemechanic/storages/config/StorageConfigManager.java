@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.config;
 
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.compatibilities.AdapterManager;
+import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
@@ -28,7 +28,7 @@ public class StorageConfigManager {
 
         storagesConfig = new HashMap<>();
 
-        File base = new File(Mechanics.getInstance().getManager().getMechanicsManager().getMechanic(core).getDirConfig().getPath() + "/storages/");
+        File base = new File(core.getDataFolder() + "/storages/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -207,7 +207,9 @@ public class StorageConfigManager {
                         }
                     }
 
-                    StorageConfig storageConfig = new StorageConfig((String)key,rows,pages,storageInventoryType,title,storageSoundConfigs,soundsEnabled,storageDefaultItemsConfigs,defaultItemsEnabled,storageWhiteListItemsConfigs,whiteListItemsEnabled,storageBlackListItemsConfigs,blackListItemsEnabled,storageInterfacesConfigs,interfacesEnabled,blackListMessage,whiteListMessage,storageBlockItemConfigs,storageBlockedEnabled,storageProperties,stagesOrder,refreshTimeStages,stagesHashMap);
+                    int maxViewers = sectionStorage.getInt("config.max_views",-1);
+
+                    StorageConfig storageConfig = new StorageConfig((String)key,rows,pages,storageInventoryType,title,storageSoundConfigs,soundsEnabled,storageDefaultItemsConfigs,defaultItemsEnabled,storageWhiteListItemsConfigs,whiteListItemsEnabled,storageBlackListItemsConfigs,blackListItemsEnabled,storageInterfacesConfigs,interfacesEnabled,blackListMessage,whiteListMessage,storageBlockItemConfigs,storageBlockedEnabled,storageProperties,stagesOrder,refreshTimeStages,stagesHashMap,maxViewers);
                     storagesConfig.put(storageConfig.getId(),storageConfig);
                 }
             }
@@ -293,7 +295,7 @@ public class StorageConfigManager {
                         continue;
                     }
                 }
-                AdapterManager adapterManager = Mechanics.getInstance().getManager().getAdapterManager();
+                Adapter adapterManager = Adapter.getInstance();
                 if (!adapterManager.isItemsValid(items)) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + "Item is null or invalid");
@@ -321,6 +323,10 @@ public class StorageConfigManager {
     // Verificar si existe un StorageConfig con la ID dada
     public boolean existsStorageConfig(String id) {
         return storagesConfig.containsKey(id);
+    }
+
+    public HashMap<String,StorageConfig> getStoragesConfigMap() {
+        return storagesConfig;
     }
 
 }

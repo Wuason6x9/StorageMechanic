@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.inventory.inventories.SearchItem.anvil;
 
-import dev.wuason.fastinv.FastInv;
+import dev.wuason.libs.invmechaniclib.events.CloseEvent;
+import dev.wuason.libs.invmechaniclib.types.InvCustom;
 import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
@@ -23,7 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AnvilResultInventory extends FastInv {
+public class AnvilResultInventory extends InvCustom {
     private InventoryAnvilManager inventoryAnvilManager;
     private AnvilInventory anvilInventory;
     private StorageMechanic core;
@@ -34,7 +35,7 @@ public class AnvilResultInventory extends FastInv {
     private static NamespacedKey NAMESPACEDKEY_ITEM_SEARCH = new NamespacedKey(StorageMechanic.getInstance(),"ItemSearch");
 
     public AnvilResultInventory(int size, String title, AnvilInventory anvilInventory, InventoryAnvilManager inventoryAnvilManager, String inventoryConfigId, StorageMechanic core) {
-        super(size, title);
+        super(title, size);
         this.anvilInventory = anvilInventory;
         this.inventoryConfigId = inventoryConfigId;
         this.core = core;
@@ -135,11 +136,11 @@ public class AnvilResultInventory extends FastInv {
         }
     }
     @Override
-    public void onClose(InventoryCloseEvent event) {
-        if(anvilInventory.getInventoryAnvilManager().getAnvils().containsKey(event.getPlayer())){
+    public void onClose(CloseEvent event) {
+        if(anvilInventory.getInventoryAnvilManager().getAnvils().containsKey(event.getEvent().getPlayer())){
             if(anvilInventory.getAnvilResultInventory() != null){
                 Bukkit.getScheduler().runTaskLater(StorageMechanic.getInstance(), () -> {
-                    event.getPlayer().openInventory(getInventory());
+                    event.getEvent().getPlayer().openInventory(getInventory());
                 }, 1L);
             }
         }
