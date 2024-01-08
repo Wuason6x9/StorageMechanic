@@ -1,0 +1,25 @@
+Items:
+  item1:
+    itemType: blocked_item
+    item: 'or:sm_blocked_item'
+    displayName: '<red> '
+  item3:
+    itemType: next_page
+    item: 'or:sm_next_page'
+    displayName: '<gold>Next >>'
+  item4:
+    itemType: back_page
+    item: 'or:sm_back_page'
+    displayName: '<gold><< Back'
+  item5:
+    itemType: search_page
+    item: 'mc:paper'
+    displayName: '<gold>Go to page'
+  itemSearch:
+    itemType: SEARCH_ITEM
+    item: 'or:sm_search_item'
+    displayName: '<gold>Search items'
+    properties:
+      inv_id: searchItemAnvil
+      inv_result_id: searchItemAnvilResult
+      type: name

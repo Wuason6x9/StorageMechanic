@@ -1,0 +1,156 @@
+storages:
+  storage1: #Storage ID
+    storage:
+      rows: 6
+      pages: 3 #Pages that the storage will have
+      inventory_type: chest #dropper, hopper, dispenser 
+      title: "<white><shift:-8>%oraxen_storagegui1% <shift:-252>Storage (%ACTUAL_PAGE%/%MAX_PAGES%)" #Menu Title
+    sounds:
+      enabled: true
+      list:
+        sound_1:
+          type: close #Sound when closing the storage
+          pages: [0,1]
+          sound: 'minecraft:block.barrel.close'
+        sound_2:
+          type: open #Sound when opening the storage
+          pages: [0,1]
+          sound: 'minecraft:block.barrel.open'
+        sound_3:
+          type: click #Sound when click the storage
+          pages: [0,1]
+          slots: [0]
+          sound: 'minecraft:block.calcite.hit'
+    items:
+      block: #block slots
+        enabled: true
+        list:
+          block3:
+            pages: [ 0 ]
+            slots: [ 52 ]
+          block2:
+            pages: [ 2 ]
+            slots: [ 53 ]
+          block1:
+            pages: [ 0-2 ]
+            slots: [ 47-51 ]
+      blacklist:
+        enabled: false
+        message: "It is on the blacklist!"
+        list:
+          items_test:
+            pages: [1]
+            slots: [36-44]
+            items:
+              - 'mc:stone'
+          items_2:
+            pages: [1]
+            slots: [27-35]
+            items:
+              - 'mc:oak_log'
+
+      whitelist:
+        enabled: false
+        message: "It is not in the white list!"
+        list:
+          items_1:
+            pages: [0]
+            slots: [36-44]
+            items:
+              #- 'mc:diamond'
+              - mc:emerald
+          items_2:
+            pages: [0]
+            slots: [27-35]
+            items:
+              - 'mc:diamond'
+              #- mc:emerald
+    interfaces:
+      enabled: true
+      list:
+        next_page:
+          pages: [0-1] 
+          slots: [53]
+          item: item3 #item3 in iteminterface.yml
+        back_page:
+          pages: [1-2] #pages on which they will be
+          slots: [52]
+          item: item4 #item4 in iteminterface.yml
+        search_page:
+          pages: [0-2] #pages on which they will be
+          slots: [46]
+          item: item5 #item5 in iteminterface.yml
+        search_item:
+          pages: [0-2] #pages on which they will be
+          slots: [45]
+          item: itemSearch #item5 in iteminterface.yml
+  storageDiamonds: #Storage ID
+    storage:
+      pages: 1 #Pages that the storage will have
+      inventory_type: dropper #dropper, hopper, dispenser 
+      title: "<aqua>Only Diamonds!" #Menu Title
+    sounds:
+      enabled: true
+      list:
+        sound_1:
+          type: close #Sound when closing the storage
+          pages: [0,1]
+          sound: 'minecraft:block.barrel.close'
+        sound_2:
+          type: open #Sound when opening the storage
+          pages: [0,1]
+          sound: 'minecraft:block.barrel.open'
+        sound_3:
+          type: click #Sound when click the storage
+          pages: [0,1]
+          slots: [0]
+          sound: 'minecraft:block.calcite.hit'
+    items:
+      whitelist:
+        enabled: true
+        message: "It is not a diamond!"
+        list:
+          items_1:
+            pages: [0]
+            slots: [0-8]
+            items:
+              - 'mc:diamond'
+  storageMinerals: #Storage ID
+    storage:
+      pages: 1 #Pages that the storage will have
+      inventory_type: hopper #dropper, hopper, dispenser 
+      title: "<gold>Only minerals!" #Menu Title
+    sounds:
+      enabled: true
+      list:
+        sound_1:
+          type: close #Sound when closing the storage
+          pages: [0,1]
+          sound: 'minecraft:block.barrel.close'
+        sound_2:
+          type: open #Sound when opening the storage
+          pages: [0,1]
+          sound: 'minecraft:block.barrel.open'
+        sound_3:
+          type: click #Sound when click the storage
+          pages: [0,1]
+          slots: [0]
+          sound: 'minecraft:block.calcite.hit'
+    items:
+      whitelist:
+        enabled: true
+        message: "It is not a mineral!"
+        list:
+          items_1:
+            pages: [0]
+            slots: [0-8]
+            items:
+              - 'mc:diamond_ore'
+              - 'mc:emerald_ore'
+              - 'mc:iron_ore'
+              - 'mc:coal_ore'
+              - 'mc:gold_ore'
+              - 'mc:lapis_ore'
+              - 'mc:redstone_ore'
+              - 'mc:nether_quartz_ore'
+              - 'mc:copper_ore'
