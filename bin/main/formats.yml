@@ -1,6 +1,0 @@
-locations: "UUID_X_Y_Z"
-blockStorageShukler: "blockStorageID:blockStorageConfigID:ownerUUID"
-blockStorageData:
-  1: blockStorageID
-  2: BlockStorageConfigID
-  3: OwnerUUID
