@@ -104,7 +104,7 @@ public class ItemInterfaceManager {
                         }
                         case "ACTION" -> {
                             String actionId = sectionItemInterface.getString("properties.action_id");
-                            if(actionId == null || !core.getManagers().getActionConfigManager().getActionConfigHashMap().containsKey(actionId)){
+                            if(actionId == null || !core.getManagers().getActionManager().isActionConfigRegistered(actionId)){
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Action id is null or invalid!");
                                 continue;

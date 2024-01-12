@@ -1,14 +1,17 @@
 package dev.wuason.storagemechanic.actions.config;
 
-import dev.wuason.mechanics.Mechanics;
+import dev.wuason.mechanics.actions.args.Argument;
+import dev.wuason.mechanics.actions.args.Arguments;
+import dev.wuason.mechanics.actions.config.*;
+import dev.wuason.mechanics.actions.events.Events;
+import dev.wuason.mechanics.actions.executators.Executor;
+import dev.wuason.mechanics.actions.executators.Executors;
+import dev.wuason.mechanics.actions.executators.Run;
+import dev.wuason.mechanics.actions.functions.Functions;
+import dev.wuason.mechanics.actions.utils.ActionConfigUtils;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.actions.events.EventEnum;
-import dev.wuason.storagemechanic.actions.functions.Functions;
-import dev.wuason.storagemechanic.actions.types.ArgType;
-import dev.wuason.storagemechanic.actions.types.Executator;
-import dev.wuason.storagemechanic.actions.types.Run;
-import dev.wuason.storagemechanic.utils.ActionConfigUtils;
+import dev.wuason.storagemechanic.actions.ActionManager;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -16,25 +19,18 @@ import java.io.File;
 import java.util.*;
 
 public class ActionConfigManager {
-
-    private HashMap<String, ActionConfig> actionConfigHashMap = new HashMap<>();
-    private HashMap<EventEnum, Set<String>> eventsConfig = new HashMap<>();
     private StorageMechanic core;
+    private ActionManager actionManager;
 
-    public ActionConfigManager(StorageMechanic core) {
+    public ActionConfigManager(StorageMechanic core, ActionManager actionManager) {
         this.core = core;
-    }
-
-    public void loadEvents(){
-        eventsConfig = new HashMap<>();
-        for(EventEnum eventEnum : EventEnum.values()){
-            eventsConfig.put(eventEnum, new HashSet<>());
-        }
+        this.actionManager = actionManager;
     }
 
     public void loadActions(){
-        loadEvents();
-        actionConfigHashMap = new HashMap<>();
+
+        actionManager.clearActionConfigs();
+        actionManager.registerAllEvents();
 
         File base = new File(core.getDataFolder() + "/Actions/");
         base.mkdirs();
@@ -54,48 +50,41 @@ public class ActionConfigManager {
             ConfigurationSection sectionActions = config.getConfigurationSection("actions");
 
             if(sectionActions != null){
-                for(Object key : sectionActions.getKeys(false).toArray()){
+                for(String key : sectionActions.getKeys(false)){
 
                     ConfigurationSection actionSection = sectionActions.getConfigurationSection((String)key);
                     if(actionSection == null) continue;
                     // EVENT CONFIG
                     String eventStr = actionSection.getString("event", ".").toUpperCase(Locale.ENGLISH);
-                    EventEnum event = null;
-                    if(eventStr != null && !eventStr.equals(".")){
-                        try {
-                            event = EventEnum.valueOf(eventStr);
-                            eventsConfig.get(event).add((String)key);
-                        }
-                        catch (Exception e){
-                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Action Config! action_id: " + key +  " in file: " + file.getName());
-                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Event is invalid");
-                            continue;
-                        }
+                    if(eventStr.equals(".") || eventStr.equals("") || !Events.EVENTS.containsKey(eventStr)){
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Action Config! action_id: " + key +  " in file: " + file.getName());
+                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Event is invalid");
+                        continue;
                     }
+
                     //RUN CONFIG
                     String runStr = actionSection.getString("run", "sync");
                     Run run = null;
                     try {
-                        run = Run.valueOf(runStr);
+                        run = Run.valueOf(runStr.toUpperCase(Locale.ENGLISH));
                     }
                     catch (Exception e){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Action Config! action_id: " + key +  " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: run method is invalid");
                         continue;
                     }
-                    //EXECUTATOR CONFIG
-                    String executatorStr = actionSection.getString("execute_as", "storage").toUpperCase(Locale.ENGLISH);
-                    Executator executator = null;
-                    try {
-                        executator = Executator.valueOf(executatorStr);
-                    }
-                    catch (Exception e){
+
+                    //EXECUTOR CONFIG
+                    String executorStr = actionSection.getString("execute_as", "default").toUpperCase(Locale.ENGLISH);
+                    if(!Executors.EXECUTORS.containsKey(executorStr)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Action Config! action_id: " + key +  " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Executator method is invalid");
                         continue;
                     }
+                    Executor executor = Executors.EXECUTORS.get(executorStr);
+
                     //VAR LIST CONFIG
-                    ArrayList<VarListConfig> varListComputed = new ArrayList<>();
+                    ArrayList<VarListConfig<?>> varListComputed = new ArrayList<>();
                     ConfigurationSection varsList = actionSection.getConfigurationSection("vars_list");
                     if(varsList != null){
 
@@ -109,24 +98,23 @@ public class ActionConfigManager {
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Var is null or invalid!");
                                 continue;
                             }
-                            ArgType argType = null;
-                            try {
-                                argType = ArgType.valueOf(varList.getString("type").toUpperCase(Locale.ENGLISH));
-                            }
-                            catch (Exception e){
+
+                            Class<? extends Argument> argType = Arguments.ARGUMENTS.get(varList.getString("type").toUpperCase(Locale.ENGLISH));
+
+                            if(argType == null){
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Var List Config! var_list_id: " + varListkey + " action_id: " + key +  " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Type is null or invalid!");
                                 continue;
                             }
-                            List<String> objList = varList.getStringList("list");
-                            if(objList == null){
+
+                            List<String> argList = varList.getStringList("list");
+                            if(argList == null){
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Var List Config! var_list_id: " + varListkey + " action_id: " + key +  " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: List is null or invalid!");
                                 continue;
                             }
 
-                            VarListConfig varListConfig = new VarListConfig(varListkey,argType,var,objList);
-                            varListComputed.add(varListConfig);
+                            varListComputed.add(ActionConfigUtils.getVarList(var, argType, argList));
                         }
 
                     }
@@ -151,7 +139,7 @@ public class ActionConfigManager {
                     if(functions != null){
                         for(String f : functions){
                             FunctionConfig functionConfig = ActionConfigUtils.getFunction(f);
-                            if(functionConfig == null || !Functions.functionHashMap.containsKey(functionConfig.getFunction())){
+                            if(functionConfig == null){
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Function Config! function: " + f + " action_id: " + key +  " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Function is null or invalid!");
                                 continue;
@@ -175,20 +163,13 @@ public class ActionConfigManager {
                     }
                     List<String> importsList = actionSection.getStringList("java_imports");
                     if(importsList == null) importsList = new ArrayList<>();
-                    ActionConfig actionConfig = new ActionConfig(event,run,executator,varListComputed,varsComputed,functionsComputed,conditionsList,importsList);
-                    actionConfigHashMap.put((String)key,actionConfig);
+                    ActionConfig actionConfig = new ActionConfig(importsList, run, executor, eventStr, key, varsComputed, varListComputed, functionsComputed, conditionsList);
+
+                    actionManager.registerActionConfig(actionConfig);
                 }
             }
         }
-        AdventureUtils.sendMessagePluginConsole(core, "<aqua> Actions loaded: <yellow>" + actionConfigHashMap.size());
+        AdventureUtils.sendMessagePluginConsole(core, "<aqua> Actions loaded: <yellow>" + actionManager.getActionConfigs().size());
 
-    }
-
-    public HashMap<EventEnum, Set<String>> getEventsConfig() {
-        return eventsConfig;
-    }
-
-    public HashMap<String, ActionConfig> getActionConfigHashMap() {
-        return actionConfigHashMap;
     }
 }

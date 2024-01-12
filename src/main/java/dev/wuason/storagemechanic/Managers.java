@@ -58,7 +58,6 @@ public class Managers {
     private InventoryConfigManager inventoryConfigManager;
     private InventoriesManager inventoryManager;
     private BlockMechanicManager blockMechanicManager;
-    private ActionConfigManager actionConfigManager;
     private ActionManager actionManager;
     private StorageApiManager storageApiManager;
     private RecipesManager recipesManager;
@@ -102,8 +101,6 @@ public class Managers {
         storageApiManager = new StorageApiManager(core);
         //********* INVENTORIES *********
         inventoryManager = new InventoriesManager(core,storageManager);
-        //********* ACTIONS *********
-        actionManager = new ActionManager(core);
 
         //********* ANTI TRASH *********
 
@@ -120,7 +117,8 @@ public class Managers {
     }
     public void loadConfigManagers(){
         customBlockManager = new CustomBlockManager(core); //1
-        actionConfigManager = new ActionConfigManager(core);
+        //********* ACTIONS *********
+        actionManager = new ActionManager(core);
         itemInterfaceManager = new ItemInterfaceManager(core);//2
         storageConfigManager = new StorageConfigManager(core);//3
         blockStorageConfigManager = new BlockStorageConfigManager(core); //4
@@ -275,9 +273,6 @@ public class Managers {
 
     public BlockMechanicManager getBlockMechanicManager() {
         return blockMechanicManager;
-    }
-    public ActionConfigManager getActionConfigManager() {
-        return actionConfigManager;
     }
 
     public ActionManager getActionManager() {

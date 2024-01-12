@@ -1,8 +1,6 @@
 package dev.wuason.storagemechanic.items.items;
 
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.actions.Action;
-import dev.wuason.storagemechanic.actions.events.ClickStorageItemInterfaceAction;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
@@ -28,11 +26,11 @@ public class ActionItemInterface extends ItemInterface {
     @Override
     public void execute(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
         Player player = (Player) event.getWhoClicked();
-        ClickStorageItemInterfaceAction eventAction = new ClickStorageItemInterfaceAction(event,this,storageInventory);
-        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
-            Action action = core.getManagers().getActionManager().createAction(storage, actionId, player, eventAction);
-            action.execute();
-        });
+        //ClickStorageItemInterfaceAction eventAction = new ClickStorageItemInterfaceAction(event,this,storageInventory);
+        //Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
+        //    Action action = core.getManagers().getActionManager().createAction(storage, actionId, player, eventAction);
+        //    action.execute();
+        //});
     }
 
     public String getActionId() {

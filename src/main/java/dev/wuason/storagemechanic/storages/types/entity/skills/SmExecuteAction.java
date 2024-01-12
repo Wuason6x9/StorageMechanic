@@ -1,9 +1,6 @@
 package dev.wuason.storagemechanic.storages.types.entity.skills;
 
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.actions.Action;
-import dev.wuason.storagemechanic.actions.events.EventAction;
-import dev.wuason.storagemechanic.actions.events.SkillMythicExecutorAction;
 import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
@@ -51,11 +48,11 @@ public class SmExecuteAction implements ITargetedEntitySkill {
         if(skillMetadata.getTrigger() != null && skillMetadata.getTrigger().getBukkitEntity() instanceof Player){
             player = (Player) skillMetadata.getTrigger().getBukkitEntity();
         }
-        EventAction eventAction = new SkillMythicExecutorAction(null,abstractEntity,skillMetadata);
+        //EventAction eventAction = new SkillMythicExecutorAction(null,abstractEntity,skillMetadata);
         try{
-            Action action = core.getManagers().getActionManager().createAction(storage, actionConfigId.intern(), player, eventAction);
-            if(action == null) return SkillResult.ERROR;
-            action.execute();
+            //Action action = core.getManagers().getActionManager().createAction(storage, actionConfigId.intern(), player, eventAction);
+            //if(action == null) return SkillResult.ERROR;
+            //action.execute();
         }catch (Exception e){
             e.printStackTrace();
         }

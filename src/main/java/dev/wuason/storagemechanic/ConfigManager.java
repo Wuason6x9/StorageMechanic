@@ -111,7 +111,7 @@ public class ConfigManager {
         core.getManagers().runDataSaveTask();
         langDocumentYaml.reload();
         core.getManagers().getCustomBlockManager().loadCustomBlocks();
-        core.getManagers().getActionConfigManager().loadActions();
+        core.getManagers().getActionManager().getActionConfigManager().loadActions();
         core.getManagers().getItemInterfaceManager().loadItemsInterface();
         core.getManagers().getStorageConfigManager().loadStoragesConfig();
         core.getManagers().getBlockStorageConfigManager().loadBlockStorageConfigs();

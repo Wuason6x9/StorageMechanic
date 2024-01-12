@@ -1,6 +1,6 @@
 package dev.wuason.storagemechanic.actions.functions;
 
-import dev.wuason.storagemechanic.actions.Action;
+import dev.wuason.mechanics.actions.Action;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;

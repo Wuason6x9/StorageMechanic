@@ -313,7 +313,8 @@ public class CommandManager {
                                                     setButtonsPage(getActualPage());
                                                 }
                                             };
-                                            getPlayer().getInventory().setItem(1, addItemInterface(itemInterface).getItemModified());
+
+                                            regAndSetInvItemInterface(itemInterface);
 
                                         }
 

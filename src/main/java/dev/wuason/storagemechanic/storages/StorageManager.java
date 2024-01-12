@@ -3,7 +3,6 @@ package dev.wuason.storagemechanic.storages;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.Managers;
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.actions.events.EventEnum;
 import dev.wuason.storagemechanic.api.events.storage.ClickPageStorageEvent;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
@@ -153,7 +152,7 @@ public class StorageManager implements Listener {
                 BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
             }
             //Events
-            core.getManagers().getActionManager().callActionsEvent(EventEnum.CLICK_STORAGE_PAGE,storage,(Player) event.getWhoClicked(), event , storageInventory);
+            //core.getManagers().getActionManager().callActionsEvent(EventEnum.CLICK_STORAGE_PAGE,storage,(Player) event.getWhoClicked(), event , storageInventory);
             ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event,storageInventory);
             Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
 
@@ -168,7 +167,7 @@ public class StorageManager implements Listener {
             StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
 
             //events
-            core.getManagers().getActionManager().callActionsEvent(EventEnum.OPEN_STORAGE_PAGE,storage, (Player) event.getPlayer(), event, storageInventory);
+            //core.getManagers().getActionManager().callActionsEvent(EventEnum.OPEN_STORAGE_PAGE,storage, (Player) event.getPlayer(), event, storageInventory);
 
             //Hopper event
             if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.context.BLOCK_STORAGE)){
@@ -200,7 +199,7 @@ public class StorageManager implements Listener {
             Object[] objects = {event, storageInventory};
 
             //events
-            core.getManagers().getActionManager().callActionsEvent(EventEnum.CLOSE_STORAGE_PAGE,storage, (Player) event.getPlayer(), objects);
+            //core.getManagers().getActionManager().callActionsEvent(EventEnum.CLOSE_STORAGE_PAGE,storage, (Player) event.getPlayer(), objects);
 
             //SAVE STORAGE
             storage.closeStorage(storageInventory.getPage(), (Player) event.getPlayer());
