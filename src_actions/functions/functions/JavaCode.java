@@ -1,4 +1,4 @@
-package dev.wuason.storagemechanic.actions.functions.functions;
+ackage dev.wuason.storagemechanic.actions.functions.functions;
 
 
 import dev.wuason.libs.bsh.EvalError;
