@@ -123,3 +123,4 @@ run/
 !gradle-wrapper.jar
 
 !.idea/icon.png
+!libs/*.jar
