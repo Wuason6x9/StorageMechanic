@@ -3,6 +3,9 @@ package dev.wuason.storagemechanic.storages;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.Managers;
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.actions.events.def.ClickStoragePageActionEvent;
+import dev.wuason.storagemechanic.actions.events.def.CloseStoragePageActionEvent;
+import dev.wuason.storagemechanic.actions.events.def.OpenStoragePageActionEvent;
 import dev.wuason.storagemechanic.api.events.storage.ClickPageStorageEvent;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
@@ -22,6 +25,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -147,12 +151,15 @@ public class StorageManager implements Listener {
                 }
             }
             //Hopper event
-            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.context.BLOCK_STORAGE)){
+            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)){
                 List<String> list = storage.getStorageOriginContext().getData();
                 BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
             }
             //Events
-            //core.getManagers().getActionManager().callActionsEvent(EventEnum.CLICK_STORAGE_PAGE,storage,(Player) event.getWhoClicked(), event , storageInventory);
+
+            ClickStoragePageActionEvent clickStoragePageActionEvent = new ClickStoragePageActionEvent(storageInventory, event);
+            core.getManagers().getActionManager().callEvent(clickStoragePageActionEvent, storage.getId(), storage);
+
             ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event,storageInventory);
             Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
 
@@ -167,10 +174,12 @@ public class StorageManager implements Listener {
             StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
 
             //events
-            //core.getManagers().getActionManager().callActionsEvent(EventEnum.OPEN_STORAGE_PAGE,storage, (Player) event.getPlayer(), event, storageInventory);
+
+            OpenStoragePageActionEvent openStoragePageActionEvent = new OpenStoragePageActionEvent(storageInventory, event);
+            core.getManagers().getActionManager().callEvent(openStoragePageActionEvent, storage.getId(), storage);
 
             //Hopper event
-            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.context.BLOCK_STORAGE)){
+            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)){
                 List<String> list = storage.getStorageOriginContext().getData();
                 BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
             }
@@ -196,16 +205,15 @@ public class StorageManager implements Listener {
             Storage storage = storageInventory.getStorage();
             StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
 
-            Object[] objects = {event, storageInventory};
-
             //events
-            //core.getManagers().getActionManager().callActionsEvent(EventEnum.CLOSE_STORAGE_PAGE,storage, (Player) event.getPlayer(), objects);
+            CloseStoragePageActionEvent closeStoragePageActionEvent = new CloseStoragePageActionEvent(storageInventory, event);
+            core.getManagers().getActionManager().callEvent(closeStoragePageActionEvent, storage.getId(), storage);
 
             //SAVE STORAGE
             storage.closeStorage(storageInventory.getPage(), (Player) event.getPlayer());
 
             //Hopper event
-            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.context.BLOCK_STORAGE)){
+            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)){
                 List<String> list = storage.getStorageOriginContext().getData();
                 BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
             }
@@ -602,5 +610,16 @@ public class StorageManager implements Listener {
 
     public Map<String, Storage> getStorageMap() {
         return storageMap;
+    }
+
+    @EventHandler
+    public void onDisable(PluginDisableEvent event){
+        if(event.getPlugin().equals(core)){
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                if(player.getOpenInventory().getTopInventory() != null && player.getOpenInventory().getTopInventory().getHolder() instanceof StorageInventory){
+                    player.closeInventory();
+                }
+            });
+        }
     }
 }

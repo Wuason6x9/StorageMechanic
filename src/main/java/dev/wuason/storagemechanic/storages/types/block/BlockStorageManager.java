@@ -1,6 +1,5 @@
 package dev.wuason.storagemechanic.storages.types.block;
 
-import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.libs.protectionlib.ProtectionLib;
@@ -77,7 +76,7 @@ public class BlockStorageManager implements Listener {
         if(!blockStorages.containsKey(StorageUtils.getStoragePhysicalId(blockLocation)) && core.getManagers().getBlockStorageConfigManager().blockStorageConfigExists(blockStorageConfigID)){
             BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
 
-            Storage storage = core.getManagers().getStorageManager().createStorage(blockStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.context.BLOCK_STORAGE, new ArrayList<>(){{
+            Storage storage = core.getManagers().getStorageManager().createStorage(blockStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.Context.BLOCK_STORAGE, new ArrayList<>(){{
                 add(blockStorageConfigID);
                 add(id);
                 add(player.getUniqueId().toString());

@@ -106,7 +106,7 @@ public class FurnitureStorage {
         Storage storage = null;
         if(!existStoragePlayer(player)){
             Managers managers = StorageMechanic.getInstance().getManagers();
-            storage = managers.getStorageManager().createStorage(managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.context.FURNITURE_STORAGE, new ArrayList<>(){{
+            storage = managers.getStorageManager().createStorage(managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.FURNITURE_STORAGE, new ArrayList<>(){{
                 add(furnitureStorageConfigID);
                 add(getId());
                 add(player.getUniqueId().toString());
@@ -150,7 +150,7 @@ public class FurnitureStorage {
         StorageManager storageManager = managers.getStorageManager();
         FurnitureStorageConfig furnitureStorageConfig = managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).orElse(null);
 
-        Storage storage = storageManager.createStorage(furnitureStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.context.FURNITURE_STORAGE, new ArrayList<>(){{
+        Storage storage = storageManager.createStorage(furnitureStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.FURNITURE_STORAGE, new ArrayList<>(){{
             add(furnitureStorageConfigID);
             add(getId());
             add(id);

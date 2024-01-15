@@ -75,7 +75,7 @@ public class StorageManagerData {
     //Serialize
     public Storage storageDataToStorage(StorageData storageData) {
         if(storageData != null){
-            Storage storage = new Storage(storageData.getId(), storageData.getItems(), storageData.getStorageIdConfig(), storageData.getDate(), new StorageOriginContext(StorageOriginContext.context.valueOf(storageData.getStorageOriginContext()),storageData.getStorageOriginContextData()), storageData.getLastOpenDate());return storage;
+            Storage storage = new Storage(storageData.getId(), storageData.getItems(), storageData.getStorageIdConfig(), storageData.getDate(), new StorageOriginContext(StorageOriginContext.Context.valueOf(storageData.getStorageOriginContext()),storageData.getStorageOriginContextData()), storageData.getLastOpenDate());return storage;
         }
         return null;
     }

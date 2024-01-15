@@ -4,7 +4,6 @@ import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
-import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
 import io.lumine.mythic.api.adapters.AbstractEntity;
 import io.lumine.mythic.api.adapters.AbstractLocation;
 import io.lumine.mythic.api.mobs.MythicMob;
@@ -86,7 +85,7 @@ public class MythicManager implements Listener {
         try {
             uuid = UUID.fromString(storageId);
 
-            if(storageOriginContext.getContext().equals(StorageOriginContext.context.ENTITY_STORAGE)){
+            if(storageOriginContext.getContext().equals(StorageOriginContext.Context.ENTITY_STORAGE)){
 
                 String type = storageOriginContext.getData().get(0);
                 String id = null;

@@ -4,15 +4,15 @@ import java.io.Serializable;
 import java.util.List;
 
 public class StorageOriginContext implements Serializable {
-    private context context;
+    private Context context;
     private List<String> data;
 
-    public StorageOriginContext(StorageOriginContext.context context, List<String> data) {
+    public StorageOriginContext(Context context, List<String> data) {
         this.context = context;
         this.data = data;
     }
 
-    public StorageOriginContext.context getContext() {
+    public Context getContext() {
         return context;
     }
 
@@ -20,7 +20,7 @@ public class StorageOriginContext implements Serializable {
         return data;
     }
 
-    public enum context implements Serializable {
+    public enum Context implements Serializable {
         BLOCK_STORAGE,
         FURNITURE_STORAGE,
         ENTITY_STORAGE,

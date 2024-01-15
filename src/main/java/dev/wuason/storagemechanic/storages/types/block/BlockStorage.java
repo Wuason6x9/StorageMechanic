@@ -105,7 +105,7 @@ public class BlockStorage {
         Storage storage = null;
         if(!existStoragePlayer(player)){
             Managers managers = StorageMechanic.getInstance().getManagers();
-            storage = managers.getStorageManager().createStorage(managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.context.BLOCK_STORAGE, new ArrayList<>(){{
+            storage = managers.getStorageManager().createStorage(managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.BLOCK_STORAGE, new ArrayList<>(){{
                 add(blockStorageConfigID);
                 add(id);
                 add(player.getUniqueId().toString());
@@ -149,7 +149,7 @@ public class BlockStorage {
         StorageManager storageManager = managers.getStorageManager();
         BlockStorageConfig blockStorageConfig = managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
 
-        Storage storage = storageManager.createStorage(blockStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.context.BLOCK_STORAGE, new ArrayList<>(){{
+        Storage storage = storageManager.createStorage(blockStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.Context.BLOCK_STORAGE, new ArrayList<>(){{
             add(blockStorageConfigID);
             add(getId());
             add(id);

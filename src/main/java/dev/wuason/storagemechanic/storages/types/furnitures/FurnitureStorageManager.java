@@ -1,6 +1,5 @@
 package dev.wuason.storagemechanic.storages.types.furnitures;
 
-import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.libs.protectionlib.ProtectionLib;
@@ -81,7 +80,7 @@ public class FurnitureStorageManager {
         if(!furnitureStorages.containsKey(StorageUtils.getStoragePhysicalId(furnitureLocation)) && core.getManagers().getFurnitureStorageConfigManager().furnitureStorageConfigExists(furnitureStorageConfigID)){
             FurnitureStorageConfig furnitureStorageConfig = core.getManagers().getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).orElse(null);
 
-            Storage storage = core.getManagers().getStorageManager().createStorage(furnitureStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.context.FURNITURE_STORAGE, new ArrayList<>(){{
+            Storage storage = core.getManagers().getStorageManager().createStorage(furnitureStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.FURNITURE_STORAGE, new ArrayList<>(){{
                 add(furnitureStorageConfigID);
                 add(id);
                 add(player.getUniqueId().toString());

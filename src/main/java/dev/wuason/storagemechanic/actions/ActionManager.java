@@ -1,21 +1,22 @@
 package dev.wuason.storagemechanic.actions;
 
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.actions.config.ActionConfigManager;
+import dev.wuason.storagemechanic.actions.events.EventsRegister;
+import dev.wuason.storagemechanic.actions.executors.ExecutorsStorage;
+import dev.wuason.storagemechanic.actions.functions.FunctionsStorage;
 
 public class ActionManager extends dev.wuason.mechanics.actions.ActionManager {
 
-    private ActionConfigManager actionConfigManager;
-    private StorageMechanic core;
-
     public ActionManager(StorageMechanic core) {
-        super(core);
-        this.core = core;
-        setListenDefEvents(true);
-        actionConfigManager = new ActionConfigManager(core,this);
+        super(core, true);
+        setListenDefEvents(false);
+        EventsRegister.registerEvents();
+        ExecutorsStorage.registerExecutors();
+        FunctionsStorage.registerFunctions();
+        registerAllEvents();
     }
 
-    public ActionConfigManager getActionConfigManager() {
-        return actionConfigManager;
-    }
+
+
+
 }

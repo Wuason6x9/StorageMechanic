@@ -1,9 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.item;
 
-import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.StorageUtils;
-import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.data.player.PlayerData;
 import dev.wuason.storagemechanic.data.player.PlayerDataManager;
@@ -20,16 +18,13 @@ import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
-import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -77,7 +72,7 @@ public class ItemStorageManager implements Listener {
             if(itemStorageConfig == null) return;
             if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
             if(e.getPlayer().isSneaking()) return;
-            Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.context.ITEM_STORAGE,new ArrayList<>(){{
+            Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.Context.ITEM_STORAGE,new ArrayList<>(){{
                 add(itemStorageConfig.getId());
                 add(e.getPlayer().getUniqueId().toString());
             }}));

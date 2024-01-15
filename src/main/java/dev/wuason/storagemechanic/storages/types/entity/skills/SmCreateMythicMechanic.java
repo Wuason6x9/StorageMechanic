@@ -55,7 +55,7 @@ public class SmCreateMythicMechanic implements ITargetedEntitySkill {
             return SkillResult.INVALID_CONFIG;
         }
         String finalType = type;
-        Storage storage = core.getManagers().getStorageManager().createStorage(storageConfigId, UUID.fromString(id),new StorageOriginContext(StorageOriginContext.context.ENTITY_STORAGE, new ArrayList<>(){{
+        Storage storage = core.getManagers().getStorageManager().createStorage(storageConfigId, UUID.fromString(id),new StorageOriginContext(StorageOriginContext.Context.ENTITY_STORAGE, new ArrayList<>(){{
             add(finalType);
         }}));
         return SkillResult.SUCCESS;

@@ -145,7 +145,7 @@ public class CommandManager {
                                 })))
                                 .executes((sender, args) -> {
                                     String id = (String) args.get(0);
-                                    core.getManagers().getStorageApiManager().saveStorageApi(id);
+                                    core.getManagers().getStorageApiManager().saveStorageApi(id, SaveCause.NORMAL_SAVE);
                                 })
                         )
                         .withSubcommand(new CommandAPICommand("panel")
@@ -241,7 +241,7 @@ public class CommandManager {
                                             else {
                                                 if(event.getEvent().isRightClick()){
                                                     if(core.getManagers().getStorageApiManager().getStorageApis().containsKey((String) event.getContent())){
-                                                        core.getManagers().getStorageApiManager().saveStorageApi((String) event.getContent());
+                                                        core.getManagers().getStorageApiManager().saveStorageApi((String) event.getContent(), SaveCause.NORMAL_SAVE);
                                                         setContent(event.getInventoryCustomPagesContent().getPage());
                                                         event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
                                                     }

@@ -35,7 +35,7 @@ public class StorageApiManager implements Listener {
     }
 
     public StorageApi createStorageApi(String id, StorageApiType type, String storageConfigId){
-        StorageOriginContext storageOriginContext = new StorageOriginContext(StorageOriginContext.context.API, new ArrayList<>(){{
+        StorageOriginContext storageOriginContext = new StorageOriginContext(StorageOriginContext.Context.API, new ArrayList<>(){{
             add(id);
             add(storageConfigId);
             add(type.toString());
@@ -62,10 +62,10 @@ public class StorageApiManager implements Listener {
         storageApis.remove(id);
         core.getManagers().getDataManager().getStorageManagerData().getStorageApiManager().removeStorageApiData(id);
     }
-    public void saveStorageApi(String id){
+    public void saveStorageApi(String id, SaveCause saveCause){
         if(!storageApis.containsKey(id)) return;
         StorageApi storageApi = storageApis.get(id);
-        core.getManagers().getStorageManager().saveStorage(storageApi.getStorage(), SaveCause.NORMAL_SAVE);
+        core.getManagers().getStorageManager().saveStorage(storageApi.getStorage(), saveCause);
         storageApis.remove(id);
         core.getManagers().getDataManager().getStorageManagerData().getStorageApiManager().saveStorageApi(storageApi);
     }
@@ -76,9 +76,9 @@ public class StorageApiManager implements Listener {
 
     public void stop(){
         while (!storageApis.isEmpty()){
-            System.out.println(storageApis.size());
-            String id = storageApis.keySet().iterator().next();
-            saveStorageApi(id);
+            String id = (String) storageApis.keySet().toArray()[0];
+            if(id == null) continue;
+            saveStorageApi(id, SaveCause.STOPPING_SAVE);
         }
     }
 
