@@ -11,7 +11,8 @@ public class EventsRegister {
         Events.EVENTS.put("close_storage_page".toUpperCase(Locale.ENGLISH), CloseStoragePageActionEvent.class);
         Events.EVENTS.put("click_storage_page".toUpperCase(Locale.ENGLISH), ClickStoragePageActionEvent.class);
         Events.EVENTS.put("open_storage_page".toUpperCase(Locale.ENGLISH), OpenStoragePageActionEvent.class);
-        Events.EVENTS.put("click_item_interface".toUpperCase(Locale.ENGLISH), ClickItemInterfaceActionEvent.class);
+        Events.EVENTS.put("click_item_interface_item".toUpperCase(Locale.ENGLISH), ClickItemInterfaceTypeActionEvent.class);
         Events.EVENTS.put("skill_mythic".toUpperCase(Locale.ENGLISH), SkillMythicActionEvent.class);
+        Events.EVENTS.put("click_item_interface".toUpperCase(Locale.ENGLISH), ClickItemInterfaceActionEvent.class);
     }
 }

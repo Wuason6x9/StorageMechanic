@@ -36,6 +36,7 @@ public class PlaceholderItemInterface extends ItemInterface {
     }
 
     public static boolean isPlaceholderItem(ItemStack itemStack){
+        System.out.println("ITEM: " + itemStack);
         if(itemStack == null || itemStack.getType().equals(Material.AIR)) return false;
         ItemMeta itemMeta = itemStack.getItemMeta();
         if(itemMeta == null) return false;
@@ -44,7 +45,7 @@ public class PlaceholderItemInterface extends ItemInterface {
     }
 
     @Override
-    public void execute(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
+    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
         Player player = (Player) event.getWhoClicked();
         ItemStack clickedItem = event.getCurrentItem();
         ItemMeta clickedItemMeta = clickedItem.getItemMeta();

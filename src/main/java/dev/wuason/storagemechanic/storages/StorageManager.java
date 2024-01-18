@@ -3,6 +3,7 @@ package dev.wuason.storagemechanic.storages;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.Managers;
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.actions.events.def.ClickItemInterfaceActionEvent;
 import dev.wuason.storagemechanic.actions.events.def.ClickStoragePageActionEvent;
 import dev.wuason.storagemechanic.actions.events.def.CloseStoragePageActionEvent;
 import dev.wuason.storagemechanic.actions.events.def.OpenStoragePageActionEvent;
@@ -140,7 +141,11 @@ public class StorageManager implements Listener {
                 if (clickedItem != null && itemInterfaceManager.isItemInterface(clickedItem) ) {
                     event.setCancelled(true);
                     ItemInterface itemInterface = core.getManagers().getItemInterfaceManager().getItemInterfaceByItemStack(clickedItem);
-                    itemInterface.execute(storage,storageInventory,event,storageConfig,this);
+                    itemInterface.onClick(storage,storageInventory,event,storageConfig,this);
+
+                    //events
+                    ClickItemInterfaceActionEvent clickItemInterfaceActionEvent = new ClickItemInterfaceActionEvent(storageInventory, event, itemInterface);
+                    core.getManagers().getActionManager().callEvent(clickItemInterfaceActionEvent, storage.getId(), storage);
                 }
                 ClickItemCheck(storage, storageInventory, event, storageConfig);
                 if(storageConfig.isStorageBlockItemEnabled()){

@@ -1,0 +1,16 @@
+inventories:
+  drop-items:
+    title: '&cDrop Items'
+    type: CHEST
+    rows: 3
+    items:
+      item1:
+        id: ByMaterial #by material , by name, by page, by slots, by itemAdapter
+        item: mc:stone
+        amount: 1
+        slots: [0-53]
+      item2:
+        id: blocked
+        item: mc:stone
+        amount: 1
+        slots: [0-53]

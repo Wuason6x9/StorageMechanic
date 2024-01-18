@@ -2,21 +2,18 @@ package dev.wuason.storagemechanic.actions.events.def;
 
 import dev.wuason.mechanics.actions.Action;
 import dev.wuason.mechanics.actions.events.EventAction;
-import dev.wuason.storagemechanic.actions.data.ItemInterfaceData;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.HashMap;
 import java.util.Locale;
 
-public class ClickItemInterfaceActionEvent implements EventAction {
-
+public class ClickItemInterfaceTypeActionEvent implements EventAction {
     private final StorageInventory storageInventory;
     private final InventoryClickEvent event;
     private final ItemInterface itemInterface;
 
-    public ClickItemInterfaceActionEvent(StorageInventory storageInventory, InventoryClickEvent event, ItemInterface itemInterface) {
+    public ClickItemInterfaceTypeActionEvent(StorageInventory storageInventory, InventoryClickEvent event, ItemInterface itemInterface) {
         this.storageInventory = storageInventory;
         this.event = event;
         this.itemInterface = itemInterface;
@@ -34,16 +31,22 @@ public class ClickItemInterfaceActionEvent implements EventAction {
         action.registerPlaceholder("$itemInterface_id$", itemInterface.getId());
         action.registerPlaceholder("$itemInterface_itemStack$", itemInterface.getItemStack());
         action.registerPlaceholder("$itemInterface_name$", itemInterface.getName());
-
-        for(Object object : itemInterface.getData()){
-            if(object instanceof ItemInterfaceData data){
-                action.registerPlaceholder(data.getId(), data.getObject());
-            }
-        }
     }
 
     @Override
     public String getId() {
-        return "CLICK_ITEM_INTERFACE".toUpperCase(Locale.ENGLISH);
+        return "click_item_interface_item".toUpperCase(Locale.ENGLISH);
+    }
+
+    public StorageInventory getStorageInventory() {
+        return storageInventory;
+    }
+
+    public InventoryClickEvent getEvent() {
+        return event;
+    }
+
+    public ItemInterface getItemInterface() {
+        return itemInterface;
     }
 }

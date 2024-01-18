@@ -25,6 +25,7 @@ public class StorageUtils {
         return Range.between(0.5, 1.5).contains(bLoc.getY() - pLoc.getY()) && Range.between(-0.80, 0.80).contains(bLoc.getX() - pLoc.getX()) && Range.between(-0.80, 0.80).contains(bLoc.getZ() - pLoc.getZ());
     }
 
+    @Deprecated
     public static ArrayList<Integer> configFill(List<String> arrayList){
 
         ArrayList<Integer> arrayListNumbers = new ArrayList<>();

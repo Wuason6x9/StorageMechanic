@@ -1,18 +1,15 @@
 package dev.wuason.storagemechanic.items;
 
 import dev.wuason.mechanics.items.ItemBuilderMechanic;
-import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
-import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class ItemInterface {
     private final ItemStack itemStack;
@@ -53,5 +50,5 @@ public abstract class ItemInterface {
     public void removeData(Object data) {
         this.data.remove(data);
     }
-    public abstract void execute(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager);
+    public abstract void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager);
 }

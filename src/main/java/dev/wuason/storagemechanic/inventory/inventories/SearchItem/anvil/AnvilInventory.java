@@ -302,14 +302,9 @@ public class AnvilInventory {
             case NAME -> {
                 inSearch = true;
                 updateStatusItem();
-                Set<Map.Entry<Integer,HashMap<Integer,ItemStack>>> entries = storage.searchItemsByName(s).entrySet();
-                for(Map.Entry<Integer,HashMap<Integer,ItemStack>> entryPage : entries){
-
-                    for(Map.Entry<Integer,ItemStack> entrySlots : entryPage.getValue().entrySet()){
-                        UUID uuid = UUID.randomUUID();
-                        resultList.put(uuid.toString(),new SearchItem(entrySlots.getKey(),entryPage.getKey(),entrySlots.getValue(),storage,uuid.toString()));
-                    }
-
+                List<SearchItem> list = storage.searchItemsByName(s, false).stream().map(item -> new SearchItem(item.getSlot(),item.getPage(), item.getItemStack(), item.getStorage())).toList();
+                for(SearchItem searchItem : list){
+                    resultList.put(searchItem.getId(), searchItem);
                 }
                 inSearch = false;
                 updateStatusItem();
@@ -318,15 +313,9 @@ public class AnvilInventory {
             case MATERIAL -> {
                 inSearch = true;
                 updateStatusItem();
-                for(Map.Entry<Integer,HashMap<Integer,ItemStack>> entryPage : storage.searchItemsByMaterial(s).entrySet()){
-
-                    for(Map.Entry<Integer,ItemStack> entrySlots : entryPage.getValue().entrySet()){
-
-                        UUID uuid = UUID.randomUUID();
-                        resultList.put(uuid.toString(),new SearchItem(entrySlots.getKey(),entryPage.getKey(),entrySlots.getValue(),storage,uuid.toString()));
-
-                    }
-
+                List<SearchItem> list = storage.searchItemsByMaterial(s, false).stream().map(item -> new SearchItem(item.getSlot(),item.getPage(), item.getItemStack(), item.getStorage())).toList();
+                for(SearchItem searchItem : list){
+                    resultList.put(searchItem.getId(), searchItem);
                 }
                 inSearch = false;
                 updateStatusItem();

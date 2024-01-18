@@ -28,6 +28,7 @@ public class ItemInterfaceManager {
         add("BLOCKED_ITEM");
         add("SEARCH_ITEM");
         add("CLEAN_ITEM");
+        add("DROP_ITEMS");
         add("PLACEHOLDER");
         add("ACTION");
     }};
@@ -140,6 +141,24 @@ public class ItemInterfaceManager {
                             itemInterfaceHashMap.put(key, new PlaceholderItemInterface(item, displayName, lore, whitelistEnabled, blacklistEnabled, itemsWhiteListComputed, itemsBlackListComputed, key));
                             continue;
                         }
+
+                        case "CLEAN_ITEM" -> {
+                            List<String> pagesString = sectionItemInterface.getStringList("properties.pages");
+                            List<String> slotsString = sectionItemInterface.getStringList("properties.slots");
+                            if(slotsString == null || pagesString == null){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: CLEAN_ITEM slots or pages is invalid!");
+                                continue;
+                            }
+                            itemInterfaceHashMap.put(key, new CleanItemsItemInterface(item, displayName, lore, StorageUtils.configFill(pagesString), StorageUtils.configFill(slotsString), key));
+                            continue;
+                        }
+
+                        case "DROP_ITEMS" -> {
+                            itemInterfaceHashMap.put(key, new DropItemsItemInterface(item, displayName, lore, key));
+                        }
+
+
 
                     }
 

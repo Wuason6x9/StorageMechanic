@@ -53,6 +53,7 @@ public class Managers {
     private StorageApiManager storageApiManager;
     private RecipesManager recipesManager;
     private BukkitTask saveDataTask;
+    private dev.wuason.storagemechanic.inventories.InventoryConfigManager inventoryConfigManager1; //change this line
 
 
     public Managers(StorageMechanic core) {
@@ -92,6 +93,7 @@ public class Managers {
         storageApiManager = new StorageApiManager(core);
         //********* INVENTORIES *********
         inventoryManager = new InventoriesManager(core,storageManager);
+        inventoryConfigManager1 = new dev.wuason.storagemechanic.inventories.InventoryConfigManager(core); //change this line
 
         //********* ANTI TRASH *********
 
@@ -256,6 +258,10 @@ public class Managers {
 
     public InventoriesManager getInventoryManager() {
         return inventoryManager;
+    }
+
+    public dev.wuason.storagemechanic.inventories.InventoryConfigManager getInventoryConfigManager1() { //change this line
+        return inventoryConfigManager1;
     }
 
     public FurnitureStorageConfigManager getFurnitureStorageConfigManager() {

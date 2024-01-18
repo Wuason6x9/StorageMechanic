@@ -317,7 +317,7 @@ public class StorageConfigManager {
 
     // Obtener un StorageConfig específico por su ID
     public StorageConfig getStorageConfigById(String id) {
-        return storagesConfig.getOrDefault(id,null);
+        return storagesConfig.get(id);
     }
 
     // Verificar si existe un StorageConfig con la ID dada

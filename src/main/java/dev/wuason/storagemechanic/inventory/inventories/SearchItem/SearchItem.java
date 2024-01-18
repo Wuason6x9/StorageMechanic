@@ -3,6 +3,8 @@ package dev.wuason.storagemechanic.inventory.inventories.SearchItem;
 import dev.wuason.storagemechanic.storages.Storage;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.UUID;
+
 public class SearchItem {
     private int slot;
     private int page;
@@ -10,8 +12,8 @@ public class SearchItem {
     private Storage storage;
     private String id;
 
-    public SearchItem(int slot, int page, ItemStack itemStack, Storage storage, String id) {
-        this.id = id;
+    public SearchItem(int slot, int page, ItemStack itemStack, Storage storage) {
+        this.id = UUID.randomUUID().toString();
         this.slot = slot;
         this.page = page;
         this.itemStack = itemStack;

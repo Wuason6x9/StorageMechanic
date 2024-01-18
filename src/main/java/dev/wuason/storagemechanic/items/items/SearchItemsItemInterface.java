@@ -26,7 +26,7 @@ public class SearchItemsItemInterface extends ItemInterface {
     }
 
     @Override
-    public void execute(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
+    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
         Player player = (Player) event.getWhoClicked();
         StorageMechanic.getInstance().getManagers().getInventoryManager().getSearchItemInventoryManager().openSearchItemMenu(player, invId, invResultId, storage, searchType);
     }

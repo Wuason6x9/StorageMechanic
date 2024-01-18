@@ -18,7 +18,7 @@ public class BackPageItemInterface extends ItemInterface {
     }
 
     @Override
-    public void execute(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
+    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
         if(storageInventory.getPage() > 0){
             storage.openStorage((Player) event.getWhoClicked(),storageInventory.getPage() - 1);
         }

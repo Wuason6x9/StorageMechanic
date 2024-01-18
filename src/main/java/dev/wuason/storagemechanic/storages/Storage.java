@@ -475,7 +475,8 @@ public class Storage {
     }
 
     public void clearSlotWithRestrictions(int page, int slot) {
-        if(isItemInterfaceSlot(page,slot,getStorageConfig())) return;
+        System.out.println("Page: " + page + " Slot: " + slot);
+        if(isItemInterfaceSlot(page,slot,getStorageConfig()) && !PlaceholderItemInterface.isPlaceholderItem(getItem(page, slot))) return;
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             Inventory inventory = storageInventory.getInventory();
@@ -502,6 +503,35 @@ public class Storage {
         }
     }
 
+    public void dropItem(StorageItemDataInfo item, Location loc, boolean sync, boolean remove){
+        if(remove) item.remove();
+        Runnable runnable = () -> {
+            loc.getWorld().dropItem(loc, item.getItemStack());
+        };
+        if(!sync) runnable.run();
+        else Bukkit.getScheduler().runTask(StorageMechanic.getInstance(), runnable);
+    }
+    public void dropItem(StorageItemDataInfo item, Location loc){
+        loc.getWorld().dropItem(loc, item.getItemStack());
+    }
+
+    public void dropItems(List<StorageItemDataInfo> items, Location loc){
+        for(StorageItemDataInfo item : items){
+            dropItem(item,loc);
+        }
+    }
+
+    public void dropItems(List<StorageItemDataInfo> items, Location loc, boolean sync, boolean remove){
+        if(remove) items.forEach(StorageItemDataInfo::remove);
+        Runnable runnable = () -> {
+            for(StorageItemDataInfo item : items){
+                dropItem(item,loc);
+            }
+        };
+        if(!sync) runnable.run();
+        else Bukkit.getScheduler().runTask(StorageMechanic.getInstance(), runnable);
+    }
+
     public void dropItemsFromPage(Location dropLocation, int page) {
         List<ItemStack> itemsList = getItemsFromPage(page);
         World world = dropLocation.getWorld();
@@ -522,7 +552,7 @@ public class Storage {
                         itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
                     }).build();
                 }
-                world.dropItemNaturally(dropLocation, item);
+                world.dropItem(dropLocation, item);
             }
         });
     }
@@ -614,36 +644,72 @@ public class Storage {
     }
 
 
-    public HashMap<Integer,HashMap<Integer,ItemStack>> searchItemsByName(String s){
-        HashMap<Integer,HashMap<Integer,ItemStack>> mapPages = new HashMap<>();
-        for(int i=0;i<items.size();i++){
-            HashMap<Integer,ItemStack> mapSlots = new HashMap<>();
-            for(Map.Entry<Integer,ItemStack> entry : getMapItemsFromPage(i).entrySet()){
-                if(entry.getValue().equals(Material.AIR)) continue;
-                String display = entry.getValue().getItemMeta().getDisplayName().toLowerCase(Locale.ENGLISH);
-                if(display.equals("") || display == null) display = entry.getValue().getType().toString().toLowerCase();
-                if(display.contains(s)){
-                    mapSlots.put(entry.getKey(),entry.getValue());
-                }
-            }
-            mapPages.put(i,mapSlots);
-        }
-        return mapPages;
-    }
-
-    public HashMap<Integer,HashMap<Integer,ItemStack>> searchItemsByMaterial(String s){
-        HashMap<Integer,HashMap<Integer,ItemStack>> mapPages = new HashMap<>();
-        for(int i=0;i<items.size();i++){
-            HashMap<Integer,ItemStack> mapSlots = new HashMap<>();
+    public List<StorageItemDataInfo> searchItemsByName(String s, boolean exact){
+        s = s.toUpperCase(Locale.ENGLISH).trim();
+        List<StorageItemDataInfo> list = new ArrayList<>();
+        if(s.isEmpty()) return list;
+        for(int i=0;i<getTotalPages();i++){
             HashMap<Integer,ItemStack> pageItemsMap = getMapItemsFromPage(i);
             for(Map.Entry<Integer,ItemStack> entry : pageItemsMap.entrySet()){
-                if(entry.getValue().getType().toString().toLowerCase(Locale.ENGLISH).contains(s)){
-                    mapSlots.put(entry.getKey(),entry.getValue());
+                if(entry.getValue().getType().equals(Material.AIR)) continue;
+                String name = entry.getValue().getItemMeta().getDisplayName() != null ? entry.getValue().getItemMeta().getDisplayName().trim() : null;
+                if(name == null || name.isEmpty()) name = entry.getValue().getType().toString();
+                name = name.toUpperCase(Locale.ENGLISH);
+                System.out.println("name: " + name + " Search: " + s);
+                if(exact){
+                    if(name.equals(s)){
+                        list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                    }
+                }
+                else {
+                    if(name.contains(s)){
+                        list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                    }
                 }
             }
-            mapPages.put(i,mapSlots);
         }
-        return mapPages;
+        return list;
+    }
+
+    public List<StorageItemDataInfo> searchItemsByMaterial(String s, boolean exact){
+        s = s.toUpperCase(Locale.ENGLISH).trim();
+        List<StorageItemDataInfo> list = new ArrayList<>();
+        if(s.isEmpty()) return list;
+        for(int i=0;i<getTotalPages();i++){
+            HashMap<Integer,ItemStack> pageItemsMap = getMapItemsFromPage(i);
+            for(Map.Entry<Integer,ItemStack> entry : pageItemsMap.entrySet()){
+                if(entry.getValue().getType().equals(Material.AIR)) continue;
+                if(exact){
+                    if(entry.getValue().getType().toString().toUpperCase(Locale.ENGLISH).equals(s)){
+                        list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                    }
+                }
+                else {
+                    if(entry.getValue().getType().toString().toUpperCase(Locale.ENGLISH).contains(s)){
+                        list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    public List<StorageItemDataInfo> searchItemsByAdapterId(String s, boolean exact){
+        if(exact) s = Adapter.getInstance().computeAdapterId(s);
+        s = s.toUpperCase(Locale.ENGLISH).trim();
+        List<StorageItemDataInfo> list = new ArrayList<>();
+        if(s.isEmpty()) return list;
+        for(int i=0;i<getTotalPages();i++){
+            HashMap<Integer,ItemStack> pageItemsMap = getMapItemsFromPage(i);
+            for(Map.Entry<Integer,ItemStack> entry : pageItemsMap.entrySet()){
+                if(entry.getValue().getType().equals(Material.AIR)) continue;
+                String adapterId = Adapter.getInstance().getAdapterID(entry.getValue()).toUpperCase(Locale.ENGLISH);
+                if(adapterId.contains(s)){
+                    list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                }
+            }
+        }
+        return list;
     }
 
 
@@ -893,6 +959,19 @@ public class Storage {
         }
     }
 
+    public ItemStack getItem(int slot, int page){
+        if (inventories.containsKey(page)) {
+            StorageInventory storageInventory = inventories.get(page);
+            return storageInventory.getInventory().getItem(slot);
+        }
+
+        if (items.containsKey(page)) {
+            ItemStack[] contents = items.get(page);
+            return contents[slot];
+        }
+        return null;
+    }
+
     public ItemStack[] getItemsFromPageInventory(int page){
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
@@ -963,6 +1042,15 @@ public class Storage {
             ItemStack[] contents = storageInventory.getInventory().getContents();
             for(int i=0;i<contents.length;i++){
                 if (contents[i] != null) {
+                    if(PlaceholderItemInterface.isPlaceholderItem(contents[i])){
+                        ItemStack item = ItemBuilderMechanic.copyOf(contents[i]).meta( meta -> {
+                            PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
+                            itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
+                            itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
+                        }).build();
+                        itemsList.put(i,item);
+                        continue;
+                    }
                     itemsList.put(i,contents[i]);
                 }
             }
@@ -972,6 +1060,15 @@ public class Storage {
             ItemStack[] contents = items.get(page);
             for(int i=0;i<contents.length;i++){
                 if (contents[i] != null) {
+                    if(PlaceholderItemInterface.isPlaceholderItem(contents[i])){
+                        ItemStack item = ItemBuilderMechanic.copyOf(contents[i]).meta( meta -> {
+                            PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
+                            itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
+                            itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
+                        }).build();
+                        itemsList.put(i,item);
+                        continue;
+                    }
                     itemsList.put(i,contents[i]);
                 }
             }
