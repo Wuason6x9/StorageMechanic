@@ -16,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class FunctionsStorage {
     public static void registerFunctions() {
-        Functions.registerFunction(fBuilder ->{
+        Functions.registerFunction(fBuilder -> {
             fBuilder.setName("ClearSlotInventory");
             fBuilder.addArguments(argBuilder -> {
                 argBuilder.addArgument(0, "slot", (s, action, objects) -> {
@@ -27,16 +27,15 @@ public class FunctionsStorage {
                     propertiesBuilder.setAutoGetPlaceholder(true);
                     propertiesBuilder.setRequired(true);
                 });
-            });
-            fBuilder.addArguments(argBuilder -> {
+
                 argBuilder.addArgument(1, "inventory", (s, action, objects) -> {
-                    if(s == null) return action.getPlaceholder("$inventory$");
-                    return "INVENTORY ERRROR";
-                },
-                propertiesBuilder -> {
-                    propertiesBuilder.setAutoGetPlaceholder(true);
-                    propertiesBuilder.setRequired(false);
-                });
+                            if(s == null) return action.getPlaceholder("$inventory$");
+                            return "INVENTORY ERRROR";
+                        },
+                        propertiesBuilder -> {
+                            propertiesBuilder.setAutoGetPlaceholder(true);
+                            propertiesBuilder.setRequired(false);
+                        });
             });
             fBuilder.setExecute((action, objects) -> {
                 int slot = (int) objects[0];
@@ -318,6 +317,8 @@ public class FunctionsStorage {
                 return false;
             });
         });
+
+
 
     }
 }

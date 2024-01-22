@@ -26,7 +26,6 @@ import java.util.*;
 
 public class AnvilInventory {
 
-    private VersionWrapper.AnvilGui anvilGui;
     private String configId;
     private ItemStack[] playerInventory = null;
     private Storage storage;

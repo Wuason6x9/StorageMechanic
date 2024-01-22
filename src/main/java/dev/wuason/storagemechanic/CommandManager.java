@@ -4,7 +4,6 @@ import dev.lone.itemsadder.api.CustomStack;
 import dev.lone.itemsadder.api.ItemsAdder;
 import dev.wuason.libs.commandapi.CommandAPICommand;
 import dev.wuason.libs.commandapi.arguments.*;
-import dev.wuason.libs.invmechaniclib.events.CloseEvent;
 import dev.wuason.libs.invmechaniclib.items.ItemInterface;
 import dev.wuason.libs.invmechaniclib.types.InvCustom;
 import dev.wuason.libs.invmechaniclib.types.pages.content.anvil.InvCustomPagesAnvil;
@@ -23,7 +22,7 @@ import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.mechanics.utils.StorageUtils;
 import dev.wuason.mechanics.utils.Utils;
-import dev.wuason.storagemechanic.customblocks.CustomBlock;
+import dev.wuason.storagemechanic.customitems.CustomItem;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.data.player.PlayerData;
 import dev.wuason.storagemechanic.data.storage.StorageManagerData;
@@ -671,16 +670,16 @@ public class CommandManager {
                             sender.sendMessage(AdventureUtils.deserializeLegacy("StorageMechanic reloaded!",null));
                         })
                 )
-                .withSubcommands(new CommandAPICommand("customblocks")
+                .withSubcommands(new CommandAPICommand("customItems")
                         .withSubcommands(new CommandAPICommand("get")
-                                .withPermission("sm.command.customblocks.get")
+                                .withPermission("sm.command.customitems.get")
                                 .withArguments(new StringArgument("id").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
 
-                                    String[] ids = new String[core.getManagers().getCustomBlockManager().getAllCustomBlocks().size()];
+                                    String[] ids = new String[core.getManagers().getCustomItemsManager().getAllCustomItems().size()];
 
-                                    for(int i=0;i<core.getManagers().getCustomBlockManager().getAllCustomBlocks().size();i++){
+                                    for(int i = 0; i<core.getManagers().getCustomItemsManager().getAllCustomItems().size(); i++){
 
-                                       ids[i] = core.getManagers().getCustomBlockManager().getAllCustomBlocks().get(i).getId();
+                                       ids[i] = core.getManagers().getCustomItemsManager().getAllCustomItems().get(i).getId();
 
                                     }
 
@@ -693,10 +692,10 @@ public class CommandManager {
                                     Player player = (Player) sender;
                                     int quantity = (int) args.get(1);
                                     String id = (String) args.get(0);
-                                    CustomBlock customBlock = core.getManagers().getCustomBlockManager().getCustomBlockById(id);
+                                    CustomItem customItem = core.getManagers().getCustomItemsManager().getCustomItemById(id);
                                     if(quantity<1||quantity>64) quantity = 64;
-                                    if(customBlock != null){
-                                        ItemStack itemStack = customBlock.getItemStack();
+                                    if(customItem != null){
+                                        ItemStack itemStack = customItem.getItemStack();
                                         itemStack.setAmount(quantity);
                                         StorageUtils.addItemToInventoryOrDrop(player,itemStack);
                                         AdventureUtils.playerMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.valid_id","you have received: " + id).replace("%id%",id), player);
@@ -706,15 +705,15 @@ public class CommandManager {
                                 })
                         )
                         .withSubcommands(new CommandAPICommand("give")
-                                .withPermission("sm.command.customblocks.give")
+                                .withPermission("sm.command.customitems.give")
                                 .withArguments(new EntitySelectorArgument.ManyPlayers("player"))
                                 .withArguments(new StringArgument("id").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
 
-                                    String[] ids = new String[core.getManagers().getCustomBlockManager().getAllCustomBlocks().size()];
+                                    String[] ids = new String[core.getManagers().getCustomItemsManager().getAllCustomItems().size()];
 
-                                    for(int i=0;i<core.getManagers().getCustomBlockManager().getAllCustomBlocks().size();i++){
+                                    for(int i = 0; i<core.getManagers().getCustomItemsManager().getAllCustomItems().size(); i++){
 
-                                        ids[i] = core.getManagers().getCustomBlockManager().getAllCustomBlocks().get(i).getId();
+                                        ids[i] = core.getManagers().getCustomItemsManager().getAllCustomItems().get(i).getId();
 
                                     }
 
@@ -727,10 +726,10 @@ public class CommandManager {
                                     if(players.isEmpty()) return;
                                     int quantity = (int) args.get(2);
                                     String id = (String) args.get(1);
-                                    CustomBlock customBlock = core.getManagers().getCustomBlockManager().getCustomBlockById(id);
+                                    CustomItem customItem = core.getManagers().getCustomItemsManager().getCustomItemById(id);
                                     if(quantity<1||quantity>64) quantity = 64;
-                                    if(customBlock != null){
-                                        ItemStack itemStack = customBlock.getItemStack();
+                                    if(customItem != null){
+                                        ItemStack itemStack = customItem.getItemStack();
                                         itemStack.setAmount(quantity);
                                         for(Player player : players){
                                             StorageUtils.addItemToInventoryOrDrop(player,itemStack);

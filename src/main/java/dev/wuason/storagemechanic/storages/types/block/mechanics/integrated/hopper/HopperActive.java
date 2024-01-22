@@ -185,7 +185,7 @@ public class HopperActive {
                         similar.getItemStack().setAmount(amountSimilar - actualTransferAmount);
 
                         if(similar.getItemStack().getAmount() == 0) {
-                            similar.remove();
+                            similar.removeWithRestrictions();
                         }
 
                         return true;  // Se ha transferido un item, devolver true
@@ -208,7 +208,7 @@ public class HopperActive {
                     // Si todos los ítems fueron añadidos exitosamente al hopper
                     if (notFit.isEmpty()) {
                         int newStorageAmount = storageStack.getAmount() - transferableAmount;
-                        if(newStorageAmount == 0) storageItem.remove();
+                        if(newStorageAmount == 0) storageItem.removeWithRestrictions();
                         else storageStack.setAmount(newStorageAmount);
                         return true;  // Retorna true después de transferir el primer ItemStack
                     }

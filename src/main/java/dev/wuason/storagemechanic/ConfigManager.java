@@ -6,24 +6,14 @@ import dev.wuason.libs.boostedyaml.settings.dumper.DumperSettings;
 import dev.wuason.libs.boostedyaml.settings.general.GeneralSettings;
 import dev.wuason.libs.boostedyaml.settings.loader.LoaderSettings;
 import dev.wuason.libs.boostedyaml.settings.updater.UpdaterSettings;
-import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.compatibilities.ItemsAdderEvent;
-import dev.wuason.storagemechanic.customblocks.CustomBlock;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
-import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -110,7 +100,7 @@ public class ConfigManager {
         core.getManagers().stopAndRemoveDataSaveTask();
         core.getManagers().runDataSaveTask();
         langDocumentYaml.reload();
-        core.getManagers().getCustomBlockManager().loadCustomBlocks();
+        core.getManagers().getCustomItemsManager().loadCustomBlocks();
         core.getManagers().getActionManager().getActionConfigManager().loadActions(new File(core.getDataFolder() + "/actions/"));
         AdventureUtils.sendMessagePluginConsole(core, "<aqua> Actions loaded: <yellow>" + core.getManagers().getActionManager().getActionConfigs().size());
         core.getManagers().getItemInterfaceManager().loadItemsInterface();

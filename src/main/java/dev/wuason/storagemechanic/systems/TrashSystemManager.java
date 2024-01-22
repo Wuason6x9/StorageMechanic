@@ -7,7 +7,6 @@ import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.player.PlayerData;
 import dev.wuason.storagemechanic.data.storage.type.block.BlockStorageData;
 import dev.wuason.storagemechanic.data.storage.type.furniture.FurnitureStorageData;
-import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorage;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorageManager;
@@ -55,7 +54,7 @@ public class TrashSystemManager implements Listener {
 
                 String customBlockId = persistentDataContainer.get(namespacedKey,PersistentDataType.STRING);
 
-                if(!core.getManagers().getCustomBlockManager().customBlockExists(customBlockId)){
+                if(!core.getManagers().getCustomItemsManager().customItemExists(customBlockId)){
                     persistentDataContainer.remove(namespacedKey);
                 }
 

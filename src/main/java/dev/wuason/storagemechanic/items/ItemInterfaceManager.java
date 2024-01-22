@@ -155,13 +155,49 @@ public class ItemInterfaceManager {
                         }
 
                         case "DROP_ITEMS" -> {
-                            itemInterfaceHashMap.put(key, new DropItemsItemInterface(item, displayName, lore, key));
+
+                            String dropItemsTypeString = sectionItemInterface.getString("properties.def-action");
+                            String inventoryConfigId = sectionItemInterface.getString("properties.inv-id");
+
+                            itemInterfaceHashMap.put(key, new DropItemsItemInterface(item, displayName, lore, key, dropItemsTypeString != null ? DropItemsItemInterface.DropItemsType.valueOf(dropItemsTypeString.toUpperCase(Locale.ENGLISH)) : null, inventoryConfigId));
                         }
 
+                        case "SEARCH_ITEM" -> {
+                            String invId = sectionItemInterface.getString("properties.inv-id", "search-item");
+                            String invResultId = sectionItemInterface.getString("properties.inv-result-id");
+                            String searchTypeString = sectionItemInterface.getString("properties.def-action");
+                            if(invId == null || invResultId == null || searchTypeString == null){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: SEARCH_ITEM invId, invResultId or searchType is invalid!");
+                                continue;
+                            }
 
 
+                            SearchItemsItemInterface.SearchType searchType = null;
+                            try {
+                                if(searchTypeString != null) searchType = SearchItemsItemInterface.SearchType.valueOf(searchTypeString.toUpperCase(Locale.ENGLISH));
+                            } catch (IllegalArgumentException e) {
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: SEARCH_ITEM searchType is invalid!");
+                                continue;
+                            }
+
+                            String searchInputString = sectionItemInterface.getString("properties.search-input", "ANVIL");
+
+                            SearchItemsItemInterface.SearchInput searchInput = null;
+                            try {
+                                searchInput = SearchItemsItemInterface.SearchInput.valueOf(searchInputString.toUpperCase(Locale.ENGLISH));
+                            } catch (IllegalArgumentException e) {
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: SEARCH_ITEM searchInput is invalid!");
+                                continue;
+                            }
+
+                            String invAnvilId = sectionItemInterface.getString("properties.inv-anvil-id");
+
+                            itemInterfaceHashMap.put(key, new SearchItemsItemInterface(item, displayName, lore, key, invId, invResultId, searchType, searchInput, invAnvilId));
+                        }
                     }
-
                 }
             }
         }

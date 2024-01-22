@@ -20,7 +20,6 @@ import org.bukkit.entity.Player;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -475,19 +474,8 @@ public class Storage {
     }
 
     public void clearSlotWithRestrictions(int page, int slot) {
-        System.out.println("Page: " + page + " Slot: " + slot);
-        if(isItemInterfaceSlot(page,slot,getStorageConfig()) && !PlaceholderItemInterface.isPlaceholderItem(getItem(page, slot))) return;
-        if (inventories.containsKey(page)) {
-            StorageInventory storageInventory = inventories.get(page);
-            Inventory inventory = storageInventory.getInventory();
-            inventory.clear(slot);
-        }
-        else {
-            ItemStack[] contents = items.getOrDefault(page,null);
-            if (contents != null) {
-                contents[slot] = null;
-            }
-        }
+        if(isItemInterfaceSlot(page,slot,getStorageConfig()) && !PlaceholderItemInterface.isPlaceholderItem(getItem(slot, page))) return;
+        clearSlotPage(page, slot);
     }
     public void clearSlotPage(int page, int slot) {
         if (inventories.containsKey(page)) {
@@ -504,7 +492,7 @@ public class Storage {
     }
 
     public void dropItem(StorageItemDataInfo item, Location loc, boolean sync, boolean remove){
-        if(remove) item.remove();
+        if(remove) item.removeWithRestrictions();
         Runnable runnable = () -> {
             loc.getWorld().dropItem(loc, item.getItemStack());
         };
@@ -522,7 +510,7 @@ public class Storage {
     }
 
     public void dropItems(List<StorageItemDataInfo> items, Location loc, boolean sync, boolean remove){
-        if(remove) items.forEach(StorageItemDataInfo::remove);
+        if(remove) items.forEach(StorageItemDataInfo::removeWithRestrictions);
         Runnable runnable = () -> {
             for(StorageItemDataInfo item : items){
                 dropItem(item,loc);
@@ -655,7 +643,6 @@ public class Storage {
                 String name = entry.getValue().getItemMeta().getDisplayName() != null ? entry.getValue().getItemMeta().getDisplayName().trim() : null;
                 if(name == null || name.isEmpty()) name = entry.getValue().getType().toString();
                 name = name.toUpperCase(Locale.ENGLISH);
-                System.out.println("name: " + name + " Search: " + s);
                 if(exact){
                     if(name.equals(s)){
                         list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
@@ -1085,9 +1072,7 @@ public class Storage {
                 for(int k=0;k<contents.length;k++){
                     ItemStack item = contents[k];
                     if (item != null && !item.getType().isAir() && !core.getManagers().getItemInterfaceManager().isItemInterface(item)) {
-
                         return new StorageItemDataInfo(item,i,k,this);
-
                     }
                 }
             }
@@ -1096,9 +1081,7 @@ public class Storage {
                 for(int k=0;k<contents.length;k++){
                     ItemStack item = contents[k];
                     if (item != null && !item.getType().isAir()) {
-
                         return new StorageItemDataInfo(item,i,k,this);
-
                     }
                 }
             }
@@ -1106,7 +1089,6 @@ public class Storage {
         return null;
     }
     public StorageItemDataInfo getFirstItemStackSimilar(ItemStack similar){
-
         for(int i=0;i<getTotalPages();i++){
             if (inventories.containsKey(i)) {
                 StorageInventory storageInventory = inventories.get(i);
@@ -1116,7 +1098,6 @@ public class Storage {
                     if (item != null && !item.getType().isAir() && item.isSimilar(similar)) return new StorageItemDataInfo(item,i,k,this);
                 }
             }
-
             else if (items.containsKey(i)) {
                 ItemStack[] contents = items.get(i);
                 for(int k=0;k<contents.length;k++){
@@ -1125,7 +1106,6 @@ public class Storage {
                 }
             }
         }
-
         return null;
     }
     public int firstSlotEmptyPage(int page){

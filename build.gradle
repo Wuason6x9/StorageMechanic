@@ -47,7 +47,7 @@ dependencies {
 }
 
 shadowJar {
-    archiveFileName.set("storagemechanic.jar")
+    archiveFileName.set("StorageMechanic-${archiveVersion.get()}.jar")
 }
 
 

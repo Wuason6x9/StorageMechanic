@@ -19,12 +19,24 @@ public class StorageItemDataInfo {
         this.id = UUID.randomUUID();
     }
 
-    public void remove(){
+    public void removeWithRestrictions(){
         storage.clearSlotWithRestrictions(page,slot);
+    }
+
+    public void remove(){
+        storage.clearSlotPage(page,slot);
     }
 
     public ItemStack getItemStack() {
         return itemStack;
+    }
+
+    public boolean isSimilar(ItemStack itemStack){
+        return this.itemStack.isSimilar(itemStack);
+    }
+
+    public boolean exists(){
+        return storage.getItem(page, slot) == itemStack;
     }
 
     public int getPage() {

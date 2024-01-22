@@ -1,11 +1,9 @@
-package dev.wuason.storagemechanic.customblocks;
+package dev.wuason.storagemechanic.customitems;
 
 import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
-import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,16 +11,16 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 
-public class CustomBlock {
+public class CustomItem {
     private String id;
     private String item;
     private ItemStack itemStack;
-    private CustomBlockProperties customBlockProperties;
+    private CustomItemProperties customItemProperties;
 
-    public CustomBlock(String id, String item, String displayName, List<String> lore, CustomBlockProperties customBlockProperties) {
+    public CustomItem(String id, String item, String displayName, List<String> lore, CustomItemProperties customItemProperties) {
         this.id = id;
         this.item = item;
-        this.customBlockProperties = customBlockProperties;
+        this.customItemProperties = customItemProperties;
         ItemBuilderMechanic itemBuilderMechanic = new ItemBuilderMechanic(item,1);
 
         if(lore != null) itemBuilderMechanic.setLore(AdventureUtils.deserializeLegacyList(lore,null));
@@ -51,7 +49,7 @@ public class CustomBlock {
         return item;
     }
 
-    public CustomBlockProperties getCustomBlockProperties() {
-        return customBlockProperties;
+    public CustomItemProperties getCustomBlockProperties() {
+        return customItemProperties;
     }
 }

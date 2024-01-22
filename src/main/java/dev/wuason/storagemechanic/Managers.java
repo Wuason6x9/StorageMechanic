@@ -3,7 +3,7 @@ package dev.wuason.storagemechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.actions.ActionManager;
 import dev.wuason.storagemechanic.compatibilities.Compatibilities;
-import dev.wuason.storagemechanic.customblocks.CustomBlockManager;
+import dev.wuason.storagemechanic.customitems.CustomItemsManager;
 import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.inventory.InventoriesManager;
 import dev.wuason.storagemechanic.inventory.config.InventoryConfigManager;
@@ -30,7 +30,7 @@ import org.bukkit.scheduler.BukkitTask;
 public class Managers {
     private StorageMechanic core;
 
-    private CustomBlockManager customBlockManager;
+    private CustomItemsManager customItemsManager;
     private ItemInterfaceManager itemInterfaceManager;
     private ConfigManager configManager;
     private StorageConfigManager storageConfigManager;
@@ -109,7 +109,7 @@ public class Managers {
 
     }
     public void loadConfigManagers(){
-        customBlockManager = new CustomBlockManager(core); //1
+        customItemsManager = new CustomItemsManager(core); //1
         //********* ACTIONS *********
         actionManager = new ActionManager(core);
         itemInterfaceManager = new ItemInterfaceManager(core);//2
@@ -125,7 +125,7 @@ public class Managers {
 
     public void registerEvents(){
         PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents(customBlockManager, core);
+        pm.registerEvents(customItemsManager, core);
         pm.registerEvents(storageManager,core);
         pm.registerEvents(blockStorageManager,core);
         pm.registerEvents(itemStorageManager,core);
@@ -192,8 +192,8 @@ public class Managers {
         dataManager.stop();
     }
 
-    public CustomBlockManager getCustomBlockManager() {
-        return customBlockManager;
+    public CustomItemsManager getCustomItemsManager() {
+        return customItemsManager;
     }
 
     public ConfigManager getConfigManager() {

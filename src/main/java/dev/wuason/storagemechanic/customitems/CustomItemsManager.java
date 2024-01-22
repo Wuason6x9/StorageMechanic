@@ -1,7 +1,5 @@
-package dev.wuason.storagemechanic.customblocks;
+package dev.wuason.storagemechanic.customitems;
 
-import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.api.events.block.CustomBlockDestroyEvent;
@@ -20,10 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -31,26 +26,25 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.RayTraceResult;
 
 
 import java.io.File;
 import java.util.*;
 
-public class CustomBlockManager implements Listener {
+public class CustomItemsManager implements Listener {
 
     private StorageMechanic core;
-    private HashMap<String,CustomBlock> customBlocks = new HashMap<>();
+    private HashMap<String, CustomItem> customItems = new HashMap<>();
 
-    public CustomBlockManager(StorageMechanic core) {
+    public CustomItemsManager(StorageMechanic core) {
         this.core = core;
     }
 
     public void loadCustomBlocks(){
 
-        customBlocks = new HashMap<>();
+        customItems = new HashMap<>();
 
-        File base = new File(core.getDataFolder().getPath() + "/CustomBlocks/");
+        File base = new File(core.getDataFolder().getPath() + "/CustomItems/");
         base.mkdirs();
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
@@ -65,30 +59,30 @@ public class CustomBlockManager implements Listener {
 
             YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-            ConfigurationSection sectionCustomBlocks = config.getConfigurationSection("blocks");
+            ConfigurationSection sectionCustomBlocks = config.getConfigurationSection("items");
 
             if(sectionCustomBlocks != null){
                 for(Object key : sectionCustomBlocks.getKeys(false).toArray()){
 
                     ConfigurationSection customBlockSection = sectionCustomBlocks.getConfigurationSection((String)key);
-                    String material = customBlockSection.getString("material", "mc:stone");
+                    String material = customBlockSection.getString("item", "mc:stone");
 
                     String displayName = customBlockSection.getString("displayName");
 
                     List<String> lore = customBlockSection.getStringList("lore");
                     boolean dropBlock = customBlockSection.getBoolean("properties.drop_block",true);
                     boolean stackable = customBlockSection.getBoolean("properties.stackable",true);
-                    CustomBlockProperties customBlockProperties = new CustomBlockProperties(dropBlock, stackable);
-                    CustomBlock customBlock = new CustomBlock((String)key,material,displayName,lore,customBlockProperties);
+                    CustomItemProperties customItemProperties = new CustomItemProperties(dropBlock, stackable);
+                    CustomItem customItem = new CustomItem((String)key,material,displayName,lore, customItemProperties);
 
-                    customBlocks.put(customBlock.getId(), customBlock);
+                    customItems.put(customItem.getId(), customItem);
 
                 }
             }
 
         }
 
-        AdventureUtils.sendMessagePluginConsole(core, "<aqua> CustomBlocks loaded: <yellow>" + customBlocks.size());
+        AdventureUtils.sendMessagePluginConsole(core, "<aqua> CustomItems loaded: <yellow>" + customItems.size());
 
     }
 
@@ -112,7 +106,7 @@ public class CustomBlockManager implements Listener {
 
             blockDataContainer.set(new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicb" + "x" + x + "x" + y + "x" + z), PersistentDataType.STRING, customBlockId);
 
-            CustomBlockPlaceEvent CustomBlockPlaceEvent = new CustomBlockPlaceEvent(event,getCustomBlockById(customBlockId));
+            CustomBlockPlaceEvent CustomBlockPlaceEvent = new CustomBlockPlaceEvent(event, getCustomItemById(customBlockId));
             Bukkit.getPluginManager().callEvent(CustomBlockPlaceEvent);
 
             if(CustomBlockPlaceEvent.isCancelled()){
@@ -135,12 +129,12 @@ public class CustomBlockManager implements Listener {
         if (chunkDataContainer.has(blockKey, PersistentDataType.STRING)) {
             ItemStack itemInMainHand = event.getPlayer().getInventory().getItemInMainHand();
             String customBlockId = chunkDataContainer.get(blockKey, PersistentDataType.STRING);
-            CustomBlock customBlock = getCustomBlockById(customBlockId);
-            if(customBlock == null){
+            CustomItem customItem = getCustomItemById(customBlockId);
+            if(customItem == null){
                 core.getManagers().getTrashSystemManager().checkTrashOnChunk(chunkDataContainer);
                 return;
             }
-            CustomBlockDestroyEvent customBlockDestroyEvent = new CustomBlockDestroyEvent(event,getCustomBlockById(customBlockId));
+            CustomBlockDestroyEvent customBlockDestroyEvent = new CustomBlockDestroyEvent(event, getCustomItemById(customBlockId));
             Bukkit.getPluginManager().callEvent(customBlockDestroyEvent);
             if(customBlockDestroyEvent.isCancelled()){
                 event.setCancelled(true);
@@ -151,8 +145,8 @@ public class CustomBlockManager implements Listener {
             event.setDropItems(false);
 
             if(itemInMainHand == null) return;
-            if(customBlock.getCustomBlockProperties().isDropBlock()){
-                blockLocation.getWorld().dropItem(blockLocation,customBlock.getItemStack());
+            if(customItem.getCustomBlockProperties().isDropBlock()){
+                blockLocation.getWorld().dropItem(blockLocation, customItem.getItemStack());
             }
         }
     }
@@ -172,7 +166,7 @@ public class CustomBlockManager implements Listener {
             if (chunkDataContainer.has(blockKey, PersistentDataType.STRING)) {
                 String customBlockId = chunkDataContainer.get(blockKey, PersistentDataType.STRING);
                 event.setCancelled(true);
-                CustomBlockInteractEvent customBlockInteractEvent = new CustomBlockInteractEvent(event,getCustomBlockById(customBlockId));
+                CustomBlockInteractEvent customBlockInteractEvent = new CustomBlockInteractEvent(event, getCustomItemById(customBlockId));
                 Bukkit.getPluginManager().callEvent(customBlockInteractEvent);
                 event.setCancelled(customBlockInteractEvent.isCancelled());
             }
@@ -182,38 +176,38 @@ public class CustomBlockManager implements Listener {
     @EventHandler
     public void onPlayerInteractCreative(InventoryCreativeEvent event){
         Block block = event.getWhoClicked().getTargetBlockExact(6, FluidCollisionMode.NEVER);
-        if(block != null && isCustomBlock(block)){
+        if(block != null && isCustomItem(block)){
             PlayerInventory inventory = event.getWhoClicked().getInventory();
-            CustomBlock customBlock = getCustomBlockById(getCustomBlockIdFromBlock(block));
-            if( !customBlock.getItemStack().getType().equals( event.getCursor().getType() ) ) return;
+            CustomItem customItem = getCustomItemById(getCustomItemIdFromBlock(block));
+            if( !customItem.getItemStack().getType().equals( event.getCursor().getType() ) ) return;
             for( int i = 0 ; i < 9 ; i ++ ){
-                if(inventory.getItem(i) != null && inventory.getItem(i).isSimilar(customBlock.getItemStack())){
+                if(inventory.getItem(i) != null && inventory.getItem(i).isSimilar(customItem.getItemStack())){
                     event.setCancelled(true);
                     event.getWhoClicked().getInventory().setHeldItemSlot(i);
                     return;
                 }
             }
-            event.setCursor(customBlock.getItemStack());
+            event.setCursor(customItem.getItemStack());
         }
     }
 
 
-    public CustomBlock getCustomBlockById(String id) {
-        return customBlocks.getOrDefault(id,null);
+    public CustomItem getCustomItemById(String id) {
+        return customItems.getOrDefault(id,null);
     }
 
-    public boolean customBlockExists(String id) {
-        return customBlocks.containsKey(id);
+    public boolean customItemExists(String id) {
+        return customItems.containsKey(id);
     }
 
-    public List<CustomBlock> getAllCustomBlocks() {
-        return new ArrayList<>(customBlocks.values());
+    public List<CustomItem> getAllCustomItems() {
+        return new ArrayList<>(customItems.values());
     }
 
-    public boolean giveCustomBlockToPlayer(Player player, String customBlockId, int amount) {
-        CustomBlock customBlock = getCustomBlockById(customBlockId);
-        if (customBlock != null) {
-            ItemStack itemStack = customBlock.getItemStack().clone();
+    public boolean giveCustomItemToPlayer(Player player, String customBlockId, int amount) {
+        CustomItem customItem = getCustomItemById(customBlockId);
+        if (customItem != null) {
+            ItemStack itemStack = customItem.getItemStack().clone();
             itemStack.setAmount(amount);
             StorageUtils.addItemToInventoryOrDrop(player, itemStack);
             return true;
@@ -222,7 +216,7 @@ public class CustomBlockManager implements Listener {
         }
     }
 
-    public String getCustomBlockIdFromBlock(Block block) {
+    public String getCustomItemIdFromBlock(Block block) {
         Location blockLocation = block.getLocation();
         int x = blockLocation.getBlockX();
         int y = blockLocation.getBlockY();
@@ -237,11 +231,11 @@ public class CustomBlockManager implements Listener {
         return null;
     }
 
-    public boolean isCustomBlock(Block block) {
+    public boolean isCustomItem(Block block) {
         return block.getChunk().getPersistentDataContainer().has(new NamespacedKey(core,"storagemechanicb" + "x" + block.getX() + "x" + block.getY() + "x" + block.getZ()),PersistentDataType.STRING);
     }
 
-    public String getCustomBlockIdFromItemStack(ItemStack itemStack) {
+    public String getCustomItemIdFromItemStack(ItemStack itemStack) {
         ItemMeta itemMeta = itemStack.getItemMeta();
         PersistentDataContainer itemDataContainer = itemMeta.getPersistentDataContainer();
 
@@ -251,43 +245,43 @@ public class CustomBlockManager implements Listener {
         return null;
     }
 
-    public boolean isCustomBlockItemStack(ItemStack itemStack) {
-        return getCustomBlockIdFromItemStack(itemStack) != null;
+    public boolean isCustomItemItemStack(ItemStack itemStack) {
+        return getCustomItemIdFromItemStack(itemStack) != null;
     }
 
     //EVENTS BLOCK
 
     @EventHandler
     public void onBlockBurn(BlockBurnEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockExplode(BlockExplodeEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockFade(BlockFadeEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockFromTo(BlockFromToEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
@@ -297,12 +291,12 @@ public class CustomBlockManager implements Listener {
         /*for(int i=0;i<event.blockList().size();i++){
             if(isCustomBlock(event.blockList().get(i))) event.setCancelled(true););
         }*/
-        event.blockList().removeIf(block -> isCustomBlock(block));
+        event.blockList().removeIf(block -> isCustomItem(block));
     }
 
     @EventHandler
     public void onLeafDecay(LeavesDecayEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
@@ -310,41 +304,41 @@ public class CustomBlockManager implements Listener {
     @EventHandler
     public void onBlockPistonRetract(BlockPistonRetractEvent event) {
         for(int i=0;i<event.getBlocks().size();i++){
-            if(isCustomBlock(event.getBlocks().get(i))) event.setCancelled(true);
+            if(isCustomItem(event.getBlocks().get(i))) event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockPistonExtend(BlockPistonExtendEvent event) {
         for(int i=0;i<event.getBlocks().size();i++){
-            if(isCustomBlock(event.getBlocks().get(i))) event.setCancelled(true);
+            if(isCustomItem(event.getBlocks().get(i))) event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockIgnite(BlockIgniteEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockPhysics(BlockPhysicsEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockSpread(BlockSpreadEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onFluidLevelChange(FluidLevelChangeEvent event) {
-        if (isCustomBlock(event.getBlock())) {
+        if (isCustomItem(event.getBlock())) {
             event.setCancelled(true);
         }
     }

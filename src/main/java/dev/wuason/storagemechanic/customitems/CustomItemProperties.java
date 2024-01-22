@@ -1,11 +1,11 @@
-package dev.wuason.storagemechanic.customblocks;
+package dev.wuason.storagemechanic.customitems;
 
-public class CustomBlockProperties {
+public class CustomItemProperties {
 
     private boolean dropBlock = true;
     private boolean stackable = true;
 
-    public CustomBlockProperties(boolean dropBlock, boolean stackable) {
+    public CustomItemProperties(boolean dropBlock, boolean stackable) {
         this.stackable = stackable;
         this.dropBlock = dropBlock;
     }
