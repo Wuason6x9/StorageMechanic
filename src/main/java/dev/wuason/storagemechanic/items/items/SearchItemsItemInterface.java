@@ -1,5 +1,6 @@
 package dev.wuason.storagemechanic.items.items;
 
+import dev.wuason.libs.apache.lang3.function.TriConsumer;
 import dev.wuason.libs.invmechaniclib.types.InvCustom;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.InvCustomPagesContent;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.InvCustomPagesContentManager;
@@ -12,6 +13,7 @@ import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.InventoryUtils;
 import dev.wuason.mechanics.utils.Utils;
+import dev.wuason.mechanics.utils.functions.QuadConsumer;
 import dev.wuason.nms.wrappers.NMSManager;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.ItemInterface;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 public class SearchItemsItemInterface extends ItemInterface {
@@ -59,14 +62,13 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         Player player = (Player) event.getWhoClicked();
 
-        if(searchType == null){
+        player.closeInventory();
+        if(searchType != null){
             //TODO: Open search inventory
+            searchInput.open(this, player, storageInventory, searchType);
             return;
         }
-
-        player.closeInventory();
         openInvSelector(storage, storageInventory, event, storageConfig, storageManager);
-
     }
 
     public void openInvSelector(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager){
@@ -91,26 +93,25 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         invConfig.setOnItemLoad( (inventoryConfig, configurationSection, itemConfig) -> {
 
-            switch (itemConfig.getActionId()){
-                case "BY_MATERIAL" -> {
+            try {
 
-                    dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invCustom.registerItemInterface( builder -> {
+                SearchType searchType = SearchType.valueOf(itemConfig.getActionId());
 
-                        builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
-                        builder.addData(itemConfig);
-                        builder.onClick((e, inv) -> {
+                dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invCustom.registerItemInterface( builder -> {
 
-                            if(this.searchInput.equals(SearchInput.SIGN)) {
-                                signOpen((Player) e.getWhoClicked(), storageInventory, SearchType.BY_MATERIAL);
-                            }
+                    builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    builder.addData(itemConfig);
+                    builder.onClick((e, inv) -> {
 
-                        });
+                        searchInput.open(this, (Player) e.getWhoClicked(), storageInventory, searchType);
 
                     });
 
-                    invCustom.setItemInterfaceInv(itemInterface, itemConfig.getSlots());
+                });
 
-                }
+                invCustom.setItemInterfaceInv(itemInterface, itemConfig.getSlots());
+
+            } catch (IllegalArgumentException ignored) {
             }
 
         });
@@ -290,9 +291,17 @@ public class SearchItemsItemInterface extends ItemInterface {
 
     public enum SearchInput {
 
-        ANVIL(),
-        SIGN();
+        ANVIL(null),
+        SIGN(SearchItemsItemInterface::signOpen);
 
+        private final QuadConsumer<SearchItemsItemInterface, Player, StorageInventory, SearchType> consumer;
 
+        private SearchInput(QuadConsumer<SearchItemsItemInterface, Player, StorageInventory, SearchType> consumer){
+            this.consumer = consumer;
+        }
+
+        public void open(SearchItemsItemInterface itemInterface, Player player, StorageInventory storageInventory, SearchType searchType){
+            consumer.accept(itemInterface, player, storageInventory, searchType);
+        }
     }
 }

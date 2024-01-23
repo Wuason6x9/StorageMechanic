@@ -30,6 +30,7 @@ import dev.wuason.storagemechanic.data.storage.type.api.StorageApiData;
 import dev.wuason.storagemechanic.data.storage.type.api.StorageApiManagerData;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
+import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.types.api.StorageApi;
 import dev.wuason.storagemechanic.storages.types.api.StorageApiManager;
 import dev.wuason.storagemechanic.storages.types.api.StorageApiType;
@@ -85,8 +86,7 @@ public class CommandManager {
                                 .withArguments(new IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.strings(si -> {
 
                                     String storageApiId = (String) si.previousArgs().get(0);
-                                    if (!core.getManagers().getStorageApiManager().existStorageApi(storageApiId))
-                                        return new String[0];
+                                    if (!core.getManagers().getStorageApiManager().existStorageApi(storageApiId)) return new String[]{"0"};
 
                                     StorageApi storageApi = core.getManagers().getStorageApiManager().getStorageApi(storageApiId);
 
@@ -143,22 +143,17 @@ public class CommandManager {
                                         , new StringArgument("storageConfigId").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
                                             return core.getManagers().getStorageConfigManager().getStoragesConfigMap().keySet().toArray(new String[0]);
                                         })))
-                                .withArguments(new IntegerArgument("page").replaceSuggestions(
+                                .withArguments(new IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.strings( si -> {
 
-                                                ArgumentSuggestions.strings(si -> {
+                                    String storageConfigId = (String) si.previousArgs().get(1);
 
-                                                    String storageApiId = (String) si.previousArgs().get(0);
-                                                    if (!core.getManagers().getStorageApiManager().existStorageApi(storageApiId))
-                                                        return new String[0];
+                                    if (!core.getManagers().getStorageConfigManager().existsStorageConfig(storageConfigId)) return new String[]{"0"};
 
-                                                    StorageApi storageApi = core.getManagers().getStorageApiManager().getStorageApi(storageApiId);
+                                    StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storageConfigId);
 
-                                                    return IntStream.range(0, storageApi.getStorage().getTotalPages()).boxed().map(String::valueOf).toArray(String[]::new);
+                                    return IntStream.range(0, storageConfig.getPages()).boxed().map(String::valueOf).toArray(String[]::new);
 
-                                                })
-
-                                        )
-                                        , new EntitySelectorArgument.OnePlayer("player").setOptional(true))
+                                })), new EntitySelectorArgument.OnePlayer("player").setOptional(true))
                                 .executes((sender, args) -> {
                                     String id = (String) args.get(0);
                                     String storageConfigId = (String) args.get(1);
