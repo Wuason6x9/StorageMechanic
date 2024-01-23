@@ -248,7 +248,7 @@ public class StorageManager implements Listener {
                 Storage storage = data.getStorage();
                 if(pageNumber>0 && pageNumber <= storage.getStorageConfig().getPages()){
                     if(event.getPlayer().getLocation().distance(data.getLocation()) < ((SearchPageItemInterface)data.getItemInterface()).getMaxDistance() || ((SearchPageItemInterface)data.getItemInterface()).getMaxDistance() <= 0 ){
-                        Bukkit.getScheduler().runTask(core,()-> storage.openStorage(event.getPlayer(), (pageNumber - 1)));
+                        Bukkit.getScheduler().runTask(core,()-> storage.openStorageR(event.getPlayer(), (pageNumber - 1)));
                     }
                 }
                 else {

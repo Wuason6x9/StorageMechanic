@@ -126,13 +126,13 @@ public class BlockStorageManager implements Listener {
 
         switch (blockStorageConfig.getBlockStorageType()){
             case ENDER_CHEST -> {
-                blockStorage.getStoragePlayer(player.getUniqueId().toString()).openStorage(player,0);
+                blockStorage.getStoragePlayer(player.getUniqueId().toString()).openStorageR(player,0);
             }
             case PERSONAL -> {
-                blockStorage.getStoragePlayer(player.getUniqueId() + "").openStorage(player,0);
+                blockStorage.getStoragePlayer(player.getUniqueId() + "").openStorageR(player,0);
             }
             default -> {
-                blockStorage.getStoragePlayer(blockStorage.getOwnerUUID().toString()).openStorage(player,0);
+                blockStorage.getStoragePlayer(blockStorage.getOwnerUUID().toString()).openStorageR(player,0);
             }
         }
 

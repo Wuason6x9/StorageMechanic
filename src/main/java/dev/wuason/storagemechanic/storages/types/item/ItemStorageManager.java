@@ -65,7 +65,7 @@ public class ItemStorageManager implements Listener {
                 if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
                 if(e.getPlayer().isSneaking()) return;
                 e.setCancelled(true);
-                Bukkit.getScheduler().runTask(core,() -> storage.openStorage(e.getPlayer(),0));
+                Bukkit.getScheduler().runTask(core,() -> storage.openStorageR(e.getPlayer(),0));
                 return;
             }
             ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Adapter.getInstance().getAdapterID(e.getItem()));
@@ -84,7 +84,7 @@ public class ItemStorageManager implements Listener {
             e.setCancelled(true);
             Bukkit.getScheduler().runTask(core,() -> {
                 StorageUtils.addItemToInventoryOrDrop(e.getPlayer(), itemStack);
-                storage.openStorage(e.getPlayer(), 0);
+                storage.openStorageR(e.getPlayer(), 0);
             });
         }
 

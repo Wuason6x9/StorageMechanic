@@ -30,6 +30,7 @@ import dev.wuason.storagemechanic.data.storage.type.api.StorageApiData;
 import dev.wuason.storagemechanic.data.storage.type.api.StorageApiManagerData;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageManager;
+import dev.wuason.storagemechanic.storages.types.api.StorageApi;
 import dev.wuason.storagemechanic.storages.types.api.StorageApiManager;
 import dev.wuason.storagemechanic.storages.types.api.StorageApiType;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
@@ -47,21 +48,27 @@ import java.util.stream.IntStream;
 
 public class CommandManager {
     StorageMechanic core;
-    public CommandManager(StorageMechanic core){
+
+    public CommandManager(StorageMechanic core) {
         this.core = core;
     }
-    private static final String[] COLORS = {"dark_blue","dark_green","dark_aqua","dark_red","dark_purple","gold","blue","green","aqua","red","light_purple","yellow"};
 
-    public void loadCommand(){
+    private static final String[] COLORS = {"dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "blue", "green", "aqua", "red", "light_purple", "yellow"};
+
+    public void loadCommand() {
 
         new CommandAPICommand("StorageMechanic")
                 .withPermission("sm.command")
-                .withAliases("sm","storagem")
+                .withAliases("sm", "storagem")
                 .withSubcommand(new CommandAPICommand("api")
                         .withPermission("sm.command.api")
                         .withSubcommand(new CommandAPICommand("create")
                                 .withPermission("sm.command.api.create")
-                                .withArguments(new TextArgument("id"), new StringArgument("storageConfigId").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
+                                .withArguments(new TextArgument("id").replaceSuggestions(ArgumentSuggestions.strings(si -> {
+
+                                    return new String[]{"MyCustomId_" + UUID.randomUUID().toString().split("-")[1]};
+
+                                })), new StringArgument("storageConfigId").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
                                     return core.getManagers().getStorageConfigManager().getStoragesConfigMap().keySet().toArray(new String[0]);
                                 })))
                                 .executes((sender, args) -> {
@@ -75,14 +82,24 @@ public class CommandManager {
                                 .withArguments(new TextArgument("id").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
                                     return core.getManagers().getStorageApiManager().getAllStoragesId().toArray(new String[0]);
                                 })))
-                                .withArguments(new IntegerArgument("page"), new EntitySelectorArgument.OnePlayer("player").setOptional(true))
+                                .withArguments(new IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.strings(si -> {
+
+                                    String storageApiId = (String) si.previousArgs().get(0);
+                                    if (!core.getManagers().getStorageApiManager().existStorageApi(storageApiId))
+                                        return new String[0];
+
+                                    StorageApi storageApi = core.getManagers().getStorageApiManager().getStorageApi(storageApiId);
+
+                                    return IntStream.range(0, storageApi.getStorage().getTotalPages()).boxed().map(String::valueOf).toArray(String[]::new);
+
+                                })), new EntitySelectorArgument.OnePlayer("player").setOptional(true))
                                 .executes((sender, args) -> {
                                     String id = (String) args.get(0);
                                     int page = (int) args.get(1);
                                     Player player = (args.get(2) == null) ? (Player) sender : (Player) args.get(2);
                                     Storage storage = core.getManagers().getStorageApiManager().getStorageApi(id).getStorage();
-                                    if(storage == null) return;
-                                    storage.openStorage(player, page);
+                                    if (storage == null) return;
+                                    storage.openStorageR(player, page);
                                 })
                         )
                         .withSubcommand(new CommandAPICommand("delete")
@@ -99,7 +116,7 @@ public class CommandManager {
                                 .withPermission("sm.command.api.list")
                                 .executes((sender, args) -> {
                                     String list = "";
-                                    for(String id : core.getManagers().getStorageApiManager().getAllStoragesId()){
+                                    for (String id : core.getManagers().getStorageApiManager().getAllStoragesId()) {
                                         list += "<" + COLORS[MathUtils.randomNumber(0, COLORS.length - 1)] + "><click:run_command:/sm api open " + id + " 0>" + id + "</click><reset>, ";
                                     }
                                     AdventureUtils.sendMessage(sender, list);
@@ -117,24 +134,45 @@ public class CommandManager {
                         )
                         .withSubcommand(new CommandAPICommand("createIfNotExistAndOpen")
                                 .withPermission("sm.command.api.createIfNotExistAndOpen")
-                                .withArguments(new TextArgument("id"), new StringArgument("storageConfigId").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
-                                    return core.getManagers().getStorageConfigManager().getStoragesConfigMap().keySet().toArray(new String[0]);
-                                })))
-                                .withArguments(new IntegerArgument("page"),new EntitySelectorArgument.OnePlayer("player").setOptional(true))
+                                .withArguments(new TextArgument("id")
+                                                .replaceSuggestions(ArgumentSuggestions.strings(si -> {
+
+                                                    return new String[]{"MyCustomId_" + UUID.randomUUID().toString().split("-")[1]};
+
+                                                }))
+                                        , new StringArgument("storageConfigId").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
+                                            return core.getManagers().getStorageConfigManager().getStoragesConfigMap().keySet().toArray(new String[0]);
+                                        })))
+                                .withArguments(new IntegerArgument("page").replaceSuggestions(
+
+                                                ArgumentSuggestions.strings(si -> {
+
+                                                    String storageApiId = (String) si.previousArgs().get(0);
+                                                    if (!core.getManagers().getStorageApiManager().existStorageApi(storageApiId))
+                                                        return new String[0];
+
+                                                    StorageApi storageApi = core.getManagers().getStorageApiManager().getStorageApi(storageApiId);
+
+                                                    return IntStream.range(0, storageApi.getStorage().getTotalPages()).boxed().map(String::valueOf).toArray(String[]::new);
+
+                                                })
+
+                                        )
+                                        , new EntitySelectorArgument.OnePlayer("player").setOptional(true))
                                 .executes((sender, args) -> {
                                     String id = (String) args.get(0);
                                     String storageConfigId = (String) args.get(1);
                                     int page = (int) args.get(2);
                                     Player player = (args.get(3) == null) ? (Player) sender : (Player) args.get(3);
                                     Storage storage = null;
-                                    if(!core.getManagers().getStorageApiManager().existStorageApi(id)){
+                                    if (!core.getManagers().getStorageApiManager().existStorageApi(id)) {
                                         storage = core.getManagers().getStorageApiManager().createStorageApi(id, StorageApiType.COMMAND, storageConfigId).getStorage();
                                     }
-                                    if(storage == null){
+                                    if (storage == null) {
                                         storage = core.getManagers().getStorageApiManager().getStorageApi(id).getStorage();
                                     }
-                                    if(storage == null) return;
-                                    storage.openStorage(player, page);
+                                    if (storage == null) return;
+                                    storage.openStorageR(player, page);
                                 })
                         )
                         .withSubcommand(new CommandAPICommand("saveAndUnload")
@@ -158,17 +196,17 @@ public class CommandManager {
                                     StorageApiManagerData storageApiManagerData = core.getManagers().getDataManager().getStorageManagerData().getStorageApiManager();
 
                                     InvCustomPagesContentManager<String> invManager = new InvCustomPagesContentManager<String>(
-                                            IntStream.rangeClosed(0,44).boxed().toList(),
+                                            IntStream.rangeClosed(0, 44).boxed().toList(),
                                             new PreviousPageItem(45, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.previous_page", "INCORRECT")).build()),
-                                            new NextPageItem(53, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.next_page","INCORRECT")).build()),
+                                            new NextPageItem(53, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.next_page", "INCORRECT")).build()),
                                             (inv, page) -> {
 
-                                                HashMap<String, String> replaces = new HashMap<>(){{
+                                                HashMap<String, String> replaces = new HashMap<>() {{
                                                     put("%page%", page + 1 + "");
                                                     put("%max_page%", inv.getMaxPage() + 1 + "");
                                                 }};
 
-                                                InvCustomPagesContent pagesContent = new InvCustomPagesContent(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.title", "untitled"),replaces), player), 54, inv, page){
+                                                InvCustomPagesContent pagesContent = new InvCustomPagesContent(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.title", "untitled"), replaces), player), 54, inv, page) {
                                                     @Override
                                                     public void onClick(InventoryClickEvent event) {
                                                         event.setCancelled(true);
@@ -183,22 +221,20 @@ public class CommandManager {
 
                                             },
                                             core.getManagers().getStorageApiManager().getAllStoragesId().stream().toList()
-                                    ){
+                                    ) {
 
                                         @Override
                                         public ItemStack onContentPage(int page, int slot, String content) {
                                             StorageApiData storageApiData = null;
-                                            if(storageApiManager.getStorageApis().containsKey(content)){
+                                            if (storageApiManager.getStorageApis().containsKey(content)) {
                                                 storageApiData = storageApiManagerData.StorageApiToStorageApiData(storageApiManager.getStorageApis().get(content));
-                                            }
-                                            else {
+                                            } else {
                                                 storageApiData = storageApiManagerData.getStorageApiData(content);
                                             }
                                             Storage storage = null;
-                                            if(storageManager.getStorageMap().containsKey(storageApiData.getStorageId())){
+                                            if (storageManager.getStorageMap().containsKey(storageApiData.getStorageId())) {
                                                 storage = storageManager.getStorageMap().get(storageApiData.getStorageId());
-                                            }
-                                            else {
+                                            } else {
                                                 storage = storageManagerData.loadStorageData(storageApiData.getStorageId()); //ALL VARIABLES: %loaded%, %total_items%, %creation_date%, %last_open%, %storage_config_id%, %storage_origin_context%, %storage_max_pages%, %storage_viewers%
                                             }
                                             //Vars
@@ -216,8 +252,8 @@ public class CommandManager {
                                             replaces.put("%storage_api_id%", content);
 
 
-                                            ItemStack item = new ItemBuilderMechanic(Material.CHEST).setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.item_name", "untitled"),replaces), player))
-                                                    .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("api.panel.item_lore", new ArrayList<>()),replaces), player))
+                                            ItemStack item = new ItemBuilderMechanic(Material.CHEST).setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.item_name", "untitled"), replaces), player))
+                                                    .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("api.panel.item_lore", new ArrayList<>()), replaces), player))
                                                     .build();
                                             return item;
                                         }
@@ -225,28 +261,26 @@ public class CommandManager {
                                         @Override
                                         public void onContentClick(ContentClickEvent event) {
 
-                                            if(event.getEvent().isShiftClick()){
-                                                if(event.getEvent().isLeftClick()){
+                                            if (event.getEvent().isShiftClick()) {
+                                                if (event.getEvent().isLeftClick()) {
                                                     setContent(event.getInventoryCustomPagesContent().getPage());
                                                     event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
                                                 }
-                                                if(event.getEvent().isRightClick()){
+                                                if (event.getEvent().isRightClick()) {
                                                     core.getManagers().getStorageApiManager().removeStorageApi((String) event.getContent());
                                                     removeContent((String) event.getContent());
                                                     setContent(event.getInventoryCustomPagesContent().getPage());
                                                     event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
                                                 }
-                                            }
-                                            else {
-                                                if(event.getEvent().isRightClick()){
-                                                    if(core.getManagers().getStorageApiManager().getStorageApis().containsKey((String) event.getContent())){
+                                            } else {
+                                                if (event.getEvent().isRightClick()) {
+                                                    if (core.getManagers().getStorageApiManager().getStorageApis().containsKey((String) event.getContent())) {
                                                         core.getManagers().getStorageApiManager().saveStorageApi((String) event.getContent(), SaveCause.NORMAL_SAVE);
                                                         setContent(event.getInventoryCustomPagesContent().getPage());
                                                         event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
                                                     }
-                                                }
-                                                else if (event.getEvent().isLeftClick()){
-                                                    core.getManagers().getStorageApiManager().getStorageApi((String) event.getContent()).getStorage().openStorage(player, 0);
+                                                } else if (event.getEvent().isLeftClick()) {
+                                                    core.getManagers().getStorageApiManager().getStorageApi((String) event.getContent()).getStorage().openStorageR(player, 0);
                                                 }
                                             }
 
@@ -254,7 +288,7 @@ public class CommandManager {
 
                                         @Override
                                         public void onOpenPage(OpenPageEvent event) {
-                                            event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName() , e -> e.setCancelled(true));
+                                            event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
                                         }
                                     };
 
@@ -274,12 +308,12 @@ public class CommandManager {
                                     InvCustomPagesAnvil<CustomStack> invCustomPagesAnvil = new InvCustomPagesAnvil<CustomStack>(
                                             "Test",
                                             player,
-                                            IntStream.rangeClosed(9,35).boxed().toList(),
+                                            IntStream.rangeClosed(9, 35).boxed().toList(),
                                             ItemsAdder.getAllItems(),
                                             new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem(0, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage("<red><< Previous page").build()),
                                             new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem(8, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage("<red>Next page >>").build()),
                                             new ItemStack(Material.BARRIER)
-                                    ){
+                                    ) {
                                         @Override
                                         public ItemStack onContentPage(int page, int slot, CustomStack content) {
                                             return content.getItemStack();
@@ -302,7 +336,7 @@ public class CommandManager {
                                         {
                                             savePlayerInventory();
                                             setRenameTextListener(1L);
-                                            ItemInterface itemInterface = new ItemInterface(1, new ItemBuilderMechanic(Material.COMPASS).setNameWithMiniMessage("<red>Search").build()){
+                                            ItemInterface itemInterface = new ItemInterface(1, new ItemBuilderMechanic(Material.COMPASS).setNameWithMiniMessage("<red>Search").build()) {
 
                                                 @Override
                                                 public void onClick(InventoryClickEvent event, InvCustom inventoryCustom) {
@@ -363,14 +397,14 @@ public class CommandManager {
                                 })
                         )
                         .withSubcommands(new CommandAPICommand("open")
-                                .withArguments(new IntegerArgument("page"),new StringArgument("ID").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
+                                .withArguments(new IntegerArgument("page"), new StringArgument("ID").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
                                     String[] ids = core.getManagers().getStorageManager().getStorageMap().keySet().toArray(new String[0]);
                                     return ids;
                                 })))
                                 .executes((sender, args) -> {
 
-                                    Storage storage = core.getManagers().getStorageManager().getStorage((String)args.get(1));
-                                    storage.openStorage((Player)sender, (int)args.get(0));
+                                    Storage storage = core.getManagers().getStorageManager().getStorage((String) args.get(1));
+                                    storage.openStorageR((Player) sender, (int) args.get(0));
 
                                 })
                         )
@@ -392,19 +426,19 @@ public class CommandManager {
                                     StorageManager storageManager = core.getManagers().getStorageManager();
                                     StorageManagerData storageManagerData = core.getManagers().getDataManager().getStorageManagerData();
 
-                                    PageCustomInfo<Player> pagePlayers = new PageCustomInfo<Player>(Arrays.asList(0,1,2,3,9,10,11,12,18,19,20,21,27,28,29,30,36,37,38,39),
+                                    PageCustomInfo<Player> pagePlayers = new PageCustomInfo<Player>(Arrays.asList(0, 1, 2, 3, 9, 10, 11, 12, 18, 19, 20, 21, 27, 28, 29, 30, 36, 37, 38, 39),
                                             new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.PreviousPageItem(45, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.previous_page", "INCORRECT")).build()),
                                             new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.NextPageItem(48, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.next_page", "INCORRECT")).build())
-                                            );
+                                    );
 
                                     pagePlayers.setContentList(Bukkit.getOnlinePlayers().stream().map(p -> p.getPlayer()).toList());
 
-                                    PageCustomInfo<String> pageStorages = new PageCustomInfo<String>(Arrays.asList(5,6,7,8,14,15,16,17,23,24,25,26,32,33,34,35,41,42,43,44),
+                                    PageCustomInfo<String> pageStorages = new PageCustomInfo<String>(Arrays.asList(5, 6, 7, 8, 14, 15, 16, 17, 23, 24, 25, 26, 32, 33, 34, 35, 41, 42, 43, 44),
                                             new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.PreviousPageItem(50, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage("<red>Previous page").build()),
                                             new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.NextPageItem(53, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage("<red>Next page").build())
                                     );
 
-                                    InvCustomPagesContentMultiple invMultiple = new InvCustomPagesContentMultiple(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.title", "UNTITLED"),player),54){
+                                    InvCustomPagesContentMultiple invMultiple = new InvCustomPagesContentMultiple(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.title", "UNTITLED"), player), 54) {
 
                                         private Player selectedPlayer = null;
 
@@ -412,6 +446,7 @@ public class CommandManager {
                                         public void onDrag(InventoryDragEvent event) {
                                             event.setCancelled(true);
                                         }
+
                                         @Override
                                         public void onClick(InventoryClickEvent event) {
                                             event.setCancelled(true);
@@ -420,29 +455,28 @@ public class CommandManager {
                                         @Override
                                         public ItemStack onContentPage(Content content) {
 
-                                            if(content.getPageCustomInfo().equals(pagePlayers)){
+                                            if (content.getPageCustomInfo().equals(pagePlayers)) {
 
                                                 PlayerData objectiveData = core.getManagers().getDataManager().getPlayerDataManager().getPlayerData(((Player) content.getContent()).getUniqueId());
                                                 Map<String, String> replaces = new HashMap<>();
                                                 replaces.put("%player%", ((Player) content.getContent()).getName());
-                                                if(objectiveData != null){
+                                                if (objectiveData != null) {
                                                     replaces.put("%total_storages%", objectiveData.getStorages().size() + "");
                                                     replaces.put("%total_block_storages%", objectiveData.getBlockStorages().size() + "");
                                                     replaces.put("%total_furniture_storages%", objectiveData.getFurnitureStorages().size() + "");
                                                 }
-                                                return new ItemBuilderMechanic(Material.PLAYER_HEAD).setNameWithMiniMessage(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.item_name", "INCORRECT"), replaces)).setSkullOwner((Player) content.getContent()).setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.players.players.item_lore", new ArrayList<>()),replaces), (Player) content.getContent())).build();
+                                                return new ItemBuilderMechanic(Material.PLAYER_HEAD).setNameWithMiniMessage(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.item_name", "INCORRECT"), replaces)).setSkullOwner((Player) content.getContent()).setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.players.players.item_lore", new ArrayList<>()), replaces), (Player) content.getContent())).build();
 
                                             }
 
-                                            if(content.getPageCustomInfo().equals(pageStorages)){
+                                            if (content.getPageCustomInfo().equals(pageStorages)) {
 
                                                 String storageId = (String) content.getContent();
 
                                                 Storage storage = null;
-                                                if(storageManager.getStorageMap().containsKey(storageId)){
+                                                if (storageManager.getStorageMap().containsKey(storageId)) {
                                                     storage = storageManager.getStorageMap().get(storageId);
-                                                }
-                                                else {
+                                                } else {
                                                     storage = storageManagerData.loadStorageData(storageId); //ALL VARIABLES: %loaded%, %total_items%, %creation_date%, %last_open%, %storage_config_id%, %storage_origin_context%, %storage_max_pages%, %storage_viewers%
                                                 }
 
@@ -460,8 +494,8 @@ public class CommandManager {
                                                 replaces.put("%storage_id%", storageId);
 
                                                 ItemStack item = new ItemBuilderMechanic(Material.CHEST)
-                                                        .setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.storages.item_name", "INCORRECT"),replaces),selectedPlayer))
-                                                        .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.players.storages.item_lore", new ArrayList<>()),replaces),selectedPlayer))
+                                                        .setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.storages.item_name", "INCORRECT"), replaces), selectedPlayer))
+                                                        .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.players.storages.item_lore", new ArrayList<>()), replaces), selectedPlayer))
                                                         .build();
                                                 return item;
                                             }
@@ -472,10 +506,10 @@ public class CommandManager {
                                         @Override
                                         public void onContentClick(ContentMultipleClickEvent event) {
 
-                                            if(event.getPageCustomInfo().equals(pagePlayers)){
+                                            if (event.getPageCustomInfo().equals(pagePlayers)) {
                                                 Player player = (Player) event.getContent();
                                                 PlayerData playerData = core.getManagers().getDataManager().getPlayerDataManager().getPlayerData(player.getUniqueId());
-                                                if(playerData == null) return;
+                                                if (playerData == null) return;
                                                 List<String> storages = playerData.getStorages().keySet().stream().toList();
                                                 pageStorages.setContentList(storages);
                                                 setItemsSelected();
@@ -483,38 +517,36 @@ public class CommandManager {
                                                 setContentAndButtons(pageStorages);
 
                                             }
-                                            if(event.getPageCustomInfo().equals(pageStorages)){
-                                                if(event.getEvent().isShiftClick()){
-                                                    if(event.getEvent().isRightClick()){
+                                            if (event.getPageCustomInfo().equals(pageStorages)) {
+                                                if (event.getEvent().isShiftClick()) {
+                                                    if (event.getEvent().isRightClick()) {
                                                         core.getManagers().getStorageManager().getStorage((String) event.getContent()).removeAllItems();
                                                         setContentPage(event.getPageCustomInfo());
                                                     }
-                                                }
-                                                else{
-                                                    if(event.getEvent().isRightClick()){
-                                                        if(core.getManagers().getStorageManager().getStorageMap().containsKey((String) event.getContent())){
+                                                } else {
+                                                    if (event.getEvent().isRightClick()) {
+                                                        if (core.getManagers().getStorageManager().getStorageMap().containsKey((String) event.getContent())) {
                                                             core.getManagers().getStorageManager().saveStorage(core.getManagers().getStorageManager().getStorageMap().get((String) event.getContent()), SaveCause.NORMAL_SAVE);
                                                             setContentPage(event.getPageCustomInfo());
                                                         }
-                                                    }
-                                                    else if (event.getEvent().isLeftClick()){
-                                                        core.getManagers().getStorageManager().getStorage((String) event.getContent()).openStorage(player, 0);
+                                                    } else if (event.getEvent().isLeftClick()) {
+                                                        core.getManagers().getStorageManager().getStorage((String) event.getContent()).openStorageR(player, 0);
                                                     }
                                                 }
                                             }
                                         }
 
-                                        public Player getSelectedPlayer(){
+                                        public Player getSelectedPlayer() {
                                             return selectedPlayer;
                                         }
 
-                                        public void setItemsNotSelected(){
-                                            setSimpleItems(new int[]{4,13,22,31,40,49}, new ItemBuilderMechanic(Material.RED_STAINED_GLASS_PANE).buildWithVoidName());
-                                        }
-                                        public void setItemsSelected(){
-                                            setSimpleItems(new int[]{4,13,22,31,40,49}, new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
+                                        public void setItemsNotSelected() {
+                                            setSimpleItems(new int[]{4, 13, 22, 31, 40, 49}, new ItemBuilderMechanic(Material.RED_STAINED_GLASS_PANE).buildWithVoidName());
                                         }
 
+                                        public void setItemsSelected() {
+                                            setSimpleItems(new int[]{4, 13, 22, 31, 40, 49}, new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
+                                        }
 
 
                                         {
@@ -531,17 +563,17 @@ public class CommandManager {
                                             setItem(46, new ItemBuilderMechanic(Material.COMPASS).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.refresh_item_name", "INCORRECT")).build(), e -> {
                                                 pagePlayers.firstPage();
                                                 setContentAndButtons(pagePlayers);
-                                                if(selectedPlayer != null) setItemsSelected();
+                                                if (selectedPlayer != null) setItemsSelected();
                                                 else setItemsNotSelected();
                                             });
                                             setItem(51, new ItemBuilderMechanic(Material.COMPASS).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.storages.refresh_item_name", "INCORRECT")).build(), e -> {
-                                                if(selectedPlayer == null) return;
+                                                if (selectedPlayer == null) return;
                                                 setItemsSelected();
                                                 pageStorages.firstPage();
                                                 setContentAndButtons(pageStorages);
                                             });
                                             setItem(47, new ItemBuilderMechanic(Material.BARRIER).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.remove_selection_item_name", "INCORRECT")).build(), e -> {
-                                                if(selectedPlayer == null) return;
+                                                if (selectedPlayer == null) return;
                                                 selectedPlayer = null;
                                                 setItemsNotSelected();
                                                 pageStorages.clearDataSlots(this);
@@ -549,7 +581,6 @@ public class CommandManager {
                                                 pageStorages.firstPage();
                                                 pageStorages.removeButtonsPage(this);
                                             });
-
 
 
                                         }
@@ -569,23 +600,23 @@ public class CommandManager {
                                     Player player = (Player) sender;
 
                                     PlayerData playerData = core.getManagers().getDataManager().getPlayerDataManager().getPlayerData(objective.getUniqueId());
-                                    if(playerData == null) return;
+                                    if (playerData == null) return;
 
                                     Set<String> storages = playerData.getStorages().keySet();
-                                    if(storages  == null) return;
+                                    if (storages == null) return;
 
-                                    InvCustomPagesContentManager<String> invManager = new InvCustomPagesContentManager<String>(IntStream.rangeClosed(0,44).boxed().toList(), new PreviousPageItem(45, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.previous_page", "INCORRECT")).build()), new NextPageItem(53, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.next_page","INCORRECT")).build()), (inv, page) ->
+                                    InvCustomPagesContentManager<String> invManager = new InvCustomPagesContentManager<String>(IntStream.rangeClosed(0, 44).boxed().toList(), new PreviousPageItem(45, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.previous_page", "INCORRECT")).build()), new NextPageItem(53, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.next_page", "INCORRECT")).build()), (inv, page) ->
                                     {
-                                        HashMap<String, String> replaces = new HashMap<>(){{
+                                        HashMap<String, String> replaces = new HashMap<>() {{
                                             put("%player%", objective.getName());
                                             put("%page%", page + 1 + "");
                                             put("%max_page%", inv.getMaxPage() + 1 + "");
                                         }};
 
-                                        InvCustomPagesContent pagesContent = new InvCustomPagesContent(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.title", "untitled"),replaces), objective), 54, inv, page);
+                                        InvCustomPagesContent pagesContent = new InvCustomPagesContent(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.title", "untitled"), replaces), objective), 54, inv, page);
                                         return pagesContent;
 
-                                    }, storages.stream().toList()){
+                                    }, storages.stream().toList()) {
 
 
                                         @Override
@@ -594,10 +625,9 @@ public class CommandManager {
                                             StorageManagerData storageManagerData = core.getManagers().getDataManager().getStorageManagerData();
 
                                             Storage storage = null;
-                                            if(storageManager.getStorageMap().containsKey(content)){
+                                            if (storageManager.getStorageMap().containsKey(content)) {
                                                 storage = storageManager.getStorageMap().get(content);
-                                            }
-                                            else {
+                                            } else {
                                                 storage = storageManagerData.loadStorageData(content); //ALL VARIABLES: %loaded%, %total_items%, %creation_date%, %last_open%, %storage_config_id%, %storage_origin_context%, %storage_max_pages%, %storage_viewers%
                                             }
 
@@ -615,8 +645,8 @@ public class CommandManager {
                                             replaces.put("%storage_id%", content);
 
 
-                                            ItemStack item = new ItemBuilderMechanic(Material.CHEST).setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.item_name", "untitled"),replaces), objective))
-                                                    .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.player.lore", new ArrayList<>()),replaces), objective))
+                                            ItemStack item = new ItemBuilderMechanic(Material.CHEST).setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.item_name", "untitled"), replaces), objective))
+                                                    .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.player.lore", new ArrayList<>()), replaces), objective))
                                                     .build();
                                             return item;
                                         }
@@ -624,26 +654,24 @@ public class CommandManager {
                                         @Override
                                         public void onContentClick(ContentClickEvent event) {
 
-                                            if(event.getEvent().isShiftClick()){
-                                                if(event.getEvent().isLeftClick()){
+                                            if (event.getEvent().isShiftClick()) {
+                                                if (event.getEvent().isLeftClick()) {
                                                     setContent(event.getInventoryCustomPagesContent().getPage());
-                                                    event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName() , e -> e.setCancelled(true));
+                                                    event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
                                                 }
-                                                if(event.getEvent().isRightClick()){
+                                                if (event.getEvent().isRightClick()) {
                                                     core.getManagers().getStorageManager().getStorage((String) event.getContent()).removeAllItems();
                                                     setContent(event.getInventoryCustomPagesContent().getPage());
                                                 }
-                                            }
-                                            else {
-                                                if(event.getEvent().isRightClick()){
-                                                    if(core.getManagers().getStorageManager().getStorageMap().containsKey((String) event.getContent())){
+                                            } else {
+                                                if (event.getEvent().isRightClick()) {
+                                                    if (core.getManagers().getStorageManager().getStorageMap().containsKey((String) event.getContent())) {
                                                         core.getManagers().getStorageManager().saveStorage(core.getManagers().getStorageManager().getStorageMap().get((String) event.getContent()), SaveCause.NORMAL_SAVE);
                                                         setContent(event.getInventoryCustomPagesContent().getPage());
-                                                        event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName() , e -> e.setCancelled(true));
+                                                        event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
                                                     }
-                                                }
-                                                else if (event.getEvent().isLeftClick()){
-                                                    core.getManagers().getStorageManager().getStorage((String) event.getContent()).openStorage(player, 0);
+                                                } else if (event.getEvent().isLeftClick()) {
+                                                    core.getManagers().getStorageManager().getStorage((String) event.getContent()).openStorageR(player, 0);
                                                 }
                                             }
 
@@ -651,7 +679,7 @@ public class CommandManager {
 
                                         @Override
                                         public void onOpenPage(OpenPageEvent event) {
-                                            event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName() , e -> e.setCancelled(true));
+                                            event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
                                         }
                                     };
                                     invManager.open(player, 0);
@@ -667,7 +695,7 @@ public class CommandManager {
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
-                            sender.sendMessage(AdventureUtils.deserializeLegacy("StorageMechanic reloaded!",null));
+                            sender.sendMessage(AdventureUtils.deserializeLegacy("StorageMechanic reloaded!", null));
                         })
                 )
                 .withSubcommands(new CommandAPICommand("customItems")
@@ -677,9 +705,9 @@ public class CommandManager {
 
                                     String[] ids = new String[core.getManagers().getCustomItemsManager().getAllCustomItems().size()];
 
-                                    for(int i = 0; i<core.getManagers().getCustomItemsManager().getAllCustomItems().size(); i++){
+                                    for (int i = 0; i < core.getManagers().getCustomItemsManager().getAllCustomItems().size(); i++) {
 
-                                       ids[i] = core.getManagers().getCustomItemsManager().getAllCustomItems().get(i).getId();
+                                        ids[i] = core.getManagers().getCustomItemsManager().getAllCustomItems().get(i).getId();
 
                                     }
 
@@ -693,15 +721,15 @@ public class CommandManager {
                                     int quantity = (int) args.get(1);
                                     String id = (String) args.get(0);
                                     CustomItem customItem = core.getManagers().getCustomItemsManager().getCustomItemById(id);
-                                    if(quantity<1||quantity>64) quantity = 64;
-                                    if(customItem != null){
+                                    if (quantity < 1 || quantity > 64) quantity = 64;
+                                    if (customItem != null) {
                                         ItemStack itemStack = customItem.getItemStack();
                                         itemStack.setAmount(quantity);
-                                        StorageUtils.addItemToInventoryOrDrop(player,itemStack);
-                                        AdventureUtils.playerMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.valid_id","you have received: " + id).replace("%id%",id), player);
+                                        StorageUtils.addItemToInventoryOrDrop(player, itemStack);
+                                        AdventureUtils.playerMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.valid_id", "you have received: " + id).replace("%id%", id), player);
                                         return;
                                     }
-                                    AdventureUtils.playerMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.invalid_id","Invalid ID").replace("%id%",id), player);
+                                    AdventureUtils.playerMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.invalid_id", "Invalid ID").replace("%id%", id), player);
                                 })
                         )
                         .withSubcommands(new CommandAPICommand("give")
@@ -711,7 +739,7 @@ public class CommandManager {
 
                                     String[] ids = new String[core.getManagers().getCustomItemsManager().getAllCustomItems().size()];
 
-                                    for(int i = 0; i<core.getManagers().getCustomItemsManager().getAllCustomItems().size(); i++){
+                                    for (int i = 0; i < core.getManagers().getCustomItemsManager().getAllCustomItems().size(); i++) {
 
                                         ids[i] = core.getManagers().getCustomItemsManager().getAllCustomItems().get(i).getId();
 
@@ -723,27 +751,29 @@ public class CommandManager {
                                 .withArguments(new IntegerArgument("amount"))
                                 .executes((sender, args) -> {
                                     Collection<Player> players = (Collection<Player>) args.get(0);
-                                    if(players.isEmpty()) return;
+                                    if (players.isEmpty()) return;
                                     int quantity = (int) args.get(2);
                                     String id = (String) args.get(1);
                                     CustomItem customItem = core.getManagers().getCustomItemsManager().getCustomItemById(id);
-                                    if(quantity<1||quantity>64) quantity = 64;
-                                    if(customItem != null){
+                                    if (quantity < 1 || quantity > 64) quantity = 64;
+                                    if (customItem != null) {
                                         ItemStack itemStack = customItem.getItemStack();
                                         itemStack.setAmount(quantity);
-                                        for(Player player : players){
-                                            StorageUtils.addItemToInventoryOrDrop(player,itemStack);
+                                        for (Player player : players) {
+                                            StorageUtils.addItemToInventoryOrDrop(player, itemStack);
                                         }
-                                        sender.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.valid_id","you have received: " + id).replace("%id%",id),null));
+                                        sender.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.valid_id", "you have received: " + id).replace("%id%", id), null));
                                         return;
                                     }
 
-                                    sender.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.invalid_id","Invalid ID").replace("%id%",id),null));
+                                    sender.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.commands.custom_blocks.get.invalid_id", "Invalid ID").replace("%id%", id), null));
                                 })
                         )
                 )
                 .withPermission("sm.command.main")
                 .register();
-    };
+    }
+
+    ;
 
 }

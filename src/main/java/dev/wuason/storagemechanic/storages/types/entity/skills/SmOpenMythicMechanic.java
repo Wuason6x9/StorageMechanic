@@ -19,8 +19,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.UUID;
-
 public class SmOpenMythicMechanic implements ITargetedEntitySkill {
     private StorageMechanic core;
     private String storageConfigId;
@@ -54,7 +52,7 @@ public class SmOpenMythicMechanic implements ITargetedEntitySkill {
         Player player = (Player) skillMetadata.getTrigger().getBukkitEntity();
         String finalIdTriggerSkill = idTriggerSkill;
         Bukkit.getScheduler().runTask(core,() -> {
-            boolean opened = storage.openStorage(player, 0);
+            boolean opened = storage.openStorageR(player, 0);
             if(opened && storage.getAllViewers().size()<2){
                 core.getManagers().getMythicManager().runSkills(finalIdTriggerSkill,caster, StorageTriggers.OPEN_STORAGE, BukkitAdapter.adapt(player.getLocation()),BukkitAdapter.adapt(player),null);
             }

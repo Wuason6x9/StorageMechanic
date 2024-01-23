@@ -146,13 +146,13 @@ public class FurnitureStorageManager {
 
         switch (furnitureStorageConfig.getFurnitureStorageType()){
             case ENDER_CHEST -> {
-                furnitureStorage.getStoragePlayer(player.getUniqueId().toString()).openStorage(player,0);
+                furnitureStorage.getStoragePlayer(player.getUniqueId().toString()).openStorageR(player,0);
             }
             case PERSONAL -> {
-                furnitureStorage.getStoragePlayer(player.getUniqueId() + "").openStorage(player,0);
+                furnitureStorage.getStoragePlayer(player.getUniqueId() + "").openStorageR(player,0);
             }
             default -> {
-                furnitureStorage.getStoragePlayer(furnitureStorage.getOwnerUUID().toString()).openStorage(player,0);
+                furnitureStorage.getStoragePlayer(furnitureStorage.getOwnerUUID().toString()).openStorageR(player,0);
             }
         }
 

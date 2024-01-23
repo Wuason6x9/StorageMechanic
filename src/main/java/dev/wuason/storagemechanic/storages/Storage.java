@@ -107,8 +107,14 @@ public class Storage {
         }
     }
 
-    public boolean openStorage(Player player, int page) {
-
+    /**
+     * Opens a storage for a player on the specified page.
+     *
+     * @param player The player to open the storage for.
+     * @param page The page of the storage to open.
+     * @return True if the storage was successfully opened, false otherwise.
+     */
+    public boolean openStorage(Player player, int page){
         StorageConfig storageConfig = getStorageConfig();
 
         if(storageConfig.getMaxViewers() != -1){
@@ -175,6 +181,18 @@ public class Storage {
         Bukkit.getPluginManager().callEvent(openStorageEvent);
 
         return true;
+    }
+
+    /**
+     * Opens the storage for a given player and page.
+     *
+     * @param player the player for whom the storage will be opened
+     * @param page the page number of the storage to be opened
+     * @return true if the storage was successfully opened, false otherwise
+     */
+    public boolean openStorageR(Player player, int page) {
+        if(page<0 || page>=getTotalPages()) return false;
+        return openStorage(player,page);
     }
     public void startAnimationStages(int page){
         if(currentStages.containsKey(page)) return;
