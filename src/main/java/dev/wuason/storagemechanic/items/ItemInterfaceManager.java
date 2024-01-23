@@ -2,7 +2,6 @@ package dev.wuason.storagemechanic.items;
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.inventory.inventories.SearchItem.SearchType;
 import dev.wuason.storagemechanic.items.items.*;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.NamespacedKey;

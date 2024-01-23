@@ -108,9 +108,8 @@ public class ConfigManager {
         core.getManagers().getBlockStorageConfigManager().loadBlockStorageConfigs();
         core.getManagers().getItemStorageConfigManager().loadItemStorageConfigs();
         core.getManagers().getFurnitureStorageConfigManager().loadFurnitureStorageConfigs();
-        core.getManagers().getInventoryConfigManager().loadInventoriesConfig();
-        core.getManagers().getInventoryConfigManager1().load();
-        AdventureUtils.sendMessagePluginConsole(core, "<aqua> Inventories1 loaded: <yellow>" + core.getManagers().getInventoryConfigManager1().getInventories().size());
+        core.getManagers().getInventoryConfigManager().load();
+        AdventureUtils.sendMessagePluginConsole(core, "<aqua> Inventories loaded: <yellow>" + core.getManagers().getInventoryConfigManager().getInventories().size());
         core.getManagers().getRecipesManager().loadRecipes();
         setConfigLoaded(true);
     }

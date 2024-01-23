@@ -1,9 +1,8 @@
-package dev.wuason.storagemechanic.inventories;
+package dev.wuason.storagemechanic.inventory;
 
 import dev.wuason.mechanics.mechanics.MechanicAddon;
 import dev.wuason.storagemechanic.StorageMechanic;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 

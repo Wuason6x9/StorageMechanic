@@ -5,7 +5,7 @@ import dev.wuason.mechanics.actions.functions.Functions;
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.PlayerUtils;
-import dev.wuason.nms.wrappers.ServerNmsVersion;
+import dev.wuason.nms.wrappers.NMSManager;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.Storage;
 import org.bukkit.Material;
@@ -134,12 +134,12 @@ public class FunctionsStorage {
                 Inventory inventory = (Inventory) objects[2];
                 if(toAll == true){
                     for(HumanEntity player : inventory.getViewers()){
-                        ServerNmsVersion.getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(title, (Player) player),(Player) player);
+                        NMSManager.getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(title, (Player) player),(Player) player);
                     }
                     return false;
                 }
                 Player player = (Player) objects[3];
-                ServerNmsVersion.getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(title, player), player);
+                NMSManager.getVersionWrapper().updateCurrentInventoryTitle(AdventureUtils.deserializeJson(title, player), player);
                 return false;
             });
         });

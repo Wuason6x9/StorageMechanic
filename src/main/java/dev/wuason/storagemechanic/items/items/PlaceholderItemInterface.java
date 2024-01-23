@@ -43,6 +43,16 @@ public class PlaceholderItemInterface extends ItemInterface {
         return persistentDataContainer.has(NAMESPACED_KEY_PLACEHOLDER, PersistentDataType.STRING);
     }
 
+    public static ItemStack getOriginalItemStack(ItemStack itemStack){
+        if(itemStack == null || itemStack.getType().equals(Material.AIR)) return null;
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        PersistentDataContainer itemPersistentDataContainer = itemMeta.getPersistentDataContainer();
+        itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
+        itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
+    }
+
     @Override
     public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
         Player player = (Player) event.getWhoClicked();

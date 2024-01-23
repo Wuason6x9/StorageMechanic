@@ -298,7 +298,7 @@ public class AnvilInventory {
     public Set<SearchItem> searchItems(String s, SearchType searchType){
         Set<SearchItem> searchItems = new HashSet<>();
         switch (searchType){
-            case NAME -> {
+            case SearchType.NAME -> {
                 inSearch = true;
                 updateStatusItem();
                 List<SearchItem> list = storage.searchItemsByName(s, false).stream().map(item -> new SearchItem(item.getSlot(),item.getPage(), item.getItemStack(), item.getStorage())).toList();
@@ -309,7 +309,7 @@ public class AnvilInventory {
                 updateStatusItem();
             }
 
-            case MATERIAL -> {
+            case SearchType.MATERIAL -> {
                 inSearch = true;
                 updateStatusItem();
                 List<SearchItem> list = storage.searchItemsByMaterial(s, false).stream().map(item -> new SearchItem(item.getSlot(),item.getPage(), item.getItemStack(), item.getStorage())).toList();

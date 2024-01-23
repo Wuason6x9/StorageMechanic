@@ -2,7 +2,7 @@
 .idea/*
 pack/
 bin/
-src_actions/
+src_ignore/
 
 *.iml
 *.ipr

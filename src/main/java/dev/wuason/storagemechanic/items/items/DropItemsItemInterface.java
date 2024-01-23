@@ -5,9 +5,8 @@ import dev.wuason.libs.invmechaniclib.types.InvCustom;
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.configuration.inventories.InventoryConfig;
 import dev.wuason.mechanics.utils.AdventureUtils;
-import dev.wuason.nms.wrappers.ServerNmsVersion;
+import dev.wuason.nms.wrappers.NMSManager;
 import dev.wuason.storagemechanic.StorageMechanic;
-import dev.wuason.storagemechanic.inventories.InventoryConfigManager;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageItemDataInfo;
@@ -20,11 +19,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.function.BiConsumer;
 
 public class DropItemsItemInterface extends ItemInterface {
 
@@ -43,7 +37,7 @@ public class DropItemsItemInterface extends ItemInterface {
     @Override
     public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
 
-        if(!core.getManagers().getInventoryConfigManager1().existInventoryConfig(inventoryConfigId)){
+        if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(inventoryConfigId)){
 
             AdventureUtils.sendMessagePluginConsole(core, String.format("<red>InventoryConfig %s not found", inventoryConfigId));
 
@@ -58,7 +52,7 @@ public class DropItemsItemInterface extends ItemInterface {
             return;
         }
 
-        InventoryConfig invConfig = core.getManagers().getInventoryConfigManager1().createInventoryConfig(invConfigBuilder -> {
+        InventoryConfig invConfig = core.getManagers().getInventoryConfigManager().createInventoryConfig(invConfigBuilder -> {
             invConfigBuilder.setId(inventoryConfigId);
         });
 
@@ -103,7 +97,7 @@ public class DropItemsItemInterface extends ItemInterface {
 
 
     public void byMaterial(Player player, StorageInventory storageInventory){
-        ServerNmsVersion.getVersionWrapper().openSing(player, lines -> {
+        NMSManager.getVersionWrapper().openSing(player, lines -> {
 
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -122,7 +116,7 @@ public class DropItemsItemInterface extends ItemInterface {
     }
 
     public void byItemAdapter(Player player, StorageInventory storageInventory){
-        ServerNmsVersion.getVersionWrapper().openSing(player, lines -> {
+        NMSManager.getVersionWrapper().openSing(player, lines -> {
 
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -141,7 +135,7 @@ public class DropItemsItemInterface extends ItemInterface {
     }
 
     public void byDisplayName(Player player, StorageInventory storageInventory){
-        ServerNmsVersion.getVersionWrapper().openSing(player, lines -> {
+        NMSManager.getVersionWrapper().openSing(player, lines -> {
 
             StringBuilder stringBuilder = new StringBuilder();
 

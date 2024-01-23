@@ -1,14 +1,16 @@
 package dev.wuason.storagemechanic.items.items;
 
-import com.google.common.collect.ImmutableCollection;
 import dev.wuason.libs.invmechaniclib.types.InvCustom;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.InvCustomPagesContent;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.InvCustomPagesContentManager;
+import dev.wuason.libs.invmechaniclib.types.pages.content.normal.events.ContentClickEvent;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.NextPageItem;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.PreviousPageItem;
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.configuration.inventories.InventoryConfig;
+import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
+import dev.wuason.mechanics.utils.InventoryUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.nms.wrappers.NMSManager;
 import dev.wuason.storagemechanic.StorageMechanic;
@@ -21,12 +23,17 @@ import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 public class SearchItemsItemInterface extends ItemInterface {
@@ -66,12 +73,12 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         //**** CHECKS ****//
 
-        if(!core.getManagers().getInventoryConfigManager1().existInventoryConfig(invId)){
+        if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(invId)){
             AdventureUtils.sendMessagePluginConsole(core, String.format("<red>InventoryConfig %s not found", invId));
             return;
         }
 
-        InventoryConfig invConfig = core.getManagers().getInventoryConfigManager1().createInventoryConfig( builder -> builder.setId(invId));
+        InventoryConfig invConfig = core.getManagers().getInventoryConfigManager().createInventoryConfig(builder -> builder.setId(invId));
 
         InvCustom invCustom = new InvCustom(invConfig.getCreateInventoryFunction());
 
@@ -126,7 +133,7 @@ public class SearchItemsItemInterface extends ItemInterface {
                 @Override
                 public void run() {
                     List<StorageItemDataInfo> items = searchType.search(text, storageInv.getStorage());
-                    openResult(items, player, storageInv);
+                    openResult(items, player, storageInv, text);
                 }
             };
             bukkitRunnable.runTaskAsynchronously(core);
@@ -135,27 +142,77 @@ public class SearchItemsItemInterface extends ItemInterface {
     }
 
 
-    public void openResult(List<StorageItemDataInfo> list, Player player, StorageInventory storageInv){
+    public void openResult(List<StorageItemDataInfo> list, Player player, StorageInventory storageInv, String searchText){
 
-        if(!core.getManagers().getInventoryConfigManager1().existInventoryConfig(invResultId)){
+        if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(invResultId)){
             AdventureUtils.sendMessagePluginConsole(core, String.format("<red>InventoryConfig %s not found", invResultId));
             return;
         }
 
-        InventoryConfig invConfig = core.getManagers().getInventoryConfigManager1().createInventoryConfig( builder -> builder.setId(invResultId));
+        InventoryConfig invConfig = core.getManagers().getInventoryConfigManager().createInventoryConfig(builder -> builder.setId(invResultId));
 
         InvCustomPagesContentManager<StorageItemDataInfo> invManager = new InvCustomPagesContentManager<>(Utils.configFill(invConfig.getSection().getStringList("data_slots")), null, null){
 
             @Override
             public ItemStack onContentPage(int page, int slot, StorageItemDataInfo content) {
+                List<String> lore = invConfig.getSection().getStringList("result_lore");
+                if(lore == null) lore = new ArrayList<>();
+                ItemBuilderMechanic itemBuilder = ItemBuilderMechanic.copyOf(content.getItemStack());
+                Map<String, String> placeholders = Map.of("%SLOT%", content.getSlot() + "", "%PAGE%", content.getPage() + "");
+                for(String line : lore){
+                    itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(Utils.replaceVariables(line, placeholders)));
+                }
+                return itemBuilder.build();
+            }
 
+            @Override
+            public void onContentClick(ContentClickEvent event) {
+                StorageItemDataInfo storageItem = (StorageItemDataInfo) event.getContent();
+                Player pClick = (Player) event.getEvent().getWhoClicked();
+                if(!storageItem.exists()) {
+                    removeContentAndUpdate(storageItem, event.getInventoryCustomPagesContent().getPage());
+                    return;
+                }
+                if(event.getEvent().isShiftClick()){
+                    HashMap<Integer, ItemStack> map = pClick.getInventory().addItem(storageItem.getItemStack());
+                    if(map.isEmpty()) {
+                        storageItem.removeWithRestrictions();
+                        removeContentAndUpdate(storageItem, event.getInventoryCustomPagesContent().getPage());
+                        return;
+                    }
+                    storageItem.getItemStack().setAmount(map.get(0).getAmount());
+                    setContent(event.getInventoryCustomPagesContent().getPage());
+                    return;
+                }
+                if(event.getEvent().getCursor() != null && !event.getEvent().getCursor().getType().isAir()) return;
+                pClick.setItemOnCursor(storageItem.getItemStack());
+                storageItem.removeWithRestrictions();
+                removeContentAndUpdate(storageItem, event.getInventoryCustomPagesContent().getPage());
             }
         };
 
         invManager.setContentList(list);
 
         invManager.setDefaultInventory((inventoryManager, page) -> {
-            return new InvCustomPagesContent(invConfig.getCreateInventoryFunction(), invManager, page);
+            return new InvCustomPagesContent(invConfig.getCreateInventoryFunction(), invManager, page){
+                @Override
+                public void onDrag(InventoryDragEvent event) {
+                    for(Map.Entry<Integer, ItemStack> entry : event.getNewItems().entrySet()){
+                        if(InventoryUtils.isOpenedInventory(entry.getKey(), this.getInventory())){
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
+                }
+                @Override
+                public void onClick(InventoryClickEvent event) {
+                    if(event.getClickedInventory() == null) return;
+                    if(event.getClickedInventory().getType().equals(InventoryType.PLAYER)){
+                        if(event.isShiftClick()) return;
+                        event.setCancelled(false);
+                    }
+                }
+            };
         });
 
         invConfig.setItemBlockedConsumer((itemInterface, itemConfig) -> {
@@ -194,9 +251,6 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         Bukkit.getScheduler().runTask(core, () -> invManager.open(player, 0));
     }
-
-
-
 
     public String getInvId() {
         return invId;
