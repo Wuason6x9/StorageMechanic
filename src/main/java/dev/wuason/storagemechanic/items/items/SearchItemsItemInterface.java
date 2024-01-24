@@ -1,7 +1,10 @@
 package dev.wuason.storagemechanic.items.items;
 
 import dev.wuason.libs.apache.lang3.function.TriConsumer;
+import dev.wuason.libs.invmechaniclib.events.CloseEvent;
 import dev.wuason.libs.invmechaniclib.types.InvCustom;
+import dev.wuason.libs.invmechaniclib.types.pages.content.anvil.InvCustomPagesAnvil;
+import dev.wuason.libs.invmechaniclib.types.pages.content.anvil.events.ContentClickAnvilEvent;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.InvCustomPagesContent;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.InvCustomPagesContentManager;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.events.ContentClickEvent;
@@ -10,9 +13,7 @@ import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.PreviousP
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.configuration.inventories.InventoryConfig;
 import dev.wuason.mechanics.items.ItemBuilderMechanic;
-import dev.wuason.mechanics.utils.AdventureUtils;
-import dev.wuason.mechanics.utils.InventoryUtils;
-import dev.wuason.mechanics.utils.Utils;
+import dev.wuason.mechanics.utils.*;
 import dev.wuason.mechanics.utils.functions.QuadConsumer;
 import dev.wuason.nms.wrappers.NMSManager;
 import dev.wuason.storagemechanic.StorageMechanic;
@@ -32,10 +33,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
@@ -64,14 +62,13 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         player.closeInventory();
         if(searchType != null){
-            //TODO: Open search inventory
             searchInput.open(this, player, storageInventory, searchType);
             return;
         }
-        openInvSelector(storage, storageInventory, event, storageConfig, storageManager);
+        openInvSelector(storageInventory, event);
     }
 
-    public void openInvSelector(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager){
+    public void openInvSelector(StorageInventory storageInventory, InventoryClickEvent event){
 
         //**** CHECKS ****//
 
@@ -139,7 +136,158 @@ public class SearchItemsItemInterface extends ItemInterface {
             };
             bukkitRunnable.runTaskAsynchronously(core);
         });
+    }
 
+    public void openAnvil(Player player, StorageInventory storageInventory, SearchType searchType){
+        if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(invAnvilId)){
+            AdventureUtils.sendMessagePluginConsole(core, String.format("<red>InventoryConfig %s not found", invAnvilId));
+            return;
+        }
+
+        InventoryConfig invConfig = core.getManagers().getInventoryConfigManager().createInventoryConfig(builder -> builder.setId(invAnvilId));
+
+
+        InvCustomPagesAnvil<StorageItemDataInfo> invManagerAnvil = new InvCustomPagesAnvil<>(AdventureUtils.deserializeLegacy(invConfig.getTitle()), player, Utils.configFill(invConfig.getSection().getStringList("data_slots")), new ArrayList<>(), null, null, null){
+
+            private Set<StorageItemDataInfo> toAddInventory = new HashSet<>();
+
+            @Override
+            public void onRenameTextAsync(String before, String now) {
+                List<StorageItemDataInfo> contentList = searchType.search(now, storageInventory.getStorage());
+                setSearchList(contentList);
+                setActualPage(0);
+                setContent(0);
+                setButtonsPage(0);
+            }
+
+            @Override
+            public ItemStack onContentPage(int page, int slot, StorageItemDataInfo content) {
+                List<String> lore = invConfig.getSection().getStringList("result_lore");
+                if(lore == null) lore = new ArrayList<>();
+                ItemBuilderMechanic itemBuilder = ItemBuilderMechanic.copyOf(content.getItemStack());
+                Map<String, String> placeholders = Map.of("%SLOT%", content.getSlot() + "", "%PAGE%", content.getPage() + "");
+                for(String line : lore){
+                    itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(Utils.replaceVariables(line, placeholders)));
+                }
+                if(toAddInventory.contains(content)) itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(invConfig.getSection().getString("added_to_inventory", "<green>ADDED!")));
+                return itemBuilder.build();
+            }
+
+            @Override
+            public void onContentClick(ContentClickAnvilEvent<StorageItemDataInfo> event) {
+
+                if(toAddInventory.contains(event.getContent())){
+                    toAddInventory.remove(event.getContent());
+                    new ItemBuilderMechanic(event.getEvent().getCurrentItem()).removeLastLoreLine().build();
+                }
+                toAddInventory.add(event.getContent());
+                new ItemBuilderMechanic(event.getEvent().getCurrentItem()).addLoreLine(AdventureUtils.deserializeLegacy(invConfig.getSection().getString("added_to_inventory", "<green>ADDED!"))).build();
+
+            }
+
+            @Override
+            public void onClose(CloseEvent closeEvent) {
+                for(StorageItemDataInfo storageItemDataInfo : toAddInventory){
+                    if(!storageItemDataInfo.exists()) return;
+                    storageItemDataInfo.remove();
+                    StorageUtils.addItemToInventoryOrDrop(getPlayer(), storageItemDataInfo.getItemStack());
+                }
+            }
+        };
+
+        invManagerAnvil.savePlayerInventory();
+
+        invManagerAnvil.setRenameTextListener(invConfig.getSection().getLong("refresh_ticks", 20L));
+
+        invConfig.setItemBlockedConsumer((itemInterface, itemConfig) -> {
+            invManagerAnvil.registerItemInterface(itemInterface);
+            invManagerAnvil.setItemInterfaceInvPlayer(itemInterface, itemConfig.getSlots());
+        });
+
+        invConfig.setOnItemLoad( (inventoryConfig, configurationSection, itemConfig) -> {
+            switch (itemConfig.getActionId()){
+                case "NEXT_PAGE" -> {
+                    NextPageItem nextPageItem = new NextPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    invManagerAnvil.setItemNext(nextPageItem);
+                }
+                case "BACK_PAGE" -> {
+                    PreviousPageItem previousPageItem = new PreviousPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    invManagerAnvil.setItemBack(previousPageItem);
+                }
+                case "REPAIR_ITEM" -> {
+                    ItemStack itemStack = new ItemBuilderMechanic(Adapter.getInstance().getItemStack(itemConfig.getItemId()), 1).buildWithVoidName();
+                    invManagerAnvil.setItemStackRename(itemStack);
+                }
+                case "RESEARCH_ITEM" -> {
+
+                    dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invManagerAnvil.registerItemInterface( builder -> {
+
+                        builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                        builder.addData(itemConfig);
+                        builder.onClick((e, inv) -> {
+
+                            BukkitRunnable bukkitRunnable = new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    List<StorageItemDataInfo> items = searchType.search(invManagerAnvil.getRenameText(), storageInventory.getStorage());
+                                    invManagerAnvil.setSearchList(items);
+                                    invManagerAnvil.setActualPage(0);
+                                    invManagerAnvil.setContent(0);
+                                    invManagerAnvil.setButtonsPage(0);
+                                }
+                            };
+
+                            bukkitRunnable.runTaskAsynchronously(core);
+
+                        });
+
+                    });
+
+                    invManagerAnvil.registerItemInterface(itemInterface);
+
+                    invManagerAnvil.setItemInterfaceInvPlayer(itemInterface, itemConfig.getSlots());
+
+                }
+
+                case "OPEN_RESULT" -> {
+
+                    dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invManagerAnvil.registerItemInterface( builder -> {
+
+                        builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                        builder.addData(itemConfig);
+                        builder.onClick((e, inv) -> {
+
+                            BukkitRunnable bukkitRunnable = new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    openResult(invManagerAnvil.getSearchList(), player, storageInventory, invManagerAnvil.getRenameText());
+                                }
+                            };
+
+                            bukkitRunnable.runTaskAsynchronously(core);
+
+                        });
+
+                    });
+
+                    invManagerAnvil.registerItemInterface(itemInterface);
+
+                    invManagerAnvil.setItemInterfaceInvPlayer(itemInterface, itemConfig.getSlots());
+
+                }
+            }
+        });
+
+        invConfig.setOnLoad(inventoryConfig -> {
+            inventoryConfig.addData("DATA_SLOTS", inventoryConfig.getSection().getStringList("data_slots"));
+            inventoryConfig.addData("RESULT_LORE", inventoryConfig.getSection().getStringList("result_lore"));
+            inventoryConfig.addData("REFRESH_TICKS", inventoryConfig.getSection().getLong("refresh_ticks", 20L));
+        });
+
+
+        invConfig.load();
+
+        Bukkit.getScheduler().runTask(core, () -> invManagerAnvil.openSimple());
     }
 
 
@@ -291,7 +439,7 @@ public class SearchItemsItemInterface extends ItemInterface {
 
     public enum SearchInput {
 
-        ANVIL(null),
+        ANVIL(SearchItemsItemInterface::openAnvil),
         SIGN(SearchItemsItemInterface::signOpen);
 
         private final QuadConsumer<SearchItemsItemInterface, Player, StorageInventory, SearchType> consumer;

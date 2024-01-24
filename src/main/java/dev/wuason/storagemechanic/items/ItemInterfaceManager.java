@@ -165,7 +165,7 @@ public class ItemInterfaceManager {
                             String invId = sectionItemInterface.getString("properties.inv-id", "search-item");
                             String invResultId = sectionItemInterface.getString("properties.inv-result-id");
                             String searchTypeString = sectionItemInterface.getString("properties.def-action");
-                            if(invId == null || invResultId == null || searchTypeString == null){
+                            if(invId == null || invResultId == null){
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: SEARCH_ITEM invId, invResultId or searchType is invalid!");
                                 continue;
@@ -176,9 +176,6 @@ public class ItemInterfaceManager {
                             try {
                                 if(searchTypeString != null) searchType = SearchItemsItemInterface.SearchType.valueOf(searchTypeString.toUpperCase(Locale.ENGLISH));
                             } catch (IllegalArgumentException e) {
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: SEARCH_ITEM searchType is invalid!");
-                                continue;
                             }
 
                             String searchInputString = sectionItemInterface.getString("properties.search-input", "ANVIL");

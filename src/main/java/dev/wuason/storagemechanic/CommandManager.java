@@ -347,6 +347,7 @@ public class CommandManager {
                                         }
 
                                     };
+
                                     invCustomPagesAnvil.openSimple();
 
                                     System.out.println(invCustomPagesAnvil.getHolder() instanceof InvCustom);
