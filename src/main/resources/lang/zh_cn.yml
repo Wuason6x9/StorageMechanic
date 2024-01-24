@@ -1,0 +1,89 @@
+#译者：jhqwqmc
+config-version: 1 #不要动这个
+messages:
+  commands:
+    custom_blocks:
+      get:
+        valid_id: "<green>你已收到：%id%"
+        invalid_id: "<red>无效的ID"
+  storage:
+    search_page_invalid: "<red>请输入有效的页面！"
+    search_page_enter: "<red>请输入有效的页面！"
+    max_views: "<red>存储中的人数已达到限制！"
+  type:
+    furniturestorage:
+      isBreakeable: "<red>当内部有物品时，您不能摧毁此方块！"
+    blockstorage:
+      isBreakeable: "<red>当内部有物品时，您不能摧毁此方块！"
+api:
+  panel:
+    title: "存储API <red>(%page%/%max_page%)"
+    next_page: "<red>下一页 >>"
+    previous_page: "<red><< 上一页"
+    item_name: "<gold>id: <aqua>%storage_api_id%"
+    item_lore:
+      - "<red>左键点击打开存储！"
+      - "<red>右键点击保存存储！"
+      - "<dark_red>Shift + 右键点击删除存储！"
+      - "<red>Shift + 左键点击更新！"
+      - ""
+      - "<red>已加载的存储： <aqua>%loaded_storage%"
+      - "<red>已加载的存储API： <aqua>%loaded_storage_api%"
+      - "<red>总物品数： <aqua>%total_items%"
+      - "<red>创建日期： <aqua>%creation_date%"
+      - "<red>上次打开： <aqua>%last_open%"
+      - "<red>存储配置ID： <aqua>%storage_config_id%"
+      - "<red>存储原始上下文： <aqua>%storage_origin_context%"
+      - "<red>存储最大页面： <aqua>%storage_max_pages%"
+      - "<red>存储查看者： <aqua>%storage_viewers%"
+      - "<red>存储ID： <aqua>%storage_id%"
+info:
+  player:
+    title: "%player%的存储 <red>(%page%/%max_page%)"
+    next_page: "<red>下一页 >>"
+    previous_page: "<red><< 上一页"
+    item_name: "<red>id: <aqua>%storage_id%"
+    lore:
+      - "<red>左键点击打开存储！"
+      - "<red>右键点击保存存储！"
+      - "<dark_red>Shift + 右键点击删除存储！"
+      - "<red>Shift + 左键点击更新！"
+      - ""
+      - "<red>已加载： <aqua>%loaded%"
+      - "<red>总物品数： <aqua>%total_items%"
+      - "<red>创建日期： <aqua>%creation_date%"
+      - "<red>上次打开： <aqua>%last_open%"
+      - "<red>存储配置ID： <aqua>%storage_config_id%"
+      - "<red>存储原始上下文： <aqua>%storage_origin_context%"
+      - "<red>存储最大页面： <aqua>%storage_max_pages%"
+      - "<red>存储查看者： <aqua>%storage_viewers%"
+  players:
+    title: 选择玩家 / 信息存储
+    storages:
+      refresh_item_name: "<red>刷新"
+      next_page: "<red>下一页 >>"
+      previous_page: "<red><< 上一页"
+      item_name: "<red>id: <aqua>%storage_id%"
+      item_lore:
+        - "<red>左键点击打开存储！"
+        - "<red>右键点击保存存储！"
+        - "<dark_red>Shift + 右键点击删除存储！"
+        - ""
+        - "<red>已加载： <aqua>%loaded%"
+        - "<red>总物品数： <aqua>%total_items%"
+        - "<red>创建日期： <aqua>%creation_date%"
+        - "<red>上次打开： <aqua>%last_open%"
+        - "<red>存储配置ID： <aqua>%storage_config_id%"
+        - "<red>存储原始上下文： <aqua>%storage_origin_context%"
+        - "<red>存储最大页面： <aqua>%storage_max_pages%"
+        - "<red>存储查看者： <aqua>%storage_viewers%"
+    players:
+      refresh_item_name: "<red>刷新"
+      remove_selection_item_name: "<red>移除选择"
+      next_page: "<red>下一页 >>"
+      previous_page: "<red><< 上一页"
+      item_name: "<rainbow>%player%"
+      item_lore:
+        - "<red>存储： <aqua>%total_storages%"
+        - "<red>方块存储： <aqua>%total_block_storages%"
+        - "<red>家具存储： <aqua>%total_furniture_storages%"
