@@ -1,1 +1,88 @@
-config-version: 1 #DON'T CHANGE THIS
+config-version: 1 # NO CAMBIAR ESTO
+messages:
+  commands:
+    custom_blocks:
+      get:
+        valid_id: "<green> Has recibido: %id%"
+        invalid_id: "<red>ID no válido"
+  storage:
+    search_page_invalid: "<red>¡Por favor, ingresa una página válida!"
+    search_page_enter: "<red>¡Por favor, ingresa una página válida!"
+    max_views: "<red>¡Se ha alcanzado el límite de personas en el almacenamiento!"
+  type:
+    furniturestorage:
+      isBreakeable: "<red>No puedes destruir este bloque mientras tenga un ítem adentro!"
+    blockstorage:
+      isBreakeable: "<red>No puedes destruir este bloque mientras tenga un ítem adentro!"
+api:
+  panel:
+    title: "API de Almacenamientos <red>(%page%/%max_page%)"
+    next_page: "<red>Siguiente página >>"
+    previous_page: "<red><< Página anterior"
+    item_name: "<gold>ID: <aqua>%storage_api_id%"
+    item_lore:
+      - "<red>Clic izquierdo para abrir el almacenamiento."
+      - "<red>Clic derecho para guardar el almacenamiento."
+      - "<dark_red>Mayús + Clic derecho para borrar el almacenamiento."
+      - "<red>Mayús + Clic izquierdo para actualizar."
+      - ""
+      - "<red>Almacenamiento cargado: <aqua>%loaded_storage%"
+      - "<red>API de almacenamiento cargada: <aqua>%loaded_storage_api%"
+      - "<red>Total de ítems: <aqua>%total_items%"
+      - "<red>Fecha de creación: <aqua>%creation_date%"
+      - "<red>Última apertura: <aqua>%last_open%"
+      - "<red>ID de configuración de almacenamiento: <aqua>%storage_config_id%"
+      - "<red>Contexto de origen del almacenamiento: <aqua>%storage_origin_context%"
+      - "<red>Páginas máximas de almacenamiento: <aqua>%storage_max_pages%"
+      - "<red>Espectadores del almacenamiento: <aqua>%storage_viewers%"
+      - "<red>ID de almacenamiento: <aqua>%storage_id%"
+info:
+  player:
+    title: "Almacenamientos de %player% <red>(%page%/%max_page%)"
+    next_page: "<red>Siguiente página >>"
+    previous_page: "<red><< Página anterior"
+    item_name: "<red>ID: <aqua>%storage_id%"
+    lore:
+      - "<red>Clic izquierdo para abrir el almacenamiento."
+      - "<red>Clic derecho para guardar el almacenamiento."
+      - "<dark_red>Mayús + Clic derecho para borrar el almacenamiento."
+      - "<red>Mayús + Clic izquierdo para actualizar."
+      - ""
+      - "<red>Cargado: <aqua>%loaded%"
+      - "<red>Total de ítems: <aqua>%total_items%"
+      - "<red>Fecha de creación: <aqua>%creation_date%"
+      - "<red>Última apertura: <aqua>%last_open%"
+      - "<red>ID de configuración de almacenamiento: <aqua>%storage_config_id%"
+      - "<red>Contexto de origen del almacenamiento: <aqua>%storage_origin_context%"
+      - "<red>Páginas máximas de almacenamiento: <aqua>%storage_max_pages%"
+      - "<red>Espectadores del almacenamiento: <aqua>%storage_viewers%"
+  players:
+    title: Seleccionar jugador / Información de almacenamiento
+    storages:
+      refresh_item_name: "<red>Actualizar"
+      next_page: "<red>Siguiente página >>"
+      previous_page: "<red><< Página anterior"
+      item_name: "<red>ID: <aqua>%storage_id%"
+      item_lore:
+        - "<red>Clic izquierdo para abrir el almacenamiento."
+        - "<red>Clic derecho para guardar el almacenamiento."
+        - "<dark_red>Mayús + Clic derecho para borrar el almacenamiento."
+        - ""
+        - "<red>Cargado: <aqua>%loaded%"
+        - "<red>Total de ítems: <aqua>%total_items%"
+        - "<red>Fecha de creación: <aqua>%creation_date%"
+        - "<red>Última apertura: <aqua>%last_open%"
+        - "<red>ID de configuración de almacenamiento: <aqua>%storage_config_id%"
+        - "<red>Contexto de origen del almacenamiento: <aqua>%storage_origin_context%"
+        - "<red>Páginas máximas de almacenamiento: <aqua>%storage_max_pages%"
+        - "<red>Espectadores del almacenamiento: <aqua>%storage_viewers%"
+    players:
+      refresh_item_name: "<red>Actualizar"
+      remove_selection_item_name: "<red>Eliminar selección"
+      next_page: "<red>Siguiente página >>"
+      previous_page: "<red><< Página anterior"
+      item_name: "<rainbow>%player%"
+      item_lore:
+        - "<red>Almacenamientos: <aqua>%total_storages%"
+        - "<red>Almacenamientos de bloques: <aqua>%total_block_storages%"
+        - "<red>Almacenamientos de muebles: <aqua>%total_furniture_storages%"
