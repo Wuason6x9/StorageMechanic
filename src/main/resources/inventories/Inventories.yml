@@ -1,16 +1,117 @@
 inventories:
-  drop-items:
-    title: '&cDrop Items'
-    type: CHEST
-    rows: 3
+# This is the configuration for a search item mechanic on an Anvil interface within the game.
+# This section is in the YAML (YAML Ain't Markup Language) format, commonly used for configuration files.
+  search-items-anvil:
+    # 'type' defines the type of interface to be used. In this case, it is an Anvil.
+    type: ANVIL
+    # 'title' is the title displayed on the interface. It contains both text and image placeholders.
+    title: '<white>%img_offset_-60%%img_anvilsearchitem% %img_offset_-200%Search items'
+    # 'data_slots' lists the inventory slots that will be populated with the search results. They range from 9 to 35 here.
+    data_slots: [9-35]
+    # 'refresh_ticks' is the frequency at which the interface will update/refresh. This is measured in game ticks but can vary depending on server performance. 20 ticks is equivalent to 1 second as there are 20 ticks in a second in Minecraft.
+    refresh_ticks: 20
+    # 'added_to_inventory' is the message displayed to the user when an item is added to the list.
+    added_to_inventory: '<green>Added to list!'
+    # 'result_lore' provides additional lore (informational text) to the item. This is displayed when the user hovers over the item in the interface.
+    result_lore:
+      - "<red>Click to get on close!"
+      - "<red>Page: <aqua>%page% <red>slot: <aqua>%slot%"
+    # 'items' is a mapping of identifiers to item definitions. Each item is placed in the interface in defined slots and can have different behaviors when interacted with.
     items:
-      item1:
-        id: ByMaterial #by material , by name, by page, by slots, by itemAdapter
-        item: mc:stone
-        amount: 1
-        slots: [0-53]
-      item2:
+      # 'next_page' rompts the interface to display the next page of items when interacted with. An image is defined for this 'item'.
+      next_page:
+        id: NEXT_PAGE
+        item: ia:storagemechanic:next_page
+        slots: [8]
+      # 'back_page' prompts the interface to display the previous page of items when interacted with.
+      back_page:
+        id: BACK_PAGE
+        item: ia:storagemechanic:back_page
+        slots: [0]
+      # 'repair_item' is an item placeholder in this context.
+      repair_item:
+        id: REPAIR_ITEM
+        item: ia:storagemechanic:empty_item
+      # 'open_result_inv_item' opens up a sorting mechanism for the results when interacted with.
+      open_result_inv_item:
+        id: OPEN_RESULT
+      item: ia:storagemechanic:sort_item
+      slots: [3]
+    # 'research_item' initiates a new search when interacted with.
+    research_item:
+      id: RESEARCH_ITEM
+      item: ia:storagemechanic:search_item
+      slots: [5]
+
+  search-items-result:
+    type: CHEST
+    rows: 6
+    title: '<white>%img_offset_-8%%img_anvilsearchresult% %img_offset_-252%Search result:'
+    data_slots: [0-44]
+    result_lore:
+      - "<red>Page: <aqua>%page% <red>slot: <aqua>%slot%"
+    items:
+      next_page:
+        id: NEXT_PAGE
+        item: ia:storagemechanic:next_page
+        slots: [53]
+      back_page:
+        id: BACK_PAGE
+        item: ia:storagemechanic:back_page
+        slots: [45]
+  search-items:
+    title: '<red>Search Items'
+    type: CHEST
+    rows: 6
+    items:
+      item0:
         id: blocked
         item: mc:stone
-        amount: 1
         slots: [0-53]
+      item1:
+        id: BY_MATERIAL
+        item: mc:iron_ingot
+        slots: [46]
+      item2:
+        id: BY_DISPLAY_NAME
+        item: mc:emerald
+        slots: [47]
+      item3:
+        id: BY_ITEM_ADAPTER
+        item: mc:diamond
+        slots: [48]
+  drop-items:
+    title: '<red>Drop Items'
+    type: CHEST
+    rows: 6
+    items:
+      item1:
+        id: BY_MATERIAL
+        item: mc:iron_ingot
+        amount: 1
+        slots: [46]
+      item3:
+        id: BY_ITEM_ADAPTER
+        item: mc:diamond
+        amount: 1
+        slots: [47]
+      item4:
+        id: BY_DISPLAY_NAME
+        item: mc:emerald
+        amount: 1
+        slots: [48]
+      item2:
+        id: BLOCKED
+        item: mc:stone
+        amount: 1
+        slots: [0-45, 49-53]
+      item5:
+        id: BY_ACTUAL_PAGE
+        item: mc:redstone
+        amount: 1
+        slots: [49]
+      item6:
+        id: ALL_PAGES
+        item: mc:copper_ingot
+        amount: 1
+        slots: [50-53]

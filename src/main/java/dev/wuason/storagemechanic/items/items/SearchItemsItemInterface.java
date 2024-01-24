@@ -61,18 +61,18 @@ public class SearchItemsItemInterface extends ItemInterface {
         Player player = (Player) event.getWhoClicked();
 
         player.closeInventory();
-        if(searchType != null){
+        if (searchType != null) {
             searchInput.open(this, player, storageInventory, searchType);
             return;
         }
         openInvSelector(storageInventory, event);
     }
 
-    public void openInvSelector(StorageInventory storageInventory, InventoryClickEvent event){
+    public void openInvSelector(StorageInventory storageInventory, InventoryClickEvent event) {
 
         //**** CHECKS ****//
 
-        if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(invId)){
+        if (!core.getManagers().getInventoryConfigManager().existInventoryConfig(invId)) {
             AdventureUtils.sendMessagePluginConsole(core, String.format("<red>InventoryConfig %s not found", invId));
             return;
         }
@@ -88,13 +88,13 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         });
 
-        invConfig.setOnItemLoad( (inventoryConfig, configurationSection, itemConfig) -> {
+        invConfig.setOnItemLoad((inventoryConfig, configurationSection, itemConfig) -> {
 
             try {
 
                 SearchType searchType = SearchType.valueOf(itemConfig.getActionId());
 
-                dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invCustom.registerItemInterface( builder -> {
+                dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invCustom.registerItemInterface(builder -> {
 
                     builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
                     builder.addData(itemConfig);
@@ -119,14 +119,14 @@ public class SearchItemsItemInterface extends ItemInterface {
 
     }
 
-    public void signOpen(Player player, StorageInventory storageInv, SearchType searchType){
+    public void signOpen(Player player, StorageInventory storageInv, SearchType searchType) {
         NMSManager.getVersionWrapper().openSing(player, lines -> {
             StringBuilder builder = new StringBuilder();
-            for(String line : lines){
+            for (String line : lines) {
                 builder.append(line);
             }
             String text = builder.toString().trim();
-            if(text.isEmpty()) return;
+            if (text.isEmpty()) return;
             BukkitRunnable bukkitRunnable = new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -138,8 +138,8 @@ public class SearchItemsItemInterface extends ItemInterface {
         });
     }
 
-    public void openAnvil(Player player, StorageInventory storageInventory, SearchType searchType){
-        if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(invAnvilId)){
+    public void openAnvil(Player player, StorageInventory storageInventory, SearchType searchType) {
+        if (!core.getManagers().getInventoryConfigManager().existInventoryConfig(invAnvilId)) {
             AdventureUtils.sendMessagePluginConsole(core, String.format("<red>InventoryConfig %s not found", invAnvilId));
             return;
         }
@@ -147,12 +147,13 @@ public class SearchItemsItemInterface extends ItemInterface {
         InventoryConfig invConfig = core.getManagers().getInventoryConfigManager().createInventoryConfig(builder -> builder.setId(invAnvilId));
 
 
-        InvCustomPagesAnvil<StorageItemDataInfo> invManagerAnvil = new InvCustomPagesAnvil<>(AdventureUtils.deserializeLegacy(invConfig.getTitle()), player, Utils.configFill(invConfig.getSection().getStringList("data_slots")), new ArrayList<>(), null, null, null){
+        InvCustomPagesAnvil<StorageItemDataInfo> invManagerAnvil = new InvCustomPagesAnvil<>(AdventureUtils.deserializeLegacy(invConfig.getTitle()), player, Utils.configFill(invConfig.getSection().getStringList("data_slots")), new ArrayList<>(), null, null, null) {
 
             private Set<StorageItemDataInfo> toAddInventory = new HashSet<>();
 
             @Override
             public void onRenameTextAsync(String before, String now) {
+                toAddInventory.clear();
                 List<StorageItemDataInfo> contentList = searchType.search(now, storageInventory.getStorage());
                 setSearchList(contentList);
                 setActualPage(0);
@@ -163,22 +164,24 @@ public class SearchItemsItemInterface extends ItemInterface {
             @Override
             public ItemStack onContentPage(int page, int slot, StorageItemDataInfo content) {
                 List<String> lore = invConfig.getSection().getStringList("result_lore");
-                if(lore == null) lore = new ArrayList<>();
+                if (lore == null) lore = new ArrayList<>();
                 ItemBuilderMechanic itemBuilder = ItemBuilderMechanic.copyOf(content.getItemStack());
                 Map<String, String> placeholders = Map.of("%SLOT%", content.getSlot() + "", "%PAGE%", content.getPage() + "");
-                for(String line : lore){
+                for (String line : lore) {
                     itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(Utils.replaceVariables(line, placeholders)));
                 }
-                if(toAddInventory.contains(content)) itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(invConfig.getSection().getString("added_to_inventory", "<green>ADDED!")));
+                if (toAddInventory.contains(content))
+                    itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(invConfig.getSection().getString("added_to_inventory", "<green>ADDED!")));
                 return itemBuilder.build();
             }
 
             @Override
             public void onContentClick(ContentClickAnvilEvent<StorageItemDataInfo> event) {
 
-                if(toAddInventory.contains(event.getContent())){
+                if(toAddInventory.contains(event.getContent())) {
                     toAddInventory.remove(event.getContent());
                     new ItemBuilderMechanic(event.getEvent().getCurrentItem()).removeLastLoreLine().build();
+                    return;
                 }
                 toAddInventory.add(event.getContent());
                 new ItemBuilderMechanic(event.getEvent().getCurrentItem()).addLoreLine(AdventureUtils.deserializeLegacy(invConfig.getSection().getString("added_to_inventory", "<green>ADDED!"))).build();
@@ -187,9 +190,9 @@ public class SearchItemsItemInterface extends ItemInterface {
 
             @Override
             public void onClose(CloseEvent closeEvent) {
-                for(StorageItemDataInfo storageItemDataInfo : toAddInventory){
-                    if(!storageItemDataInfo.exists()) return;
-                    storageItemDataInfo.remove();
+                for (StorageItemDataInfo storageItemDataInfo : toAddInventory) {
+                    if (!storageItemDataInfo.exists()) return;
+                    storageItemDataInfo.removeWithRestrictions();
                     StorageUtils.addItemToInventoryOrDrop(getPlayer(), storageItemDataInfo.getItemStack());
                 }
             }
@@ -204,8 +207,8 @@ public class SearchItemsItemInterface extends ItemInterface {
             invManagerAnvil.setItemInterfaceInvPlayer(itemInterface, itemConfig.getSlots());
         });
 
-        invConfig.setOnItemLoad( (inventoryConfig, configurationSection, itemConfig) -> {
-            switch (itemConfig.getActionId()){
+        invConfig.setOnItemLoad((inventoryConfig, configurationSection, itemConfig) -> {
+            switch (itemConfig.getActionId()) {
                 case "NEXT_PAGE" -> {
                     NextPageItem nextPageItem = new NextPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
                     invManagerAnvil.setItemNext(nextPageItem);
@@ -220,7 +223,7 @@ public class SearchItemsItemInterface extends ItemInterface {
                 }
                 case "RESEARCH_ITEM" -> {
 
-                    dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invManagerAnvil.registerItemInterface( builder -> {
+                    dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invManagerAnvil.registerItemInterface(builder -> {
 
                         builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
                         builder.addData(itemConfig);
@@ -251,7 +254,7 @@ public class SearchItemsItemInterface extends ItemInterface {
 
                 case "OPEN_RESULT" -> {
 
-                    dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invManagerAnvil.registerItemInterface( builder -> {
+                    dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invManagerAnvil.registerItemInterface(builder -> {
 
                         builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
                         builder.addData(itemConfig);
@@ -291,24 +294,24 @@ public class SearchItemsItemInterface extends ItemInterface {
     }
 
 
-    public void openResult(List<StorageItemDataInfo> list, Player player, StorageInventory storageInv, String searchText){
+    public void openResult(List<StorageItemDataInfo> list, Player player, StorageInventory storageInv, String searchText) {
 
-        if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(invResultId)){
+        if (!core.getManagers().getInventoryConfigManager().existInventoryConfig(invResultId)) {
             AdventureUtils.sendMessagePluginConsole(core, String.format("<red>InventoryConfig %s not found", invResultId));
             return;
         }
 
         InventoryConfig invConfig = core.getManagers().getInventoryConfigManager().createInventoryConfig(builder -> builder.setId(invResultId));
 
-        InvCustomPagesContentManager<StorageItemDataInfo> invManager = new InvCustomPagesContentManager<>(Utils.configFill(invConfig.getSection().getStringList("data_slots")), null, null){
+        InvCustomPagesContentManager<StorageItemDataInfo> invManager = new InvCustomPagesContentManager<>(Utils.configFill(invConfig.getSection().getStringList("data_slots")), null, null) {
 
             @Override
             public ItemStack onContentPage(int page, int slot, StorageItemDataInfo content) {
                 List<String> lore = invConfig.getSection().getStringList("result_lore");
-                if(lore == null) lore = new ArrayList<>();
+                if (lore == null) lore = new ArrayList<>();
                 ItemBuilderMechanic itemBuilder = ItemBuilderMechanic.copyOf(content.getItemStack());
                 Map<String, String> placeholders = Map.of("%SLOT%", content.getSlot() + "", "%PAGE%", content.getPage() + "");
-                for(String line : lore){
+                for (String line : lore) {
                     itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(Utils.replaceVariables(line, placeholders)));
                 }
                 return itemBuilder.build();
@@ -318,13 +321,13 @@ public class SearchItemsItemInterface extends ItemInterface {
             public void onContentClick(ContentClickEvent event) {
                 StorageItemDataInfo storageItem = (StorageItemDataInfo) event.getContent();
                 Player pClick = (Player) event.getEvent().getWhoClicked();
-                if(!storageItem.exists()) {
+                if (!storageItem.exists()) {
                     removeContentAndUpdate(storageItem, event.getInventoryCustomPagesContent().getPage());
                     return;
                 }
-                if(event.getEvent().isShiftClick()){
+                if (event.getEvent().isShiftClick()) {
                     HashMap<Integer, ItemStack> map = pClick.getInventory().addItem(storageItem.getItemStack());
-                    if(map.isEmpty()) {
+                    if (map.isEmpty()) {
                         storageItem.removeWithRestrictions();
                         removeContentAndUpdate(storageItem, event.getInventoryCustomPagesContent().getPage());
                         return;
@@ -333,7 +336,7 @@ public class SearchItemsItemInterface extends ItemInterface {
                     setContent(event.getInventoryCustomPagesContent().getPage());
                     return;
                 }
-                if(event.getEvent().getCursor() != null && !event.getEvent().getCursor().getType().isAir()) return;
+                if (event.getEvent().getCursor() != null && !event.getEvent().getCursor().getType().isAir()) return;
                 pClick.setItemOnCursor(storageItem.getItemStack());
                 storageItem.removeWithRestrictions();
                 removeContentAndUpdate(storageItem, event.getInventoryCustomPagesContent().getPage());
@@ -343,21 +346,22 @@ public class SearchItemsItemInterface extends ItemInterface {
         invManager.setContentList(list);
 
         invManager.setDefaultInventory((inventoryManager, page) -> {
-            return new InvCustomPagesContent(invConfig.getCreateInventoryFunction(), invManager, page){
+            return new InvCustomPagesContent(invConfig.getCreateInventoryFunction(), invManager, page) {
                 @Override
                 public void onDrag(InventoryDragEvent event) {
-                    for(Map.Entry<Integer, ItemStack> entry : event.getNewItems().entrySet()){
-                        if(InventoryUtils.isOpenedInventory(entry.getKey(), this.getInventory())){
+                    for (Map.Entry<Integer, ItemStack> entry : event.getNewItems().entrySet()) {
+                        if (InventoryUtils.isOpenedInventory(entry.getKey(), this.getInventory())) {
                             event.setCancelled(true);
                             return;
                         }
                     }
                 }
+
                 @Override
                 public void onClick(InventoryClickEvent event) {
-                    if(event.getClickedInventory() == null) return;
-                    if(event.getClickedInventory().getType().equals(InventoryType.PLAYER)){
-                        if(event.isShiftClick()) return;
+                    if (event.getClickedInventory() == null) return;
+                    if (event.getClickedInventory().getType().equals(InventoryType.PLAYER)) {
+                        if (event.isShiftClick()) return;
                         event.setCancelled(false);
                     }
                 }
@@ -371,8 +375,8 @@ public class SearchItemsItemInterface extends ItemInterface {
             });
         });
 
-        invConfig.setOnItemLoad( (inventoryConfig, configurationSection, itemConfig) -> {
-            switch (itemConfig.getActionId()){
+        invConfig.setOnItemLoad((inventoryConfig, configurationSection, itemConfig) -> {
+            switch (itemConfig.getActionId()) {
                 case "NEXT_PAGE" -> {
                     NextPageItem nextPageItem = new NextPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
                     invManager.setNextButton(nextPageItem);
@@ -428,11 +432,11 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         public final BiFunction<Storage, String, List<StorageItemDataInfo>> function;
 
-        private SearchType(BiFunction<Storage, String, List<StorageItemDataInfo>> function){
+        private SearchType(BiFunction<Storage, String, List<StorageItemDataInfo>> function) {
             this.function = function;
         }
 
-        public List<StorageItemDataInfo> search(String input, Storage storage){
+        public List<StorageItemDataInfo> search(String input, Storage storage) {
             return function.apply(storage, input);
         }
     }
@@ -444,11 +448,11 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         private final QuadConsumer<SearchItemsItemInterface, Player, StorageInventory, SearchType> consumer;
 
-        private SearchInput(QuadConsumer<SearchItemsItemInterface, Player, StorageInventory, SearchType> consumer){
+        private SearchInput(QuadConsumer<SearchItemsItemInterface, Player, StorageInventory, SearchType> consumer) {
             this.consumer = consumer;
         }
 
-        public void open(SearchItemsItemInterface itemInterface, Player player, StorageInventory storageInventory, SearchType searchType){
+        public void open(SearchItemsItemInterface itemInterface, Player player, StorageInventory storageInventory, SearchType searchType) {
             consumer.accept(itemInterface, player, storageInventory, searchType);
         }
     }

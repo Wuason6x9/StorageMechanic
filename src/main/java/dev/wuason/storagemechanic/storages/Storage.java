@@ -7,6 +7,7 @@ import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.api.events.storage.CloseStorageEvent;
 import dev.wuason.storagemechanic.api.events.storage.OpenStorageEvent;
+import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
 import dev.wuason.storagemechanic.items.items.PlaceholderItemInterface;
 import dev.wuason.storagemechanic.storages.config.*;
@@ -500,6 +501,14 @@ public class Storage {
             StorageInventory storageInventory = inventories.get(page);
             Inventory inventory = storageInventory.getInventory();
             inventory.clear(slot);
+            StorageConfig storageConfig = getStorageConfig();
+            if(isItemInterfaceSlot(page, slot, storageConfig)){
+                if(storageConfig.isStorageItemsInterfaceEnabled()){
+                    getStorageItemInterfaceConfig(page, slot).ifPresent(storageItemInterfaceConfig -> {
+                        inventory.setItem(slot, storageItemInterfaceConfig.getItemInterface().getItemStack());
+                    });
+                }
+            }
         }
         else {
             ItemStack[] contents = items.getOrDefault(page,null);
@@ -507,6 +516,12 @@ public class Storage {
                 contents[slot] = null;
             }
         }
+    }
+
+    public Optional<StorageItemInterfaceConfig> getStorageItemInterfaceConfig(int page, int slot){
+        if(!getStorageConfig().getStorageItemsInterfaceConfig().containsKey(page)) return Optional.empty();
+        if(!getStorageConfig().getStorageItemsInterfaceConfig().get(page).containsKey(slot)) return Optional.empty();
+        return Optional.of(getStorageConfig().getStorageItemsInterfaceConfig().get(page).get(slot));
     }
 
     public void dropItem(StorageItemDataInfo item, Location loc, boolean sync, boolean remove){
