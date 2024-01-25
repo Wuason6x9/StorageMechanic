@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.furnitures.compatibilities;
 
+import dev.wuason.storagemechanic.storages.types.furnitures.EventCancel;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
-import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.skills.EventCancel;
 import io.th0rgal.oraxen.api.events.furniture.OraxenFurnitureBreakEvent;
 import io.th0rgal.oraxen.api.events.furniture.OraxenFurnitureInteractEvent;
 import io.th0rgal.oraxen.api.events.furniture.OraxenFurniturePlaceEvent;

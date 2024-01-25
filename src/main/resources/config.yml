@@ -1,6 +1,7 @@
 config-version: 4
 config:
   lang: en
+  extract_default_config: false
 logs:
   show_save_logs: true
 data:

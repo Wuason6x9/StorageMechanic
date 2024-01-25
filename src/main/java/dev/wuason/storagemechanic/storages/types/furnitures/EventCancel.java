@@ -1,4 +1,4 @@
-package dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.skills;
+package dev.wuason.storagemechanic.storages.types.furnitures;
 
 import org.bukkit.event.Cancellable;
 

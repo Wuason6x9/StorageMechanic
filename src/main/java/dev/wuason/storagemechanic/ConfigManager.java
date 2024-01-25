@@ -101,7 +101,7 @@ public class ConfigManager {
         core.getManagers().runDataSaveTask();
         langDocumentYaml.reload();
         core.getManagers().getCustomItemsManager().loadCustomBlocks();
-        core.getManagers().getActionManager().getActionConfigManager().loadActions(new File(core.getDataFolder() + "/actions/"));
+        core.getManagers().getActionManager().getActionConfigManager().loadActions(new File(core.getDataFolder() + "/Actions/"));
         AdventureUtils.sendMessagePluginConsole(core, "<aqua> Actions loaded: <yellow>" + core.getManagers().getActionManager().getActionConfigs().size());
         core.getManagers().getItemInterfaceManager().loadItemsInterface();
         core.getManagers().getStorageConfigManager().loadStoragesConfig();

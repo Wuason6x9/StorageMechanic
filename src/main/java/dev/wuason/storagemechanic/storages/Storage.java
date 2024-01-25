@@ -12,6 +12,7 @@ import dev.wuason.storagemechanic.items.ItemInterfaceManager;
 import dev.wuason.storagemechanic.items.items.PlaceholderItemInterface;
 import dev.wuason.storagemechanic.storages.config.*;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
+import org.apache.commons.lang3.function.TriFunction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -40,6 +41,12 @@ public class Storage {
     private HashMap<Integer, StageStorage> currentStages = new HashMap<>();
     private boolean isTempStorage = false;
 
+    /**
+     * Constructs a new Storage object with the given storageIdConfig and storageOriginContext.
+     *
+     * @param storageIdConfig The storage id configuration.
+     * @param storageOriginContext The storage origin context.
+     */
     public Storage(String storageIdConfig, StorageOriginContext storageOriginContext) {
         this.id = UUID.randomUUID().toString();
         this.storageIdConfig = storageIdConfig;
@@ -47,6 +54,13 @@ public class Storage {
         this.storageOriginContext = storageOriginContext;
     }
 
+    /**
+     * Constructs a new Storage object.
+     *
+     * @param storageIdConfig The storage ID configuration.
+     * @param id The UUID of the storage.
+     * @param storageOriginContext The origin context of the storage.
+     */
     public Storage(String storageIdConfig, UUID id, StorageOriginContext storageOriginContext) {
         this.id = id.toString();
         this.storageIdConfig = storageIdConfig;
@@ -54,6 +68,16 @@ public class Storage {
         this.storageOriginContext = storageOriginContext;
     }
 
+    /**
+     * Creates a new Storage object.
+     *
+     * @param id The ID of the storage.
+     * @param items A map representing the items in the storage. The keys are page numbers and the values are arrays of ItemStacks.
+     * @param storageIdConfig The configuration ID for the storage.
+     * @param date The creation date of the storage.
+     * @param storageOriginContext The origin context of the storage, which specifies the type of storage.
+     * @param lastOpen The date when the storage was last opened. If null, the current date will be used.
+     */
     public Storage(String id, Map<Integer,ItemStack[]> items, String storageIdConfig, Date date, StorageOriginContext storageOriginContext, Date lastOpen) {
         this.id = id;
         this.items = items;
@@ -64,6 +88,12 @@ public class Storage {
         this.lastOpen = lastOpen != null ? lastOpen : new Date();
     }
 
+    /**
+     * Closes the storage on the specified page for the given player.
+     *
+     * @param page   The page of the storage to close.
+     * @param player The player for whom the storage is being closed.
+     */
     public void closeStorage(int page, Player player) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
@@ -99,6 +129,9 @@ public class Storage {
         }
 
     }
+    /**
+     * Closes all inventories associated with the storage object.
+     */
     public void closeAllInventory(){
         while(!inventories.isEmpty()){
             StorageInventory storageInventory = (StorageInventory) (inventories.values().toArray())[0];
@@ -195,7 +228,12 @@ public class Storage {
         if(page<0 || page>=getTotalPages()) return false;
         return openStorage(player,page);
     }
-    public void startAnimationStages(int page){
+    /**
+     * Starts the animation stages for a specific page of the storage.
+     *
+     * @param page The page number of the storage.
+     */
+    public void startAnimationStages(int page){ //TODO: SOLUCIONAR ERROR DE AL CERRAR EL INVENTARIO SE VUELVE A ABRIR.
         if(currentStages.containsKey(page)) return;
         StorageConfig storageConfig = getStorageConfig();
         if(storageConfig.getRefreshTimeStages() == 0L || storageConfig.getRefreshTimeStages() == -1L) return;
@@ -216,18 +254,35 @@ public class Storage {
         },0,storageConfig.getRefreshTimeStages());
         inventory.setAnimationStagesTask(bukkitTask);
     }
+    /**
+     * Stops the animation stages for the specified page of the storage.
+     *
+     * @param page The page number of the storage.
+     */
     public void stopAnimationStages(int page){
         if(!currentStages.containsKey(page)) return;
         StorageInventory inventory = inventories.get(page);
         inventory.getAnimationStagesTask().cancel();
         inventory.setAnimationStagesTask(null);
     }
+    /**
+     * Sets the stage of the storage to the specified stage ID and page number.
+     *
+     * @param stageId The ID of the stage to set.
+     * @param page The page number to set the stage on.
+     */
     public void setStage(String stageId, int page){
         StorageConfig storageConfig = getStorageConfig();
         if(!storageConfig.getStagesHashMap().containsKey(stageId)) return;
         StageStorage stage = storageConfig.getStagesHashMap().get(stageId);
         setStage(stage,page);
     }
+    /**
+     * Sets the stage of the storage on the specified page.
+     *
+     * @param stage The stage to set for the storage.
+     * @param page The page of the storage to set the stage on.
+     */
     public void setStage(StageStorage stage, int page){
         if(!inventories.containsKey(page)) return;
         StorageInventory inventory = inventories.get(page);
@@ -258,6 +313,11 @@ public class Storage {
             loadItemsDefault(p);
         }
     }
+    /**
+     * Loads the default items for a given page in the storage.
+     *
+     * @param page The page number to load the items for.
+     */
     public void loadItemsDefault(int page){
 
         StorageConfig storageConfig = getStorageConfig();
@@ -291,6 +351,13 @@ public class Storage {
         }
     }
 
+    /**
+     * Adds an ItemStack to a specific page of the storage inventory.
+     *
+     * @param page      The page number of the storage inventory.
+     * @param itemStack The ItemStack to be added.
+     * @return A list of ItemStacks that were not successfully added to the inventory.
+     */
     public List<ItemStack> addItemStack(int page, ItemStack itemStack) {
         List<ItemStack> notAddedItems = new ArrayList<>();
         StorageConfig storageConfig = getStorageConfig();
@@ -341,6 +408,14 @@ public class Storage {
         return notAddedItems;
     }
 
+    /**
+     * Adds an ItemStack to the specified page of the storage inventory, taking into account
+     * restrictions defined in the storage configuration.
+     *
+     * @param page the page index of the storage inventory
+     * @param itemStack the ItemStack to be added
+     * @return a list of ItemStacks that were not able to be added to the storage inventory
+     */
     public List<ItemStack> addItemStackWithRestrictions(int page, ItemStack itemStack) {
         List<ItemStack> notAddedItems = new ArrayList<>();
         StorageConfig storageConfig = getStorageConfig();
@@ -599,6 +674,15 @@ public class Storage {
         objects.add(false);
         return objects;
     }
+    /**
+     * Determines whether an item can be placed in the storage at the specified page and slot.
+     *
+     * @param item The item to be placed.
+     * @param page The page of the storage.
+     * @param slot The slot on the page.
+     * @param storageConfig The configuration of the storage.
+     * @return True if the item can be placed, false otherwise.
+     */
     public boolean canBePlaced(ItemStack item, int page, int slot, StorageConfig storageConfig){
         return (!isItemInterfaceSlot(page,slot,storageConfig) && !((boolean)isBlocked(slot,page,storageConfig).get(0)) && !isItemInList(item,slot,page,ListType.BLACKLIST,storageConfig) && isItemInList(item,slot,page,ListType.WHITELIST,storageConfig));
     }
@@ -662,6 +746,27 @@ public class Storage {
             }
         }
         return false;
+    }
+
+    /**
+     * Searches for storage items that match the given filter.
+     *
+     * @param filter The filter to apply when searching for items. The filter is a function that takes three parameters: the page number (Integer), the slot number (Integer), and
+     * the item stack (ItemStack). It should return true if the item matches the filter, and false otherwise.
+     * @return A list of StorageItemDataInfo objects that match the filter.
+     */
+    public List<StorageItemDataInfo> searchItems(TriFunction<Integer, Integer, ItemStack, Boolean> filter){
+        List<StorageItemDataInfo> list = new ArrayList<>();
+        for(int i=0;i<getTotalPages();i++){
+            HashMap<Integer,ItemStack> pageItemsMap = getMapItemsFromPage(i);
+            for(Map.Entry<Integer,ItemStack> entry : pageItemsMap.entrySet()){
+                if(entry.getValue().getType().equals(Material.AIR)) continue;
+                if(filter.apply(i, entry.getKey(), entry.getValue())){
+                    list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                }
+            }
+        }
+        return list;
     }
 
 

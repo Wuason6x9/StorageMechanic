@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'dev.wuason'
-version = '1.0.1.9'
+version = '1.0.1.10'
 
 repositories {
     mavenCentral()
@@ -40,7 +40,7 @@ dependencies {
     compileOnly 'com.github.oraxen:oraxen:1.158.1'
     compileOnly 'com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b'
     compileOnly 'me.clip:placeholderapi:2.11.3'
-    compileOnly 'io.lumine:Mythic-Dist:5.5.1'
+    compileOnly 'io.lumine:Mythic-Dist:5.6.0-20240124.234541-47'
     compileOnly 'io.lumine:MythicCrucible-Dist:2.0.0-20240122.174338-17'
     compileOnly 'org.apache.commons:commons-lang3:3.12.0'
     compileOnly fileTree(dir: 'libs', include: ['*.jar'])

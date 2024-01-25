@@ -11,8 +11,8 @@ import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.ItemsAdderFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.OraxenFurnitureEvents;
-import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.MythicCrucibleFurnitureManager;
-import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.skills.EventCancel;
+//import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.MythicCrucibleFurnitureManager;
+//import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.skills.EventCancel;
 import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfig;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.*;
@@ -36,7 +36,7 @@ public class FurnitureStorageManager {
     private StorageMechanic core;
     private ItemsAdderFurnitureEvents iaEvents;
     private OraxenFurnitureEvents orEvents;
-    private MythicCrucibleFurnitureManager mythicCrucibleFurnitureManager;
+    //private MythicCrucibleFurnitureManager mythicCrucibleFurnitureManager;
     private DataManager dataManager;
 
     private final String KEY_STORAGE = "furniturestorage";
@@ -499,13 +499,10 @@ public class FurnitureStorageManager {
 
 
 
-    //METODOS
-    // Método para obtener todos los FurnitureStorages
     public HashMap<String, FurnitureStorage> getAllFurnitureStorages() {
         return this.furnitureStorages;
     }
 
-    // Método para limpiar todos los FurnitureStorages
     public void clearAllFurnitureStorages() {
         this.furnitureStorages.clear();
     }
@@ -514,37 +511,30 @@ public class FurnitureStorageManager {
         this.furnitureStorages.put(furnitureStorageId, newFurnitureStorage);
     }
 
-    // Método para obtener todos los IDs de los FurnitureStorages almacenados
     public Set<String> getAllFurnitureStorageIds() {
         return this.furnitureStorages.keySet();
     }
 
-    // Método para obtener una lista de todos los FurnitureStorages almacenados
     public List<FurnitureStorage> getAllFurnitureStoragesAsList() {
         return new ArrayList<>(this.furnitureStorages.values());
     }
 
-    // Método para verificar si un objeto FurnitureStorage específico está almacenado
     public boolean containsFurnitureStorage(FurnitureStorage furnitureStorage) {
         return this.furnitureStorages.containsValue(furnitureStorage);
     }
 
-    // Método para cambiar el HashMap a un HashMap inmutable (no se pueden hacer más cambios)
     public void makeImmutable() {
         this.furnitureStorages = (HashMap<String, FurnitureStorage>) Collections.unmodifiableMap(this.furnitureStorages);
     }
 
-    // Método para filtrar los FurnitureStorages por una condición específica (por ejemplo, sólo los FurnitureStorages que fueron creados por un jugador específico)
     public List<FurnitureStorage> filterFurnitureStorages(Predicate<FurnitureStorage> condition) {
         return this.furnitureStorages.values().stream().filter(condition).collect(Collectors.toList());
     }
 
-    // Método para ordenar los FurnitureStorages por una condición específica (por ejemplo, ordenar por la fecha de creación si esa información está disponible)
     public List<FurnitureStorage> sortFurnitureStorages(Comparator<FurnitureStorage> condition) {
         return this.furnitureStorages.values().stream().sorted(condition).collect(Collectors.toList());
     }
 
-    // Método para transformar los FurnitureStorages a otro tipo de objetos (por ejemplo, convertir a DTO si se necesita enviar los datos a una API)
     public <T> List<T> mapFurnitureStorages(Function<FurnitureStorage, T> mapper) {
         return (List<T>) this.furnitureStorages.values().stream().map(mapper).collect(Collectors.toList());
     }

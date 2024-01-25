@@ -4,13 +4,9 @@ package dev.wuason.storagemechanic.storages.types.furnitures.compatibilities;
 import dev.lone.itemsadder.api.CustomFurniture;
 import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
 import dev.lone.itemsadder.api.Events.FurnitureInteractEvent;
-import dev.lone.itemsadder.api.Events.FurniturePlaceEvent;
 import dev.lone.itemsadder.api.Events.FurniturePlaceSuccessEvent;
+import dev.wuason.storagemechanic.storages.types.furnitures.EventCancel;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
-import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.mythic.skills.EventCancel;
-import io.th0rgal.oraxen.api.events.furniture.OraxenFurnitureBreakEvent;
-import io.th0rgal.oraxen.api.events.furniture.OraxenFurnitureInteractEvent;
-import io.th0rgal.oraxen.api.events.furniture.OraxenFurniturePlaceEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 

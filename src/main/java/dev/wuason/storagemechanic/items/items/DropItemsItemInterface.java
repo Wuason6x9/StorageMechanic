@@ -47,7 +47,7 @@ public class DropItemsItemInterface extends ItemInterface {
         Player player = (Player) event.getWhoClicked();
 
         if(dropItemsType != null){
-            player.closeInventory();
+            if(dropItemsType.isPlayerCloseInventory()) player.closeInventory();
             dropItemsType.run(this, player, storageInventory);
             return;
         }
@@ -171,20 +171,26 @@ public class DropItemsItemInterface extends ItemInterface {
     }
 
     public enum DropItemsType {
-        BY_MATERIAL(DropItemsItemInterface::byMaterial),
-        BY_ITEM_ADAPTER(DropItemsItemInterface::byItemAdapter),
-        BY_DISPLAY_NAME(DropItemsItemInterface::byDisplayName),
-        BY_ACTUAL_PAGE(DropItemsItemInterface::byActualPage),
-        ALL_PAGES(DropItemsItemInterface::allPages);
+        BY_MATERIAL(DropItemsItemInterface::byMaterial, true),
+        BY_ITEM_ADAPTER(DropItemsItemInterface::byItemAdapter, true),
+        BY_DISPLAY_NAME(DropItemsItemInterface::byDisplayName, true),
+        BY_ACTUAL_PAGE(DropItemsItemInterface::byActualPage, false),
+        ALL_PAGES(DropItemsItemInterface::allPages, false);
 
         private final TriConsumer<DropItemsItemInterface, Player, StorageInventory> f;
+        private final boolean playerCloseInventory;
 
-        DropItemsType(TriConsumer<DropItemsItemInterface, Player, StorageInventory> f) {
+        private DropItemsType(TriConsumer<DropItemsItemInterface, Player, StorageInventory> f, boolean playerCloseInventory) {
             this.f = f;
+            this.playerCloseInventory = playerCloseInventory;
         }
 
         public void run(DropItemsItemInterface d, Player p, StorageInventory s) {
             f.accept(d, p, s);
+        }
+
+        public boolean isPlayerCloseInventory() {
+            return playerCloseInventory;
         }
     }
 }

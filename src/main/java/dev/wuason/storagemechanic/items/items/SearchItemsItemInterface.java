@@ -200,7 +200,7 @@ public class SearchItemsItemInterface extends ItemInterface {
 
         invManagerAnvil.savePlayerInventory();
 
-        invManagerAnvil.setRenameTextListener(invConfig.getSection().getLong("refresh_ticks", 20L));
+        invManagerAnvil.setRenameTextListener(invConfig.getSection().getLong("refresh_ticks", 20L)); //TODO: PONER QUE SI NO SE ENCUENTRA LA CONFIGURACION NO SE ACTIVE
 
         invConfig.setItemBlockedConsumer((itemInterface, itemConfig) -> {
             invManagerAnvil.registerItemInterface(itemInterface);
@@ -210,11 +210,11 @@ public class SearchItemsItemInterface extends ItemInterface {
         invConfig.setOnItemLoad((inventoryConfig, configurationSection, itemConfig) -> {
             switch (itemConfig.getActionId()) {
                 case "NEXT_PAGE" -> {
-                    NextPageItem nextPageItem = new NextPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem nextPageItem = new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
                     invManagerAnvil.setItemNext(nextPageItem);
                 }
                 case "BACK_PAGE" -> {
-                    PreviousPageItem previousPageItem = new PreviousPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem previousPageItem = new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
                     invManagerAnvil.setItemBack(previousPageItem);
                 }
                 case "REPAIR_ITEM" -> {
