@@ -59,6 +59,7 @@ inventories:
         id: BACK_PAGE
         item: ia:storagemechanic:back_page
         slots: [45]
+
   search-items:
     title: '<red>Search Items'
     type: CHEST
@@ -80,6 +81,7 @@ inventories:
         id: BY_ITEM_ADAPTER
         item: mc:diamond
         slots: [48]
+
   drop-items:
     title: '<red>Drop Items'
     type: CHEST
