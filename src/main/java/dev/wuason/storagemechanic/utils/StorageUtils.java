@@ -55,6 +55,17 @@ public class StorageUtils {
 
     }
 
+
+    /**
+     * Adds an item to the player's inventory. If the inventory is full, the item will be dropped
+     * at the player's location.
+     *
+     * @param player     The player whose inventory the item will be added to.
+     * @param itemStack  The item to be added to the inventory.
+     *
+     * @deprecated This method is deprecated and will be removed in a future release. Use {@link dev.wuason.mechanics.utils.StorageUtils#addItemToInventoryOrDrop(Player, ItemStack)}
+     * methods directly instead.
+     */
     @Deprecated
     public static void addItemToInventoryOrDrop(Player player, ItemStack itemStack) {
         HashMap<Integer, ItemStack> remainingItems = player.getInventory().addItem(itemStack);

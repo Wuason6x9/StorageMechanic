@@ -8,6 +8,7 @@ import dev.wuason.mechanics.utils.PlayerUtils;
 import dev.wuason.nms.wrappers.NMSManager;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.Storage;
+import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -313,7 +314,9 @@ public class FunctionsStorage {
                 String stage = (String) objects[0];
                 int page = (int) objects[1];
                 Storage storage = (Storage) objects[2];
-                storage.setStage(stage, page);
+                if(!storage.existsStorageInventory(page)) return false;
+                StorageInventory storageInventory = storage.getStorageInventory(page);
+                storageInventory.setStage(stage);
                 return false;
             });
         });

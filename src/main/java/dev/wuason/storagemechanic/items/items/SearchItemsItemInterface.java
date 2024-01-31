@@ -199,8 +199,10 @@ public class SearchItemsItemInterface extends ItemInterface {
         };
 
         invManagerAnvil.savePlayerInventory();
-
-        invManagerAnvil.setRenameTextListener(invConfig.getSection().getLong("refresh_ticks", 20L)); //TODO: PONER QUE SI NO SE ENCUENTRA LA CONFIGURACION NO SE ACTIVE
+        long refreshTicks = invConfig.getSection().getLong("refresh_ticks", 0L);
+        if(refreshTicks>0){
+            invManagerAnvil.setRenameTextListener(refreshTicks);
+        }
 
         invConfig.setItemBlockedConsumer((itemInterface, itemConfig) -> {
             invManagerAnvil.registerItemInterface(itemInterface);

@@ -109,12 +109,12 @@ public class Storage {
                 }
 
                 items.put(page, contents);
-                stopAnimationStages(page);
+                //stopAnimationStages(page);
                 inventories.remove(page);
+
                 if(currentStages.containsKey(page)) currentStages.remove(page);
+
                 if(getStorageConfig().getStorageProperties().isDropItemsPageOnClose()) dropItemsFromPage(player.getLocation(), page);
-
-
 
                 //MYTHIC
                 if(getInventories().size()==0){
@@ -228,74 +228,9 @@ public class Storage {
         if(page<0 || page>=getTotalPages()) return false;
         return openStorage(player,page);
     }
-    /**
-     * Starts the animation stages for a specific page of the storage.
-     *
-     * @param page The page number of the storage.
-     */
-    public void startAnimationStages(int page){ //TODO: SOLUCIONAR ERROR DE AL CERRAR EL INVENTARIO SE VUELVE A ABRIR.
-        if(currentStages.containsKey(page)) return;
-        StorageConfig storageConfig = getStorageConfig();
-        if(storageConfig.getRefreshTimeStages() == 0L || storageConfig.getRefreshTimeStages() == -1L) return;
-        ArrayList<StageStorage> stages = storageConfig.getStagesOrder();
-        if(stages.size()<1) return;
-        StorageInventory inventory = inventories.get(page);
-        BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(core, () ->{
-            StageStorage stage = null;
-            if(currentStages.containsKey(page)) {
-                stage = currentStages.get(page);
-                if(stages.indexOf(stage) + 1 < stages.size()) stage = stages.get(stages.indexOf(stage)+1);
-                else {
-                    stage = stages.get(0);
-                }
-            }
-            if(!currentStages.containsKey(page)) stage = storageConfig.getStagesOrder().get(0);
-            setStage(stage,page);
-        },0,storageConfig.getRefreshTimeStages());
-        inventory.setAnimationStagesTask(bukkitTask);
-    }
-    /**
-     * Stops the animation stages for the specified page of the storage.
-     *
-     * @param page The page number of the storage.
-     */
-    public void stopAnimationStages(int page){
-        if(!currentStages.containsKey(page)) return;
-        StorageInventory inventory = inventories.get(page);
-        inventory.getAnimationStagesTask().cancel();
-        inventory.setAnimationStagesTask(null);
-    }
-    /**
-     * Sets the stage of the storage to the specified stage ID and page number.
-     *
-     * @param stageId The ID of the stage to set.
-     * @param page The page number to set the stage on.
-     */
-    public void setStage(String stageId, int page){
-        StorageConfig storageConfig = getStorageConfig();
-        if(!storageConfig.getStagesHashMap().containsKey(stageId)) return;
-        StageStorage stage = storageConfig.getStagesHashMap().get(stageId);
-        setStage(stage,page);
-    }
-    /**
-     * Sets the stage of the storage on the specified page.
-     *
-     * @param stage The stage to set for the storage.
-     * @param page The page of the storage to set the stage on.
-     */
-    public void setStage(StageStorage stage, int page){
-        if(!inventories.containsKey(page)) return;
-        StorageInventory inventory = inventories.get(page);
-        if(stage.getTitle() != null) inventory.setTitleInventory(stage.getTitle(),null);
-        currentStages.put(page,stage);
-        if(stage.getStorageItemsInterfaceConfig().containsKey(page)){
-            removeItemsInterface(page);
-            for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : stage.getStorageItemsInterfaceConfig().get(page).entrySet()){
-                if(PlaceholderItemInterface.isPlaceholderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
-                inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
-            }
-        }
-    }
+
+
+
     public void removeItemsInterface(int page){
         if(!inventories.containsKey(page)) return;
         StorageInventory storageInventory = inventories.get(page);
@@ -1423,5 +1358,21 @@ public class Storage {
 
     public Date getLastAccess() {
         return lastAccess;
+    }
+
+    public StorageInventory getStorageInventory(int page){
+        return inventories.get(page);
+    }
+
+    public void setStorageInventory(int page, StorageInventory storageInventory){
+        inventories.put(page,storageInventory);
+    }
+
+    public void removeStorageInventory(int page){
+        inventories.remove(page);
+    }
+
+    public boolean existsStorageInventory(int page){
+        return inventories.containsKey(page);
     }
 }

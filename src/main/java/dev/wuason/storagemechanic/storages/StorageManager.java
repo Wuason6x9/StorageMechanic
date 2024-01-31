@@ -65,6 +65,7 @@ public class StorageManager implements Listener {
     }
 
     public void antiTrashTask(){
+        if(storageMap.isEmpty()) return;
         for (Map.Entry<String, Storage> entry : storageMap.entrySet()) {
             if(entry.getValue().getLastOpen().getTime() + TIME_TO_SAVE < System.currentTimeMillis() && entry.getValue().getLastAccess().getTime() + TIME_TO_SAVE < System.currentTimeMillis()){
                 saveStorage(entry.getValue(), SaveCause.NORMAL_SAVE);
@@ -87,8 +88,10 @@ public class StorageManager implements Listener {
             if(storageConfig.isStorageItemsWhiteListEnabled() || storageConfig.isStorageItemsBlackListEnabled()) {
                 DragItemCheckList(storage, storageInventory, event, storageConfig);
             }
+            storageInventory.onDrag(event);
         }
     }
+
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
         if(event.getClickedInventory() == null) return;
@@ -100,18 +103,16 @@ public class StorageManager implements Listener {
             //SOUNDS
             if(storageConfig.isStorageSoundEnabled()){
                 for(StorageSoundConfig soundConfig : storageConfig.getStorageSounds()){
-                    if(soundConfig.getType().equals(StorageSoundConfig.Type.CLICK)){
-                        if(soundConfig.getPagesToSlots().containsKey(storageInventory.getPage())){
-                            if(soundConfig.getPagesToSlots().get(storageInventory.getPage()).size()>0){
-                                if(event.getClickedInventory() != null && !event.getClickedInventory().getType().equals(InventoryType.PLAYER)) {
-                                    if (soundConfig.getPagesToSlots().get(storageInventory.getPage()).contains(storageInventory.getPage())) {
-                                        ((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), soundConfig.getSound(), soundConfig.getVolume(), soundConfig.getPitch());
-                                    }
+                    if(soundConfig.getType().equals(StorageSoundConfig.Type.CLICK) && soundConfig.getPagesToSlots().containsKey(storageInventory.getPage())){
+                        if(soundConfig.getPagesToSlots().get(storageInventory.getPage()).size()>0){
+                            if(event.getClickedInventory() != null && !event.getClickedInventory().getType().equals(InventoryType.PLAYER)) {
+                                if (soundConfig.getPagesToSlots().get(storageInventory.getPage()).contains(storageInventory.getPage())) {
+                                    ((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), soundConfig.getSound(), soundConfig.getVolume(), soundConfig.getPitch());
                                 }
                             }
-                            else {
-                                ((Player)event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(),soundConfig.getSound(), soundConfig.getVolume(),soundConfig.getPitch());
-                            }
+                        }
+                        else {
+                            ((Player)event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(),soundConfig.getSound(), soundConfig.getVolume(),soundConfig.getPitch());
                         }
                     }
                 }
@@ -168,6 +169,8 @@ public class StorageManager implements Listener {
             ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event,storageInventory);
             Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
 
+            storageInventory.onClick(event);
+
         }
     }
     @EventHandler
@@ -182,6 +185,8 @@ public class StorageManager implements Listener {
 
             OpenStoragePageActionEvent openStoragePageActionEvent = new OpenStoragePageActionEvent(storageInventory, event);
             core.getManagers().getActionManager().callEvent(openStoragePageActionEvent, storage.getId(), storage);
+
+            storageInventory.onOpen(event);
 
             //Hopper event
             if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)){
@@ -216,6 +221,8 @@ public class StorageManager implements Listener {
 
             //SAVE STORAGE
             storage.closeStorage(storageInventory.getPage(), (Player) event.getPlayer());
+
+            storageInventory.onClose(event);
 
             //Hopper event
             if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)){
