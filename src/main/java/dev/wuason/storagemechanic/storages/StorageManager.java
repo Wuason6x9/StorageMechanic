@@ -215,12 +215,12 @@ public class StorageManager implements Listener {
             Storage storage = storageInventory.getStorage();
             StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
 
+            //SAVE STORAGE
+            storage.closeStorage(storageInventory.getPage(), (Player) event.getPlayer());
+
             //events
             CloseStoragePageActionEvent closeStoragePageActionEvent = new CloseStoragePageActionEvent(storageInventory, event);
             core.getManagers().getActionManager().callEvent(closeStoragePageActionEvent, storage.getId(), storage);
-
-            //SAVE STORAGE
-            storage.closeStorage(storageInventory.getPage(), (Player) event.getPlayer());
 
             storageInventory.onClose(event);
 

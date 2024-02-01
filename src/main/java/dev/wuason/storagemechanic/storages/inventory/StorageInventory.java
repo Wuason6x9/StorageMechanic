@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StorageInventory implements InventoryHolder {
 
@@ -36,6 +37,7 @@ public class StorageInventory implements InventoryHolder {
     private int page;
     private BukkitTask animationStagesTask;
     private StageStorage currentStage;
+    private AtomicBoolean closed = new AtomicBoolean(false);
 
 
     public StorageInventory(StorageConfig storageConfig, Storage storage, int page) {
@@ -151,29 +153,14 @@ public class StorageInventory implements InventoryHolder {
         ArrayList<StageStorage> stages = storageConfig.getStagesOrder();
         if (storageConfig.getRefreshTimeStages() < 1 || stages.isEmpty()) return;
 
-        BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(StorageMechanic.getInstance(), () -> {
-
-            if (currentStage != null && stages.indexOf(currentStage)) {
-            } else {
-                currentStage = stages.get(0);
-            }
-
+        BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously( StorageMechanic.getInstance(), () -> {
+            System.out.println(isClosed());
+            if(isClosed()) return;
+            if (currentStage != null && (stages.indexOf(currentStage) + 1) < stages.size()) currentStage = stages.get(stages.indexOf(currentStage) + 1);
+            else currentStage = stages.get(0);
             setStage(currentStage);
 
-            StageStorage stage = null;
-            if (currentStages.containsKey(page)) {
-
-                stage = currentStages.get(page);
-                if (stages.indexOf(stage) + 1 < stages.size()) stage = stages.get(stages.indexOf(stage) + 1);
-                else {
-                    stage = stages.get(0);
-                }
-            }
-            if (!currentStages.containsKey(page)) stage = storageConfig.getStagesOrder().get(0);
-            setStage(stage, page);
-
         }, 0, storageConfig.getRefreshTimeStages());
-
 
         setAnimationStagesTask(bukkitTask);
     }
@@ -210,6 +197,18 @@ public class StorageInventory implements InventoryHolder {
         }
     }
 
+    public StageStorage getCurrentStage() {
+        return currentStage;
+    }
+
+    public void setClosed(boolean closed) {
+        this.closed.set(closed);
+    }
+
+    public boolean isClosed() {
+        return closed.get();
+    }
+
     public void onClose(InventoryCloseEvent event) {
 
     }
@@ -223,6 +222,7 @@ public class StorageInventory implements InventoryHolder {
 
     public void onDrag(InventoryDragEvent event) {
     }
+
 
 
 }

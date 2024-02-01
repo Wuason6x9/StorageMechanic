@@ -38,7 +38,6 @@ public class Storage {
     private Date lastAccess = new Date();
     private StorageMechanic core;
     private StorageOriginContext storageOriginContext;
-    private HashMap<Integer, StageStorage> currentStages = new HashMap<>();
     private boolean isTempStorage = false;
 
     /**
@@ -98,6 +97,7 @@ public class Storage {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             if (storageInventory.getInventory().getViewers().size() <= 1) { // <= 1 because the current player is still in the viewer list
+                storageInventory.setClosed(true);
                 ItemStack[] contents = storageInventory.getInventory().getContents();
                 ItemInterfaceManager itemInterfaceManager = StorageMechanic.getInstance().getManagers().getItemInterfaceManager();
 
@@ -109,15 +109,13 @@ public class Storage {
                 }
 
                 items.put(page, contents);
-                //stopAnimationStages(page);
+                storageInventory.stopAnimationStages();
                 inventories.remove(page);
-
-                if(currentStages.containsKey(page)) currentStages.remove(page);
 
                 if(getStorageConfig().getStorageProperties().isDropItemsPageOnClose()) dropItemsFromPage(player.getLocation(), page);
 
                 //MYTHIC
-                if(getInventories().size()==0){
+                if(getInventories().isEmpty()){
                     if(core.getManagers().getMythicManager() != null){
                         core.getManagers().getMythicManager().executeCloseStorageSkill(storageOriginContext,id,storageInventory);
                     }
@@ -205,11 +203,8 @@ public class Storage {
         }
         StorageInventory storageInventoryPage = inventories.get(page);
         storageInventoryPage.open(player);
-        if(storageConfig.getRefreshTimeStages() != 0L && storageConfig.getRefreshTimeStages() != -1L) startAnimationStages(page);
-        if(currentStages.containsKey(page)){
-            StageStorage stage = currentStages.get(page);
-            if(stage.getTitle() != null) storageInventoryPage.setTitleInventory(stage.getTitle(), player);
-        }
+        if(storageConfig.getRefreshTimeStages() != 0L && storageConfig.getRefreshTimeStages() != -1L) storageInventoryPage.startAnimationStages();
+        if(storageInventoryPage.getCurrentStage() != null && storageInventoryPage.getCurrentStage().getTitle() != null) storageInventoryPage.setTitleInventory(storageInventoryPage.getCurrentStage().getTitle(), player);
 
         OpenStorageEvent openStorageEvent = new OpenStorageEvent(player,storageInventoryPage);
         Bukkit.getPluginManager().callEvent(openStorageEvent);
@@ -623,8 +618,8 @@ public class Storage {
     }
     public boolean isItemInterfaceSlot(int page, int slot, StorageConfig storageConfig){
         if(!storageConfig.getStorageItemsInterfaceConfig().containsKey(page)) return false;
-        if(currentStages.containsKey(page)){
-            StageStorage stage = currentStages.get(page);
+        if(getStorageInventory(page).getCurrentStage() != null){
+            StageStorage stage = getStorageInventory(page).getCurrentStage();
             if(stage.getStorageItemsInterfaceConfig().containsKey(page)){
                 HashMap<Integer,StorageItemInterfaceConfig> hashMap = stage.getStorageItemsInterfaceConfig().get(page);
                 return hashMap.containsKey(slot);
@@ -1342,10 +1337,6 @@ public class Storage {
     public enum ListType {
         WHITELIST,
         BLACKLIST
-    }
-
-    public HashMap<Integer, StageStorage> getCurrentStages() {
-        return currentStages;
     }
 
     public Date getLastOpen() {
