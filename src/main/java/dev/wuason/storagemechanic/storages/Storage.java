@@ -423,6 +423,12 @@ public class Storage {
         return notAddedItems;
     }
 
+    /**
+     * Removes the specified ItemStack from the given page in the inventory.
+     *
+     * @param page The page number of the inventory.
+     * @param itemStack The ItemStack to be removed.
+     */
     public void removeItemStack(int page, ItemStack itemStack) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
@@ -448,6 +454,9 @@ public class Storage {
         }
     }
 
+    /**
+     *
+     */
     public List<ItemStack> removeItemStackAtSlot(int page, int slot, ItemStack itemStack) {
         List<ItemStack> notRemovedItems = new ArrayList<>();
 
@@ -497,10 +506,25 @@ public class Storage {
         return notRemovedItems;
     }
 
+
+    /**
+     * Clears a specific slot on a given page, with restrictions.
+     *
+     * @param page The page number where the slot is located.
+     * @param slot The slot number to be cleared on the page.
+     */
     public void clearSlotWithRestrictions(int page, int slot) {
         if(isItemInterfaceSlot(page,slot,getStorageConfig()) && !PlaceholderItemInterface.isPlaceholderItem(getItem(slot, page))) return;
         clearSlotPage(page, slot);
     }
+    /**
+     * Clears the slot on a specific page in the inventory.
+     * If the page exists, the slot on that page is cleared.
+     * If the slot contains an item interface, the item interface item is set back in the slot if enabled in the config.
+     *
+     * @param page The page index of the inventory.
+     * @param slot The slot index to clear.
+     */
     public void clearSlotPage(int page, int slot) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
@@ -523,12 +547,27 @@ public class Storage {
         }
     }
 
+    /**
+     * Retrieves the StorageItemInterfaceConfig associated with the given page and slot.
+     *
+     * @param page The page number to search for.
+     * @param slot The slot number to search for.
+     * @return An Optional object containing the StorageItemInterfaceConfig, or an empty Optional if not found.
+     */
     public Optional<StorageItemInterfaceConfig> getStorageItemInterfaceConfig(int page, int slot){
         if(!getStorageConfig().getStorageItemsInterfaceConfig().containsKey(page)) return Optional.empty();
         if(!getStorageConfig().getStorageItemsInterfaceConfig().get(page).containsKey(slot)) return Optional.empty();
         return Optional.of(getStorageConfig().getStorageItemsInterfaceConfig().get(page).get(slot));
     }
 
+    /**
+     * Drops an item at the specified location.
+     *
+     * @param item   the item to be dropped
+     * @param loc    the location at which the item should be dropped
+     * @param sync   whether the drop should be synchronized or asynchronous
+     * @param remove whether to remove the item with restrictions
+     */
     public void dropItem(StorageItemDataInfo item, Location loc, boolean sync, boolean remove){
         if(remove) item.removeWithRestrictions();
         Runnable runnable = () -> {
@@ -537,10 +576,22 @@ public class Storage {
         if(!sync) runnable.run();
         else Bukkit.getScheduler().runTask(StorageMechanic.getInstance(), runnable);
     }
+    /**
+     * Drops an item from storage at the specified location in the world.
+     *
+     * @param item The storage item data information.
+     * @param loc The location where the item will be dropped.
+     */
     public void dropItem(StorageItemDataInfo item, Location loc){
         loc.getWorld().dropItem(loc, item.getItemStack());
     }
 
+    /**
+     * Drops a list of items at the specified location.
+     *
+     * @param items The list of StorageItemDataInfo objects to drop.
+     * @param loc The location where the items will be dropped.
+     */
     public void dropItems(List<StorageItemDataInfo> items, Location loc){
         for(StorageItemDataInfo item : items){
             dropItem(item,loc);

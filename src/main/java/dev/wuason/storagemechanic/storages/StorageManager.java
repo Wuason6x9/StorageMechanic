@@ -1,5 +1,6 @@
 package dev.wuason.storagemechanic.storages;
 
+import dev.wuason.libs.invmechaniclib.events.CloseEvent;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.Managers;
 import dev.wuason.storagemechanic.StorageMechanic;
@@ -35,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class StorageManager implements Listener {
     private StorageMechanic core;
-    private Map<String, Storage> storageMap = new HashMap<>();
+    private HashMap<String, Storage> storageMap = new HashMap<>();
     private Map<UUID, WaitingInputData> waitingInput = new ConcurrentHashMap<>();
     private DataManager dataManager;
     private Managers managers;
@@ -77,17 +78,7 @@ public class StorageManager implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryDrag(InventoryDragEvent event){
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof StorageInventory) {
-            StorageInventory storageInventory = (StorageInventory) holder;
-            Storage storage = storageInventory.getStorage();
-            StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
-            DragItemCheck(storage, storageInventory, event, storageConfig);
-            if(storageConfig.isStorageBlockItemEnabled()){
-                DragItemBlocked(storage, storageInventory, event, storageConfig);
-            }
-            if(storageConfig.isStorageItemsWhiteListEnabled() || storageConfig.isStorageItemsBlackListEnabled()) {
-                DragItemCheckList(storage, storageInventory, event, storageConfig);
-            }
+        if (holder instanceof StorageInventory storageInventory) {
             storageInventory.onDrag(event);
         }
     }
@@ -169,80 +160,35 @@ public class StorageManager implements Listener {
             ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event,storageInventory);
             Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
 
-            storageInventory.onClick(event);
-
         }
     }
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof StorageInventory) {
-            StorageInventory storageInventory = (StorageInventory) holder;
-            Storage storage = storageInventory.getStorage();
-            StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
-
-            //events
-
-            OpenStoragePageActionEvent openStoragePageActionEvent = new OpenStoragePageActionEvent(storageInventory, event);
-            core.getManagers().getActionManager().callEvent(openStoragePageActionEvent, storage.getId(), storage);
-
+        if (holder instanceof StorageInventory storageInventory) {
             storageInventory.onOpen(event);
-
-            //Hopper event
-            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)){
-                List<String> list = storage.getStorageOriginContext().getData();
-                BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
-            }
-
-            //SOUNDS
-            if(storageConfig.isStorageSoundEnabled()){
-                for(StorageSoundConfig soundConfig : storageConfig.getStorageSounds()){
-                    if(soundConfig.getType().equals(StorageSoundConfig.Type.OPEN)){
-                        if(soundConfig.getPagesToSlots().containsKey(storageInventory.getPage())){
-                            ((Player)event.getPlayer()).playSound(event.getPlayer().getLocation(),soundConfig.getSound(), soundConfig.getVolume(),soundConfig.getPitch());
-                        }
-                    }
-                }
-            }
         }
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof StorageInventory) {
-            StorageInventory storageInventory = (StorageInventory) holder;
-            Storage storage = storageInventory.getStorage();
-            StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
-
-            //SAVE STORAGE
-            storage.closeStorage(storageInventory.getPage(), (Player) event.getPlayer());
-
-            //events
-            CloseStoragePageActionEvent closeStoragePageActionEvent = new CloseStoragePageActionEvent(storageInventory, event);
-            core.getManagers().getActionManager().callEvent(closeStoragePageActionEvent, storage.getId(), storage);
-
-            storageInventory.onClose(event);
-
-            //Hopper event
-            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)){
-                List<String> list = storage.getStorageOriginContext().getData();
-                BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
-            }
-
-            //SOUNDS
-            if(storageConfig.isStorageSoundEnabled()){
-                for(StorageSoundConfig soundConfig : storageConfig.getStorageSounds()){
-                    if(soundConfig.getType().equals(StorageSoundConfig.Type.CLOSE)){
-                        if(soundConfig.getPagesToSlots().containsKey(storageInventory.getPage())){
-                            ((Player)event.getPlayer()).playSound(event.getPlayer().getLocation(),soundConfig.getSound(), soundConfig.getVolume(),soundConfig.getPitch());
-                        }
-                    }
-                }
+        if (holder instanceof StorageInventory storageInventory) {
+            CloseEvent closeEvent = new CloseEvent(event);
+            storageInventory.onClose(closeEvent);
+            if(closeEvent.isCancelled()){
+                Bukkit.getScheduler().runTask(core,()->{
+                    event.getPlayer().openInventory(storageInventory.getInventory());
+                });
             }
         }
     }
 
+    /**
+     * Handles the event when a player chats.
+     *
+     * @param event The event object representing the player chat event.
+     */
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
@@ -552,6 +498,12 @@ public class StorageManager implements Listener {
 
     }
 
+    /**
+     * Returns the storage with the given ID.
+     *
+     * @param id the ID of the storage to retrieve
+     * @return the storage object if found, or null if not found
+     */
     public Storage getStorage(String id) {
         if(storageMap.containsKey(id)) {
             Storage s = storageMap.get(id);
@@ -566,27 +518,52 @@ public class StorageManager implements Listener {
         return null;
     }
 
+    /**
+     * Removes the storage with the given ID from the waiting input data.
+     *
+     * @param id the ID of the storage to remove
+     */
     public void removeStorageFromInputWait(String id){
         for(Map.Entry<UUID,WaitingInputData> entry : waitingInput.entrySet()){
             if(id.equals(entry.getValue().getStorage().getId())) waitingInput.remove(entry.getKey());
         }
     }
 
+    /**
+     * Removes the storage with the given ID.
+     *
+     * @param id the ID of the storage to remove
+     */
     public void removeStorage(String id) {
         removeStorageFromInputWait(id);
         if(storageMap.containsKey(id)) storageMap.remove(id);
         if(dataManager.getStorageManagerData().existStorageData(id)) dataManager.getStorageManagerData().removeStorageData(id);
     }
 
+    /**
+     * Checks if a storage with the given ID exists.
+     *
+     * @param id the ID of the storage
+     * @return true if the storage exists, false otherwise
+     */
     public boolean storageExists(String id) {
         if(storageMap.containsKey(id)) return true;
         if(dataManager.getStorageManagerData().existStorageData(id)) return true;
         return false;
     }
+    /**
+     * Saves the given storage object to the data manager without removing any existing data.
+     * The storage data is obtained from the data manager and then the provided storage object is saved.
+     *
+     * @param storage the storage object to be saved
+     */
     //DATA
     public void saveStorageNoRemove(Storage storage){
         dataManager.getStorageManagerData().saveStorageData(storage);
     }
+    /**
+     *
+     */
     public void saveStorage(Storage storage, SaveCause saveCause){
         String id = storage.getId();
         if(storage.getStorageConfig().getStorageProperties().isTempStorage()) {
@@ -599,6 +576,12 @@ public class StorageManager implements Listener {
         }
         dataManager.getStorageManagerData().saveStorageData(storage);
     }
+    /**
+     * Loads a storage with the specified ID from the storage map.
+     *
+     * @param id the ID of the storage to load
+     * @return the loaded storage, or null if the storage is not found or failed to load
+     */
     public Storage loadStorage(String id){
         if(!storageMap.containsKey(id)){
             Storage storage = dataManager.getStorageManagerData().loadStorageData(id);
@@ -608,11 +591,20 @@ public class StorageManager implements Listener {
         }
         return null;
     }
+    /**
+     * Saves all storages.
+     *
+     * This method iterates through all the storages in the storageMap and saves each storage using the saveStorageNoRemove method.
+     */
     public void saveAllStorages(){
         for(Storage storage : storageMap.values()){
             saveStorageNoRemove(storage);
         }
     }
+    /**
+     * Stops the process of saving all the storages.
+     * This method will iterate through the storage map and save each storage with the save cause 'STOPPING_SAVE'.
+     */
     public void stop(){
         while(!storageMap.isEmpty()){
             Storage storage = storageMap.values().stream().toList().get(0);
@@ -620,6 +612,12 @@ public class StorageManager implements Listener {
         }
     }
 
+    /**
+     * Retrieves the map of storage objects.
+     *
+     * @return A map object representing the storage map. The keys are strings representing the storage IDs,
+     *         and the values are Storage objects representing the actual storage data.
+     */
     public Map<String, Storage> getStorageMap() {
         return storageMap;
     }

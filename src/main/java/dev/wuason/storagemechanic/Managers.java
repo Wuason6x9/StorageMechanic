@@ -144,7 +144,6 @@ public class Managers {
             if (configManager.getMainConfig().getBoolean("logs.show_save_logs", true)) {
                 AdventureUtils.sendMessagePluginConsole(core, "<red> Starting save data...");
             }
-            storageManager.antiTrashTask();
             saveAllData();
             if (configManager.getMainConfig().getBoolean("logs.show_save_logs", true)) {
                 AdventureUtils.sendMessagePluginConsole(core, "<green> Data saved!");
