@@ -35,12 +35,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StorageManager implements Listener {
-    private StorageMechanic core;
-    private HashMap<String, Storage> storageMap = new HashMap<>();
-    private Map<UUID, WaitingInputData> waitingInput = new ConcurrentHashMap<>();
-    private DataManager dataManager;
-    private Managers managers;
-    private static Long TIME_TO_SAVE = 1200000L;
+    private final StorageMechanic core;
+    private final HashMap<String, Storage> storageMap = new HashMap<>();
+    private final Map<UUID, WaitingInputData> waitingInput = new ConcurrentHashMap<>();
+    private final DataManager dataManager;
+    private final Managers managers;
+    private static final Long TIME_TO_SAVE = 1200000L;
 
     public StorageManager(StorageMechanic core, DataManager dataManager, Managers managers) {
         this.core = core;
@@ -87,80 +87,7 @@ public class StorageManager implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if(event.getClickedInventory() == null) return;
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof StorageInventory) {
-            StorageInventory storageInventory = (StorageInventory) holder;
-            Storage storage = storageInventory.getStorage();
-            StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storage.getStorageIdConfig());
-            //SOUNDS
-            if(storageConfig.isStorageSoundEnabled()){
-                for(StorageSoundConfig soundConfig : storageConfig.getStorageSounds()){
-                    if(soundConfig.getType().equals(StorageSoundConfig.Type.CLICK) && soundConfig.getPagesToSlots().containsKey(storageInventory.getPage())){
-                        if(soundConfig.getPagesToSlots().get(storageInventory.getPage()).size()>0){
-                            if(event.getClickedInventory() != null && !event.getClickedInventory().getType().equals(InventoryType.PLAYER)) {
-                                if (soundConfig.getPagesToSlots().get(storageInventory.getPage()).contains(storageInventory.getPage())) {
-                                    ((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), soundConfig.getSound(), soundConfig.getVolume(), soundConfig.getPitch());
-                                }
-                            }
-                        }
-                        else {
-                            ((Player)event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(),soundConfig.getSound(), soundConfig.getVolume(),soundConfig.getPitch());
-                        }
-                    }
-                }
-            }
-            if(event.getCurrentItem() != null && event.getClickedInventory().getType().equals(InventoryType.PLAYER) && event.getClick().isShiftClick()){
-                ShiftClickItemCheck(storage, storageInventory, event, storageConfig);
-                if(storageConfig.isStorageBlockItemEnabled()) {
-                    if(storageInventory.getInventory().firstEmpty() != -1 && event.getCurrentItem() != null){
-
-                        ShiftClickItemBlocked(storage,storageInventory,event,storageConfig);
-
-                    }
-                }
-                if(storageConfig.isStorageItemsWhiteListEnabled() || storageConfig.isStorageItemsBlackListEnabled()) {
-                    if(storageInventory.getInventory().firstEmpty() != -1 && event.getCurrentItem() != null){
-
-                        ShiftClickItemCheckList(storage,storageInventory,event,storageConfig);
-
-                    }
-                }
-            }
-            //ITEMS INTERFACES & Item CheckList
-            if (event.getClickedInventory() != null && !event.getClickedInventory().getType().equals(InventoryType.PLAYER)) {
-                // Cancel event if clicked item is an interface item
-                ItemStack clickedItem = event.getCurrentItem();
-                ItemInterfaceManager itemInterfaceManager = core.getManagers().getItemInterfaceManager();
-                if (clickedItem != null && itemInterfaceManager.isItemInterface(clickedItem) ) {
-                    event.setCancelled(true);
-                    ItemInterface itemInterface = core.getManagers().getItemInterfaceManager().getItemInterfaceByItemStack(clickedItem);
-                    itemInterface.onClick(storage,storageInventory,event,storageConfig,this);
-
-                    //events
-                    ClickItemInterfaceActionEvent clickItemInterfaceActionEvent = new ClickItemInterfaceActionEvent(storageInventory, event, itemInterface);
-                    core.getManagers().getActionManager().callEvent(clickItemInterfaceActionEvent, storage.getId(), storage);
-                }
-                ClickItemCheck(storage, storageInventory, event, storageConfig);
-                if(storageConfig.isStorageBlockItemEnabled()){
-                    ClickItemBlocked(storage, storageInventory, event, storageConfig);
-                }
-                if(storageConfig.isStorageItemsWhiteListEnabled() || storageConfig.isStorageItemsBlackListEnabled()) {
-                    ClickItemCheckList(storage, storageInventory, event, storageConfig);
-                }
-            }
-            //Hopper event
-            if(storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)){
-                List<String> list = storage.getStorageOriginContext().getData();
-                BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1),list.get(0),list.get(2)});
-            }
-            //Events
-
-            ClickStoragePageActionEvent clickStoragePageActionEvent = new ClickStoragePageActionEvent(storageInventory, event);
-            core.getManagers().getActionManager().callEvent(clickStoragePageActionEvent, storage.getId(), storage);
-
-            ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event,storageInventory);
-            Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
-
-        }
+        if (holder instanceof StorageInventory storageInventory) storageInventory.onClick(event);
     }
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {
@@ -184,11 +111,6 @@ public class StorageManager implements Listener {
         }
     }
 
-    /**
-     * Handles the event when a player chats.
-     *
-     * @param event The event object representing the player chat event.
-     */
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
@@ -215,288 +137,17 @@ public class StorageManager implements Listener {
         }
     }
 
-
-    //CHECK ITEM
-    public void ClickItemCheck(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack cursor = event.getCursor();
-
-        if(cursor != null && !cursor.getType().equals(Material.AIR)){
-
-            //ITEM STORAGE
-            if(managers.getItemStorageManager().isItemStorage(cursor)){
-                String[] src = managers.getItemStorageManager().getDataFromItemStack(cursor).split(":");
-                if(src[1].equals(storage.getId())){
-                    event.setCancelled(true);
-                    return;
+    @EventHandler
+    public void onDisable(PluginDisableEvent event){
+        if(event.getPlugin().equals(core)){
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                if(player.getOpenInventory().getTopInventory() != null && player.getOpenInventory().getTopInventory().getHolder() instanceof StorageInventory){
+                    player.closeInventory();
                 }
-                if(!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()){
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-            //FURNITURE STORAGE
-            if(managers.getFurnitureStorageManager().isShulker(cursor)){
-                String[] src = managers.getFurnitureStorageManager().getShulkerData(cursor).split(":");
-                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
-                    if(!furnitureStorageC.getFurnitureStorageProperties().isStorageable()){
-                        event.setCancelled(true);
-                        return;
-                    }
-                });
-            }
-            //BLOCK STORAGE
-            if(managers.getBlockStorageManager().isShulker(cursor)){
-                String[] src = managers.getBlockStorageManager().getShulkerData(cursor).split(":");
-                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
-                    if(!blockStorageC.getBlockStorageProperties().isStorageable()){
-                        event.setCancelled(true);
-                        return;
-                    }
-                });
-            }
-
+            });
         }
     }
-    public void ShiftClickItemCheck(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
 
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack clickedItem = event.getCurrentItem();
-        int slot = storageInventory.getInventory().firstEmpty();
-
-        if(!clickedItem.getType().equals(Material.AIR)){
-
-            //ITEM STORAGE
-            if(managers.getItemStorageManager().isItemStorage(clickedItem)){
-                String[] src = managers.getItemStorageManager().getDataFromItemStack(clickedItem).split(":");
-                if(src[1].equals(storage.getId())){
-                    event.setCancelled(true);
-                    return;
-                }
-                if(!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()){
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-
-            //FURNITURE STORAGE
-            if(managers.getFurnitureStorageManager().isShulker(clickedItem)){
-                String[] src = managers.getFurnitureStorageManager().getShulkerData(clickedItem).split(":");
-                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
-                    if(!furnitureStorageC.getFurnitureStorageProperties().isStorageable()){
-                        event.setCancelled(true);
-                        return;
-                    }
-                });
-            }
-            //BLOCK STORAGE
-            if(managers.getBlockStorageManager().isShulker(clickedItem)){
-                String[] src = managers.getBlockStorageManager().getShulkerData(clickedItem).split(":");
-                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
-                    if(!blockStorageC.getBlockStorageProperties().isStorageable()){
-                        event.setCancelled(true);
-                        return;
-                    }
-                });
-            }
-        }
-
-    }
-    public void DragItemCheck(Storage storage,StorageInventory storageInventory,InventoryDragEvent event,StorageConfig storageConfig){
-
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack cursor = event.getCursor();
-        if(cursor == null){
-            cursor = (ItemStack) (event.getNewItems().values().toArray())[0];
-        }
-        if(cursor != null && !cursor.getType().equals(Material.AIR)){
-
-            //ITEM STORAGE
-            if(managers.getItemStorageManager().isItemStorage(cursor)){
-                String[] src = managers.getItemStorageManager().getDataFromItemStack(cursor).split(":");
-                if(src[1].equals(storage.getId())){
-                    event.setCancelled(true);
-                    return;
-                }
-                if(!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()){
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-
-            //FURNITURE STORAGE
-            if(managers.getFurnitureStorageManager().isShulker(cursor)){
-                String[] src = managers.getFurnitureStorageManager().getShulkerData(cursor).split(":");
-                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
-                    if(!furnitureStorageC.getFurnitureStorageProperties().isStorageable()){
-                        event.setCancelled(true);
-                        return;
-                    }
-                });
-            }
-            //BLOCK STORAGE
-            if(managers.getBlockStorageManager().isShulker(cursor)){
-                String[] src = managers.getBlockStorageManager().getShulkerData(cursor).split(":");
-                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
-                    if(!blockStorageC.getBlockStorageProperties().isStorageable()){
-                        event.setCancelled(true);
-                        return;
-                    }
-                });
-            }
-
-        }
-
-    }
-
-
-    public void ClickItemCheckList(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
-
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack cursor = event.getCursor();
-
-        if(cursor != null && !cursor.getType().equals(Material.AIR)){
-
-            if(storageConfig.isStorageItemsWhiteListEnabled()){
-                if(!storage.isItemInList(cursor,event.getSlot(),storageInventory.getPage(), Storage.ListType.WHITELIST,storageConfig)){
-                    AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), (Player) humanEntity);
-                    event.setCancelled(true);
-                }
-            }
-            if(storageConfig.isStorageItemsBlackListEnabled()){
-                if(storage.isItemInList(cursor,event.getSlot(),storageInventory.getPage(), Storage.ListType.BLACKLIST,storageConfig)){
-                    AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), (Player) humanEntity);
-                    event.setCancelled(true);
-                }
-            }
-
-        }
-
-    }
-    public void ShiftClickItemCheckList(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
-
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack clickedItem = event.getCurrentItem();
-        int slot = storageInventory.getInventory().firstEmpty();
-
-        if(!clickedItem.getType().equals(Material.AIR)){
-
-            if(storageConfig.isStorageItemsWhiteListEnabled()){
-                if(!storage.isItemInList(clickedItem,slot,storageInventory.getPage(), Storage.ListType.WHITELIST,storageConfig)){
-                    AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), (Player) humanEntity);
-                    event.setCancelled(true);
-                }
-            }
-            if(storageConfig.isStorageItemsBlackListEnabled()){
-                if(storage.isItemInList(clickedItem,slot,storageInventory.getPage(), Storage.ListType.BLACKLIST,storageConfig)){
-                    AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), (Player) humanEntity);
-                    event.setCancelled(true);
-                }
-            }
-
-        }
-
-    }
-
-    public void DragItemCheckList(Storage storage,StorageInventory storageInventory,InventoryDragEvent event,StorageConfig storageConfig){
-
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack cursor = event.getCursor();
-        if(cursor == null){
-            cursor = (ItemStack) (event.getNewItems().values().toArray())[0];
-        }
-        if(cursor != null && !cursor.getType().equals(Material.AIR)){
-
-            if(storageConfig.isStorageItemsWhiteListEnabled()){
-
-                for(Integer s : event.getRawSlots()){
-                    if(!storage.isItemInList(cursor,s,storageInventory.getPage(), Storage.ListType.WHITELIST,storageConfig)){
-                        AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), (Player) humanEntity);
-                        event.setCancelled(true);
-                    }
-                }
-            }
-            if(storageConfig.isStorageItemsBlackListEnabled()){
-
-                for(Integer s : event.getRawSlots()){
-                    if(storage.isItemInList(cursor,s,storageInventory.getPage(), Storage.ListType.BLACKLIST,storageConfig)){
-                        AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), (Player) humanEntity);
-                        event.setCancelled(true);
-                    }
-                }
-
-            }
-
-        }
-
-    }
-
-    public void ClickItemBlocked(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
-
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack cursor = event.getCursor();
-
-        if(cursor != null && !cursor.getType().equals(Material.AIR)){
-
-            if(storageConfig.isStorageBlockItemEnabled()){
-                ArrayList<Object> objects = storage.isBlocked(event.getSlot(), storageInventory.getPage(),storageConfig);
-                if((boolean) objects.get(0)){
-                    if(objects.get(1) != null){
-                        AdventureUtils.playerMessage((String) objects.get(1), (Player) humanEntity);
-                    }
-                    event.setCancelled(true);
-                }
-            }
-        }
-
-    }
-
-    public void ShiftClickItemBlocked(Storage storage,StorageInventory storageInventory,InventoryClickEvent event,StorageConfig storageConfig){
-
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack clickedItem = event.getCurrentItem();
-        int slot = storageInventory.getInventory().firstEmpty();
-
-        if(!clickedItem.getType().equals(Material.AIR)){
-
-            if(storageConfig.isStorageBlockItemEnabled()){
-                ArrayList<Object> objects = storage.isBlocked(slot, storageInventory.getPage(),storageConfig);
-                if((boolean) objects.get(0)){
-                    if(objects.get(1) != null){
-                        AdventureUtils.playerMessage((String) objects.get(1), (Player) humanEntity);
-                    }
-                    event.setCancelled(true);
-                }
-            }
-
-        }
-
-    }
-    public void DragItemBlocked(Storage storage,StorageInventory storageInventory,InventoryDragEvent event,StorageConfig storageConfig){
-
-        HumanEntity humanEntity = event.getWhoClicked();
-        ItemStack cursor = event.getCursor();
-        if(cursor == null){
-            cursor = (ItemStack) (event.getNewItems().values().toArray())[0];
-        }
-        if(cursor != null && !cursor.getType().equals(Material.AIR)){
-
-            if(storageConfig.isStorageBlockItemEnabled()){
-
-                for(Integer s : event.getRawSlots()){
-                    ArrayList<Object> objects = storage.isBlocked(s, storageInventory.getPage(),storageConfig);
-                    if((boolean) objects.get(0)){
-                        if(objects.get(1) != null){
-                            AdventureUtils.playerMessage((String) objects.get(1), (Player) humanEntity);
-                        }
-                        event.setCancelled(true);
-                    }
-                }
-            }
-
-        }
-
-    }
 
     /**
      * Returns the storage with the given ID.
@@ -620,16 +271,5 @@ public class StorageManager implements Listener {
      */
     public Map<String, Storage> getStorageMap() {
         return storageMap;
-    }
-
-    @EventHandler
-    public void onDisable(PluginDisableEvent event){
-        if(event.getPlugin().equals(core)){
-            Bukkit.getOnlinePlayers().forEach(player -> {
-                if(player.getOpenInventory().getTopInventory() != null && player.getOpenInventory().getTopInventory().getHolder() instanceof StorageInventory){
-                    player.closeInventory();
-                }
-            });
-        }
     }
 }

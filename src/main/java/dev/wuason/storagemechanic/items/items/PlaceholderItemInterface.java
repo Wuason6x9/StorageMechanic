@@ -54,7 +54,7 @@ public class PlaceholderItemInterface extends ItemInterface {
     }
 
     @Override
-    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
+    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
         Player player = (Player) event.getWhoClicked();
         ItemStack clickedItem = event.getCurrentItem();
         ItemMeta clickedItemMeta = clickedItem.getItemMeta();

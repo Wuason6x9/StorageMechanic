@@ -5,9 +5,15 @@ import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.nms.wrappers.NMSManager;
+import dev.wuason.storagemechanic.Managers;
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.actions.events.def.ClickItemInterfaceActionEvent;
+import dev.wuason.storagemechanic.actions.events.def.ClickStoragePageActionEvent;
 import dev.wuason.storagemechanic.actions.events.def.CloseStoragePageActionEvent;
 import dev.wuason.storagemechanic.actions.events.def.OpenStoragePageActionEvent;
+import dev.wuason.storagemechanic.api.events.storage.ClickPageStorageEvent;
+import dev.wuason.storagemechanic.items.ItemInterface;
+import dev.wuason.storagemechanic.items.ItemInterfaceManager;
 import dev.wuason.storagemechanic.items.items.PlaceholderItemInterface;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
@@ -15,11 +21,13 @@ import dev.wuason.storagemechanic.storages.config.*;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +38,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StorageInventory implements InventoryHolder {
 
     private final Inventory inventory;
-    private final String id;
     private final Storage storage;
     private int page;
     private BukkitTask animationStagesTask;
@@ -39,7 +46,6 @@ public class StorageInventory implements InventoryHolder {
 
 
     public StorageInventory(StorageConfig storageConfig, Storage storage, int page) {
-        this.id = UUID.randomUUID().toString();
         this.page = page;
         this.storage = storage;
         Map<String, String> replacements = new HashMap<>() {{
@@ -55,7 +61,6 @@ public class StorageInventory implements InventoryHolder {
     }
 
     public StorageInventory(InventoryType inventoryType, String title, Storage storage, int page) {
-        this.id = UUID.randomUUID().toString();
         this.page = page;
         this.storage = storage;
         Map<String, String> replacements = new HashMap<>() {{
@@ -72,7 +77,6 @@ public class StorageInventory implements InventoryHolder {
             put("%ACTUAL_PAGE%", "" + (page + 1));
             put("%STORAGE_ID%", storage.getId());
         }};
-        this.id = UUID.randomUUID().toString();
         this.page = page;
         this.storage = storage;
         inventory = Bukkit.createInventory(this, (rows * 9), AdventureUtils.deserializeLegacy(Utils.replaceVariables(title, replacements), null));
@@ -85,20 +89,20 @@ public class StorageInventory implements InventoryHolder {
 
     public void onClose(CloseEvent event) { //TODO: Add close event
 
-        StorageConfig storageConfig = storage.getStorageConfig();
+        StorageConfig storageConfig = this.storage.getStorageConfig();
         Player player = (Player) event.getEvent().getPlayer();
 
         //SAVE STORAGE
-        storage.closeStorage(this.page, player); //TODO: Modify this method
+        this.storage.closeStorage(this.page, player); //TODO: Modify this method
 
         //events
-        CloseStoragePageActionEvent closeStoragePageActionEvent = new CloseStoragePageActionEvent(this, event); //TODO: Modify this event
-        StorageMechanic.getInstance().getManagers().getActionManager().callEvent(closeStoragePageActionEvent, storage.getId(), storage);
+        CloseStoragePageActionEvent closeStoragePageActionEvent = new CloseStoragePageActionEvent(this, event.getEvent()); //TODO: Modify this event
+        StorageMechanic.getInstance().getManagers().getActionManager().callEvent(closeStoragePageActionEvent, this.storage.getId(), this.storage);
 
 
         //Hopper event
-        if (storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)) {
-            List<String> list = storage.getStorageOriginContext().getData();
+        if (this.storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)) {
+            List<String> list = this.storage.getStorageOriginContext().getData();
             BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1), list.get(0), list.get(2)});
         }
 
@@ -115,37 +119,82 @@ public class StorageInventory implements InventoryHolder {
     }
 
     public void onClick(InventoryClickEvent event) { //TODO: Add click event
-
-    }
-
-    public void onDrag(InventoryDragEvent event) { //TODO: Add drag event
-
-        StorageConfig storageConfig = storage.getStorageConfig();
-
-        DragItemCheck(storage, storageInventory, event, storageConfig);
-
-        if (storageConfig.isStorageBlockItemEnabled()) {
-            DragItemBlocked(storage, storageInventory, event, storageConfig);
+        StorageConfig storageConfig = this.storage.getStorageConfig();
+        Player player = (Player) event.getWhoClicked();
+        if (storageConfig.isStorageSoundEnabled()) {
+            for (StorageSoundConfig soundConfig : storageConfig.getStorageSounds()) {
+                if (soundConfig.getType().equals(StorageSoundConfig.Type.CLICK) && soundConfig.getPagesToSlots().containsKey(this.page)) {
+                    if (!soundConfig.getPagesToSlots().get(this.page).isEmpty() && event.getClickedInventory() != null && !event.getClickedInventory().getType().equals(InventoryType.PLAYER) && soundConfig.getPagesToSlots().get(this.page).contains(this.page))
+                        player.playSound(player.getLocation(), soundConfig.getSound(), soundConfig.getVolume(), soundConfig.getPitch());
+                    else
+                        player.playSound(event.getWhoClicked().getLocation(), soundConfig.getSound(), soundConfig.getVolume(), soundConfig.getPitch());
+                }
+            }
         }
-
-        if (storageConfig.isStorageItemsWhiteListEnabled() || storageConfig.isStorageItemsBlackListEnabled()) {
-            DragItemCheckList(storage, storageInventory, event, storageConfig);
+        if (event.getCurrentItem() != null && event.getClickedInventory().getType().equals(InventoryType.PLAYER) && event.getClick().isShiftClick()) {
+            shiftClickItemCheck(event);
+            if (storageConfig.isStorageBlockItemEnabled() && event.getCurrentItem() != null)
+                shiftClickItemBlocked(event);
+            if (storageConfig.isStorageItemsWhiteListEnabled() || storageConfig.isStorageItemsBlackListEnabled() && event.getCurrentItem() != null)
+                shiftClickItemCheckList(event);
         }
-    }
-
-    public void onOpen(InventoryOpenEvent event) {
-        StorageConfig storageConfig = storage.getStorageConfig();
-
-        //Action event
-        OpenStoragePageActionEvent openStoragePageActionEvent = new OpenStoragePageActionEvent(this, event);
-        StorageMechanic.getInstance().getManagers().getActionManager().callEvent(openStoragePageActionEvent, storage.getId(), storage);
-
+        //ITEMS INTERFACES & Item CheckList
+        if (event.getClickedInventory() != null && !event.getClickedInventory().getType().equals(InventoryType.PLAYER)) {
+            // Cancel event if clicked item is an interface item
+            ItemStack clickedItem = event.getCurrentItem();
+            ItemInterfaceManager itemInterfaceManager = StorageMechanic.getInstance().getManagers().getItemInterfaceManager();
+            if (clickedItem != null && itemInterfaceManager.isItemInterface(clickedItem)) {
+                event.setCancelled(true);
+                ItemInterface itemInterface = StorageMechanic.getInstance().getManagers().getItemInterfaceManager().getItemInterfaceByItemStack(clickedItem);
+                itemInterface.onClick(storage, this, event, storageConfig);
+                //events action
+                ClickItemInterfaceActionEvent clickItemInterfaceActionEvent = new ClickItemInterfaceActionEvent(this, event, itemInterface);
+                StorageMechanic.getInstance().getManagers().getActionManager().callEvent(clickItemInterfaceActionEvent, storage.getId(), storage);
+            }
+            clickItemCheck(event);
+            if (storageConfig.isStorageBlockItemEnabled()) {
+                clickItemBlocked(event);
+            }
+            if (storageConfig.isStorageItemsWhiteListEnabled() || storageConfig.isStorageItemsBlackListEnabled()) {
+                clickItemCheckList(event);
+            }
+        }
         //Hopper event
         if (storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)) {
             List<String> list = storage.getStorageOriginContext().getData();
             BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1), list.get(0), list.get(2)});
         }
+        //Events action
 
+        ClickStoragePageActionEvent clickStoragePageActionEvent = new ClickStoragePageActionEvent(this, event);
+        StorageMechanic.getInstance().getManagers().getActionManager().callEvent(clickStoragePageActionEvent, storage.getId(), storage);
+
+        //Events Bukkit
+        ClickPageStorageEvent clickPageStorageEvent = new ClickPageStorageEvent(event, this);
+        Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
+    }
+
+    public void onDrag(InventoryDragEvent event) { //TODO: Add drag event
+        StorageConfig storageConfig = storage.getStorageConfig();
+        dragItemCheck(event);
+        if (storageConfig.isStorageBlockItemEnabled()) {
+            dragItemBlocked(event);
+        }
+        if (storageConfig.isStorageItemsWhiteListEnabled() || storageConfig.isStorageItemsBlackListEnabled()) {
+            dragItemCheckList(event);
+        }
+    }
+
+    public void onOpen(InventoryOpenEvent event) {
+        StorageConfig storageConfig = this.storage.getStorageConfig();
+        //Action event
+        OpenStoragePageActionEvent openStoragePageActionEvent = new OpenStoragePageActionEvent(this, event);
+        StorageMechanic.getInstance().getManagers().getActionManager().callEvent(openStoragePageActionEvent, this.storage.getId(), this.storage);
+        //Hopper event
+        if (this.storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)) {
+            List<String> list = this.storage.getStorageOriginContext().getData();
+            BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1), list.get(0), list.get(2)});
+        }
         //SOUNDS
         if (storageConfig.isStorageSoundEnabled()) {
             for (StorageSoundConfig soundConfig : storageConfig.getStorageSounds()) {
@@ -157,6 +206,268 @@ public class StorageInventory implements InventoryHolder {
             }
         }
     }
+
+    //**********************************
+    //********* CLICK ITEM  ************
+    //**********************************
+
+
+    public void clickItemBlocked(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        ItemStack cursor = event.getCursor();
+        StorageConfig storageConfig = this.storage.getStorageConfig();
+        if (cursor != null && !cursor.getType().isAir()) {
+            if (storageConfig.isStorageBlockItemEnabled()) {
+                ArrayList<Object> objects = this.storage.isBlocked(event.getSlot(), this.page, storageConfig);
+                if ((boolean) objects.get(0)) {
+                    if (objects.get(1) != null) {
+                        AdventureUtils.playerMessage((String) objects.get(1), player);
+                    }
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    public void clickItemCheck(InventoryClickEvent event) {
+        ItemStack cursor = event.getCursor();
+        Managers managers = StorageMechanic.getInstance().getManagers();
+        if (cursor != null && !cursor.getType().isAir()) {
+            //ITEM STORAGE
+            if (managers.getItemStorageManager().isItemStorage(cursor)) {
+                String[] src = managers.getItemStorageManager().getDataFromItemStack(cursor).split(":");
+                if (src[1].equals(this.storage.getId())) {
+                    event.setCancelled(true);
+                    return;
+                }
+                if (!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            //FURNITURE STORAGE
+            if (managers.getFurnitureStorageManager().isShulker(cursor)) {
+                String[] src = managers.getFurnitureStorageManager().getShulkerData(cursor).split(":");
+                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
+                    if (!furnitureStorageC.getFurnitureStorageProperties().isStorageable()) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+            //BLOCK STORAGE
+            if (managers.getBlockStorageManager().isShulker(cursor)) {
+                String[] src = managers.getBlockStorageManager().getShulkerData(cursor).split(":");
+                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
+                    if (!blockStorageC.getBlockStorageProperties().isStorageable()) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+        }
+    }
+
+    public void clickItemCheckList(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        ItemStack cursor = event.getCursor();
+        StorageConfig storageConfig = this.storage.getStorageConfig();
+        if (cursor != null && !cursor.getType().isAir()) {
+            if (storageConfig.isStorageItemsWhiteListEnabled()) {
+                if (!storage.isItemInList(cursor, event.getSlot(), this.page, Storage.ListType.WHITELIST, storageConfig)) {
+                    AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), player);
+                    event.setCancelled(true);
+                }
+            }
+            if (storageConfig.isStorageItemsBlackListEnabled()) {
+                if (storage.isItemInList(cursor, event.getSlot(), this.page, Storage.ListType.BLACKLIST, storageConfig)) {
+                    AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), player);
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    //**********************************
+    //********* SHIFT ITEM  ************
+    //**********************************
+
+    public void shiftClickItemCheck(InventoryClickEvent event) {
+        ItemStack clickedItem = event.getCurrentItem();
+        Managers managers = StorageMechanic.getInstance().getManagers();
+        if (!clickedItem.getType().isAir()) {
+            //ITEM STORAGE
+            if (managers.getItemStorageManager().isItemStorage(clickedItem)) {
+                String[] src = managers.getItemStorageManager().getDataFromItemStack(clickedItem).split(":");
+                if (src[1].equals(this.storage.getId())) {
+                    event.setCancelled(true);
+                    return;
+                }
+                if (!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            //FURNITURE STORAGE
+            if (managers.getFurnitureStorageManager().isShulker(clickedItem)) {
+                String[] src = managers.getFurnitureStorageManager().getShulkerData(clickedItem).split(":");
+                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
+                    if (!furnitureStorageC.getFurnitureStorageProperties().isStorageable()) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+            //BLOCK STORAGE
+            if (managers.getBlockStorageManager().isShulker(clickedItem)) {
+                String[] src = managers.getBlockStorageManager().getShulkerData(clickedItem).split(":");
+                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
+                    if (!blockStorageC.getBlockStorageProperties().isStorageable()) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+        }
+    }
+
+    public void shiftClickItemCheckList(InventoryClickEvent event) {
+        int slotFree = this.inventory.firstEmpty();
+        if (slotFree == -1) return;
+        Player player = (Player) event.getWhoClicked();
+        ItemStack clickedItem = event.getCurrentItem();
+        ;
+        StorageConfig storageConfig = this.storage.getStorageConfig();
+        if (!clickedItem.getType().isAir()) {
+            if (storageConfig.isStorageItemsWhiteListEnabled()) {
+                if (!storage.isItemInList(clickedItem, slotFree, this.page, Storage.ListType.WHITELIST, storageConfig)) {
+                    AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), player);
+                    event.setCancelled(true);
+                }
+            }
+            if (storageConfig.isStorageItemsBlackListEnabled()) {
+                if (storage.isItemInList(clickedItem, slotFree, this.page, Storage.ListType.BLACKLIST, storageConfig)) {
+                    AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), player);
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    public void shiftClickItemBlocked(InventoryClickEvent event) {
+        int slotFree = this.inventory.firstEmpty();
+        if (slotFree == -1) return;
+        Player player = (Player) event.getWhoClicked();
+        ItemStack clickedItem = event.getCurrentItem();
+        StorageConfig storageConfig = this.storage.getStorageConfig();
+        if (!clickedItem.getType().isAir()) {
+            if (storageConfig.isStorageBlockItemEnabled()) {
+                ArrayList<Object> objects = storage.isBlocked(slotFree, this.page, storageConfig);
+                if ((boolean) objects.get(0)) {
+                    if (objects.get(1) != null) {
+                        AdventureUtils.playerMessage((String) objects.get(1), player); //TODO: CAMBIAR ESTO
+                    }
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    //**********************************
+    //********* DRAG ITEM  *************
+    //**********************************
+
+    public void dragItemCheck(InventoryDragEvent event) {
+        ItemStack cursor = event.getCursor();
+        Managers managers = StorageMechanic.getInstance().getManagers();
+        if (cursor == null) {
+            cursor = (ItemStack) (event.getNewItems().values().toArray())[0];
+        }
+        if (cursor != null && !cursor.getType().equals(Material.AIR)) {
+            //ITEM STORAGE
+            if (managers.getItemStorageManager().isItemStorage(cursor)) {
+                String[] src = managers.getItemStorageManager().getDataFromItemStack(cursor).split(":");
+                if (src[1].equals(this.storage.getId())) {
+                    event.setCancelled(true);
+                    return;
+                }
+                if (!managers.getItemStorageConfigManager().getItemStorageConfig(src[0]).getItemStoragePropertiesConfig().isStorageable()) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            //FURNITURE STORAGE
+            if (managers.getFurnitureStorageManager().isShulker(cursor)) {
+                String[] src = managers.getFurnitureStorageManager().getShulkerData(cursor).split(":");
+                managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(src[1]).ifPresent(furnitureStorageC -> {
+                    if (!furnitureStorageC.getFurnitureStorageProperties().isStorageable()) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+            //BLOCK STORAGE
+            if (managers.getBlockStorageManager().isShulker(cursor)) {
+                String[] src = managers.getBlockStorageManager().getShulkerData(cursor).split(":");
+                managers.getBlockStorageConfigManager().findBlockStorageConfigById(src[1]).ifPresent(blockStorageC -> {
+                    if (!blockStorageC.getBlockStorageProperties().isStorageable()) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                });
+            }
+        }
+    }
+
+    public void dragItemBlocked(InventoryDragEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        StorageConfig storageConfig = this.storage.getStorageConfig();
+        ItemStack cursor = event.getCursor();
+        if (cursor == null) {
+            cursor = (ItemStack) (event.getNewItems().values().toArray())[0];
+        }
+        if (cursor != null && !cursor.getType().equals(Material.AIR)) {
+            if (storageConfig.isStorageBlockItemEnabled()) {
+                for (Integer s : event.getRawSlots()) {
+                    ArrayList<Object> objects = this.storage.isBlocked(s, this.page, storageConfig);
+                    if ((boolean) objects.get(0)) {
+                        if (objects.get(1) != null) {
+                            AdventureUtils.playerMessage((String) objects.get(1), player);
+                        }
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+    }
+
+    public void dragItemCheckList(InventoryDragEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        StorageConfig storageConfig = this.storage.getStorageConfig();
+        ItemStack cursor = event.getCursor();
+        if (cursor == null) {
+            cursor = (ItemStack) (event.getNewItems().values().toArray())[0];
+        }
+        if (cursor != null && !cursor.getType().equals(Material.AIR)) {
+            if (storageConfig.isStorageItemsWhiteListEnabled()) {
+                for (Integer s : event.getRawSlots()) {
+                    if (!this.storage.isItemInList(cursor, s, this.page, Storage.ListType.WHITELIST, storageConfig)) {
+                        AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), player);
+                        event.setCancelled(true);
+                    }
+                }
+            }
+            if (storageConfig.isStorageItemsBlackListEnabled()) {
+                for (Integer s : event.getRawSlots()) {
+                    if (this.storage.isItemInList(cursor, s, this.page, Storage.ListType.BLACKLIST, storageConfig)) {
+                        AdventureUtils.playerMessage(storageConfig.getBlackListMessage(), player);
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+    }
+
 
     //*********************************
     //***** INVENTORY METHODS *****
@@ -220,15 +531,6 @@ public class StorageInventory implements InventoryHolder {
      */
     public void open(Player player) {
         player.openInventory(inventory);
-    }
-
-    /**
-     * Returns the ID of the StorageInventory.
-     *
-     * @return The ID of the StorageInventory.
-     */
-    public String getId() {
-        return id;
     }
 
     /**

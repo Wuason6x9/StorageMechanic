@@ -50,5 +50,5 @@ public abstract class ItemInterface {
     public void removeData(Object data) {
         this.data.remove(data);
     }
-    public abstract void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager);
+    public abstract void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig);
 }

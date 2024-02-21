@@ -35,7 +35,7 @@ public class DropItemsItemInterface extends ItemInterface {
     }
 
     @Override
-    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
+    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
 
         if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(inventoryConfigId)){
 

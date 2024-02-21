@@ -17,7 +17,7 @@ public class NextPageItemInterface extends ItemInterface {
     }
 
     @Override
-    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
+    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
         if(storageInventory.getPage()<(storageConfig.getPages() - 1)){
             storage.openStorageR((Player) event.getWhoClicked(),storageInventory.getPage() + 1);
         }

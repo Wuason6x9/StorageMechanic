@@ -24,7 +24,7 @@ public class ActionItemInterface extends ItemInterface {
     }
 
     @Override
-    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
+    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
         Player player = (Player) event.getWhoClicked();
         if(!core.getManagers().getActionManager().isActionConfigRegistered(actionId)) {
             player.sendMessage("§cAction with id " + actionId + " not found");

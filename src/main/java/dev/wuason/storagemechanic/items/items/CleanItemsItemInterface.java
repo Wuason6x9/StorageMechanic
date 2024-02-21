@@ -23,7 +23,7 @@ public class CleanItemsItemInterface extends ItemInterface {
     }
 
     @Override
-    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig, StorageManager storageManager) {
+    public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
         Player player = (Player) event.getWhoClicked();
         for(int page : pages){
             for(int slot : slots){

@@ -28,15 +28,17 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 
 public class Storage {
-    private Map<Integer, StorageInventory> inventories = new HashMap<>();
+    private final Map<Integer, StorageInventory> inventories = new HashMap<>();
     private Map<Integer,ItemStack[]> items = new HashMap<>();
 
-    private String id;
-    private String storageIdConfig;
+    private final String id;
+    private final String storageIdConfig;
     private Date date = new Date();
     private Date lastOpen = new Date();
     private Date lastAccess = new Date();
-    private StorageMechanic core;
+
+    private final StorageMechanic core = StorageMechanic.getInstance();
+
     private StorageOriginContext storageOriginContext;
     private boolean isTempStorage = false;
 
@@ -49,7 +51,6 @@ public class Storage {
     public Storage(String storageIdConfig, StorageOriginContext storageOriginContext) {
         this.id = UUID.randomUUID().toString();
         this.storageIdConfig = storageIdConfig;
-        core = StorageMechanic.getInstance();
         this.storageOriginContext = storageOriginContext;
     }
 
@@ -63,7 +64,6 @@ public class Storage {
     public Storage(String storageIdConfig, UUID id, StorageOriginContext storageOriginContext) {
         this.id = id.toString();
         this.storageIdConfig = storageIdConfig;
-        core = StorageMechanic.getInstance();
         this.storageOriginContext = storageOriginContext;
     }
 
@@ -82,7 +82,6 @@ public class Storage {
         this.items = items;
         this.storageIdConfig = storageIdConfig;
         this.date = date;
-        core = StorageMechanic.getInstance();
         this.storageOriginContext = storageOriginContext;
         this.lastOpen = lastOpen != null ? lastOpen : new Date();
     }
