@@ -10,7 +10,6 @@ import dev.wuason.storagemechanic.items.ItemInterfaceManager;
 import dev.wuason.storagemechanic.recipes.RecipesManager;
 import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfigManager;
-import dev.wuason.storagemechanic.storages.inventory.StorageInventoryManager;
 import dev.wuason.storagemechanic.storages.types.api.PlaceHolderApiStorageApi;
 import dev.wuason.storagemechanic.storages.types.api.StorageApiManager;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorageManager;
@@ -34,7 +33,6 @@ public class Managers {
     private ConfigManager configManager;
     private StorageConfigManager storageConfigManager;
     private CommandManager commandManager;
-    private StorageInventoryManager storageInventoryManager;
     private StorageManager storageManager;
     private BlockStorageManager blockStorageManager;
     private BlockStorageConfigManager blockStorageConfigManager;
@@ -78,7 +76,6 @@ public class Managers {
         commandManager = new CommandManager(core);
         commandManager.loadCommand();
         //********* STORAGES *********
-        storageInventoryManager = new StorageInventoryManager();
         storageManager = new StorageManager(core, dataManager, this);
         blockStorageManager = new BlockStorageManager(core, dataManager, blockMechanicManager);
         itemStorageManager = new ItemStorageManager(core);
@@ -206,10 +203,6 @@ public class Managers {
 
     public CommandManager getCommandManager() {
         return commandManager;
-    }
-
-    public StorageInventoryManager getStorageInventoryManager() {
-        return storageInventoryManager;
     }
 
     public StorageManager getStorageManager() {

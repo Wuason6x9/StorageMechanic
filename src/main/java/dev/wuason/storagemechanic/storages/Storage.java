@@ -29,7 +29,7 @@ import java.util.*;
 
 public class Storage {
     private final Map<Integer, StorageInventory> inventories = new HashMap<>();
-    private Map<Integer,ItemStack[]> items = new HashMap<>();
+    private Map<Integer, ItemStack[]> items = new HashMap<>();
 
     private final String id;
     private final String storageIdConfig;
@@ -45,7 +45,7 @@ public class Storage {
     /**
      * Constructs a new Storage object with the given storageIdConfig and storageOriginContext.
      *
-     * @param storageIdConfig The storage id configuration.
+     * @param storageIdConfig      The storage id configuration.
      * @param storageOriginContext The storage origin context.
      */
     public Storage(String storageIdConfig, StorageOriginContext storageOriginContext) {
@@ -57,8 +57,8 @@ public class Storage {
     /**
      * Constructs a new Storage object.
      *
-     * @param storageIdConfig The storage ID configuration.
-     * @param id The UUID of the storage.
+     * @param storageIdConfig      The storage ID configuration.
+     * @param id                   The UUID of the storage.
      * @param storageOriginContext The origin context of the storage.
      */
     public Storage(String storageIdConfig, UUID id, StorageOriginContext storageOriginContext) {
@@ -70,14 +70,14 @@ public class Storage {
     /**
      * Creates a new Storage object.
      *
-     * @param id The ID of the storage.
-     * @param items A map representing the items in the storage. The keys are page numbers and the values are arrays of ItemStacks.
-     * @param storageIdConfig The configuration ID for the storage.
-     * @param date The creation date of the storage.
+     * @param id                   The ID of the storage.
+     * @param items                A map representing the items in the storage. The keys are page numbers and the values are arrays of ItemStacks.
+     * @param storageIdConfig      The configuration ID for the storage.
+     * @param date                 The creation date of the storage.
      * @param storageOriginContext The origin context of the storage, which specifies the type of storage.
-     * @param lastOpen The date when the storage was last opened. If null, the current date will be used.
+     * @param lastOpen             The date when the storage was last opened. If null, the current date will be used.
      */
-    public Storage(String id, Map<Integer,ItemStack[]> items, String storageIdConfig, Date date, StorageOriginContext storageOriginContext, Date lastOpen) {
+    public Storage(String id, Map<Integer, ItemStack[]> items, String storageIdConfig, Date date, StorageOriginContext storageOriginContext, Date lastOpen) {
         this.id = id;
         this.items = items;
         this.storageIdConfig = storageIdConfig;
@@ -111,28 +111,30 @@ public class Storage {
                 storageInventory.stopAnimationStages();
                 inventories.remove(page);
 
-                if(getStorageConfig().getStorageProperties().isDropItemsPageOnClose()) dropItemsFromPage(player.getLocation(), page);
+                if (getStorageConfig().getStorageProperties().isDropItemsPageOnClose())
+                    dropItemsFromPage(player.getLocation(), page);
 
                 //MYTHIC
-                if(getInventories().isEmpty()){
-                    if(core.getManagers().getMythicManager() != null){
-                        core.getManagers().getMythicManager().executeCloseStorageSkill(storageOriginContext,id,storageInventory);
+                if (getInventories().isEmpty()) {
+                    if (core.getManagers().getMythicManager() != null) {
+                        core.getManagers().getMythicManager().executeCloseStorageSkill(storageOriginContext, id, storageInventory);
                     }
                 }
 
-                CloseStorageEvent closeStorageEvent = new CloseStorageEvent((Player)storageInventory.getInventory().getViewers().get(0),storageInventory);
+                CloseStorageEvent closeStorageEvent = new CloseStorageEvent((Player) storageInventory.getInventory().getViewers().get(0), storageInventory);
                 Bukkit.getPluginManager().callEvent(closeStorageEvent);
             }
         }
 
     }
+
     /**
      * Closes all inventories associated with the storage object.
      */
-    public void closeAllInventory(){
-        while(!inventories.isEmpty()){
+    public void closeAllInventory() {
+        while (!inventories.isEmpty()) {
             StorageInventory storageInventory = (StorageInventory) (inventories.values().toArray())[0];
-            while (!storageInventory.getInventory().getViewers().isEmpty()){
+            while (!storageInventory.getInventory().getViewers().isEmpty()) {
                 storageInventory.getInventory().getViewers().get(0).closeInventory();
             }
         }
@@ -142,14 +144,14 @@ public class Storage {
      * Opens a storage for a player on the specified page.
      *
      * @param player The player to open the storage for.
-     * @param page The page of the storage to open.
+     * @param page   The page of the storage to open.
      * @return True if the storage was successfully opened, false otherwise.
      */
-    public boolean openStorage(Player player, int page){
+    public boolean openStorage(Player player, int page) {
         StorageConfig storageConfig = getStorageConfig();
 
-        if(storageConfig.getMaxViewers() != -1){
-            if(getAllViewers().size() >= storageConfig.getMaxViewers()){
+        if (storageConfig.getMaxViewers() != -1) {
+            if (getAllViewers().size() >= storageConfig.getMaxViewers()) {
                 AdventureUtils.sendMessage(player, core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.storage.max_views"));
                 return false;
             }
@@ -159,19 +161,19 @@ public class Storage {
 
         if (!items.containsKey(page)) {
             int slots = storageConfig.getInventoryType().getSize();
-            if(storageConfig.getInventoryType().equals(StorageInventoryTypeConfig.CHEST)){
+            if (storageConfig.getInventoryType().equals(StorageInventoryTypeConfig.CHEST)) {
                 slots = (storageConfig.getRows() * 9);
             }
 
             ItemStack[] itemsInv = new ItemStack[slots]; //SLOTS
 
-            if(storageConfig.isStorageItemsDefaultEnabled()){
+            if (storageConfig.isStorageItemsDefaultEnabled()) {
 
-                for(StorageItemConfig itemDefault : storageConfig.getStorageItemsDefaultConfig()){
-                    if(!itemDefault.getPagesToSlots().containsKey(page)) continue;
-                    for(String item : itemDefault.getItemsList()){
-                        for(int s : itemDefault.getPagesToSlots().get(page)){
-                            if(!MathUtils.chance(itemDefault.getChance())) continue;
+                for (StorageItemConfig itemDefault : storageConfig.getStorageItemsDefaultConfig()) {
+                    if (!itemDefault.getPagesToSlots().containsKey(page)) continue;
+                    for (String item : itemDefault.getItemsList()) {
+                        for (int s : itemDefault.getPagesToSlots().get(page)) {
+                            if (!MathUtils.chance(itemDefault.getChance())) continue;
                             ItemStack itemStack = Adapter.getInstance().getItemStack(item);
                             itemStack.setAmount(MathUtils.randomNumberString(itemDefault.getAmount()));
                             itemsInv[s] = itemStack;
@@ -188,13 +190,14 @@ public class Storage {
         }
 
         if (!inventories.containsKey(page)) {
-            StorageInventory inventory = StorageMechanic.getInstance().getManagers().getStorageInventoryManager().createStorageInventory(storageConfig,this,page);
+            StorageInventory inventory = new StorageInventory(storageConfig, this, page);
             inventory.getInventory().setContents(items.get(page));
-            if(storageConfig.isStorageItemsInterfaceEnabled()){
-                if(storageConfig.getStorageItemsInterfaceConfig().containsKey(page)){
-                    for(Map.Entry<Integer,StorageItemInterfaceConfig> entry : storageConfig.getStorageItemsInterfaceConfig().get(page).entrySet()){
-                        if(PlaceholderItemInterface.isPlaceholderItem(inventory.getInventory().getItem(entry.getKey()))) continue;
-                        inventory.getInventory().setItem(entry.getKey(),entry.getValue().getItemInterface().getItemStack());
+            if (storageConfig.isStorageItemsInterfaceEnabled()) {
+                if (storageConfig.getStorageItemsInterfaceConfig().containsKey(page)) {
+                    for (Map.Entry<Integer, StorageItemInterfaceConfig> entry : storageConfig.getStorageItemsInterfaceConfig().get(page).entrySet()) {
+                        if (PlaceholderItemInterface.isPlaceholderItem(inventory.getInventory().getItem(entry.getKey())))
+                            continue;
+                        inventory.getInventory().setItem(entry.getKey(), entry.getValue().getItemInterface().getItemStack());
                     }
                 }
             }
@@ -202,10 +205,12 @@ public class Storage {
         }
         StorageInventory storageInventoryPage = inventories.get(page);
         storageInventoryPage.open(player);
-        if(storageConfig.getRefreshTimeStages() != 0L && storageConfig.getRefreshTimeStages() != -1L) storageInventoryPage.startAnimationStages();
-        if(storageInventoryPage.getCurrentStage() != null && storageInventoryPage.getCurrentStage().getTitle() != null) storageInventoryPage.setTitleInventory(storageInventoryPage.getCurrentStage().getTitle(), player);
+        if (storageConfig.getRefreshTimeStages() != 0L && storageConfig.getRefreshTimeStages() != -1L)
+            storageInventoryPage.startAnimationStages();
+        if (storageInventoryPage.getCurrentStage() != null && storageInventoryPage.getCurrentStage().getTitle() != null)
+            storageInventoryPage.setTitleInventory(storageInventoryPage.getCurrentStage().getTitle(), player);
 
-        OpenStorageEvent openStorageEvent = new OpenStorageEvent(player,storageInventoryPage);
+        OpenStorageEvent openStorageEvent = new OpenStorageEvent(player, storageInventoryPage);
         Bukkit.getPluginManager().callEvent(openStorageEvent);
 
         return true;
@@ -215,59 +220,59 @@ public class Storage {
      * Opens the storage for a given player and page.
      *
      * @param player the player for whom the storage will be opened
-     * @param page the page number of the storage to be opened
+     * @param page   the page number of the storage to be opened
      * @return true if the storage was successfully opened, false otherwise
      */
     public boolean openStorageR(Player player, int page) {
-        if(page<0 || page>=getTotalPages()) return false;
-        return openStorage(player,page);
+        if (page < 0 || page >= getTotalPages()) return false;
+        return openStorage(player, page);
     }
 
 
-
-    public void removeItemsInterface(int page){
-        if(!inventories.containsKey(page)) return;
+    public void removeItemsInterface(int page) {
+        if (!inventories.containsKey(page)) return;
         StorageInventory storageInventory = inventories.get(page);
-        for(int i=0;i<storageInventory.getInventory().getSize();i++){
+        for (int i = 0; i < storageInventory.getInventory().getSize(); i++) {
             ItemStack item = storageInventory.getInventory().getItem(i);
-            if(item != null && !item.getType().equals(Material.AIR) && core.getManagers().getItemInterfaceManager().isItemInterface(item)){
+            if (item != null && !item.getType().equals(Material.AIR) && core.getManagers().getItemInterfaceManager().isItemInterface(item)) {
                 storageInventory.getInventory().clear(i);
             }
         }
     }
 
 
-    public void loadAllItemsDefault(){
+    public void loadAllItemsDefault() {
         for (int p = 0; p < getTotalPages(); p++) {
             loadItemsDefault(p);
         }
     }
+
     /**
      * Loads the default items for a given page in the storage.
      *
      * @param page The page number to load the items for.
      */
-    public void loadItemsDefault(int page){
+    public void loadItemsDefault(int page) {
 
         StorageConfig storageConfig = getStorageConfig();
 
-        if(storageConfig.isStorageItemsDefaultEnabled()){
+        if (storageConfig.isStorageItemsDefaultEnabled()) {
 
             if (!items.containsKey(page)) {
 
                 int slots = storageConfig.getInventoryType().getSize();
-                if(storageConfig.getInventoryType().equals(StorageInventoryTypeConfig.CHEST)){
+                if (storageConfig.getInventoryType().equals(StorageInventoryTypeConfig.CHEST)) {
                     slots = (storageConfig.getRows() * 9);
                 }
 
                 ItemStack[] itemsInv = new ItemStack[slots]; //SLOTS
 
-                for(StorageItemConfig itemDefault : storageConfig.getStorageItemsDefaultConfig()){
+                for (StorageItemConfig itemDefault : storageConfig.getStorageItemsDefaultConfig()) {
 
-                    if(!itemDefault.getPagesToSlots().containsKey(page)) continue;
-                    for(ItemStack item : itemDefault.getItems()){
-                        for(int s : itemDefault.getPagesToSlots().get(page)){
-                            if(!MathUtils.chance(itemDefault.getChance())) continue;
+                    if (!itemDefault.getPagesToSlots().containsKey(page)) continue;
+                    for (ItemStack item : itemDefault.getItems()) {
+                        for (int s : itemDefault.getPagesToSlots().get(page)) {
+                            if (!MathUtils.chance(itemDefault.getChance())) continue;
                             ItemStack itemStack = item.clone();
                             itemStack.setAmount(MathUtils.randomNumberString(itemDefault.getAmount()));
                             itemsInv[s] = itemStack;
@@ -308,7 +313,7 @@ public class Storage {
 
             int remainingAmount = itemStack.getAmount();
             for (int i = 0; i < contents.length && remainingAmount > 0; i++) {
-                if(isItemInterfaceSlot(page,i,storageConfig)) continue;
+                if (isItemInterfaceSlot(page, i, storageConfig)) continue;
                 if (contents[i] == null || contents[i].getAmount() == 0) {
                     contents[i] = itemStack.clone();
                     contents[i].setAmount(remainingAmount);
@@ -341,7 +346,7 @@ public class Storage {
      * Adds an ItemStack to the specified page of the storage inventory, taking into account
      * restrictions defined in the storage configuration.
      *
-     * @param page the page index of the storage inventory
+     * @param page      the page index of the storage inventory
      * @param itemStack the ItemStack to be added
      * @return a list of ItemStacks that were not able to be added to the storage inventory
      */
@@ -382,8 +387,7 @@ public class Storage {
                 notAddedItem.setAmount(remainingAmount);
                 notAddedItems.add(notAddedItem);
             }
-        }
-        else {
+        } else {
             ItemStack[] contents = items.get(page);
             if (contents == null) {
                 int slots = getStorageConfig().getInventoryType().getSize();
@@ -393,7 +397,7 @@ public class Storage {
 
             int remainingAmount = itemStack.getAmount();
             for (int i = 0; i < contents.length && remainingAmount > 0; i++) {
-                if(!canBePlaced(itemStack,page,i,storageConfig)) continue;
+                if (!canBePlaced(itemStack, page, i, storageConfig)) continue;
                 if (contents[i] == null || contents[i].getAmount() == 0) {
                     contents[i] = itemStack.clone();
                     contents[i].setAmount(remainingAmount);
@@ -425,7 +429,7 @@ public class Storage {
     /**
      * Removes the specified ItemStack from the given page in the inventory.
      *
-     * @param page The page number of the inventory.
+     * @param page      The page number of the inventory.
      * @param itemStack The ItemStack to be removed.
      */
     public void removeItemStack(int page, ItemStack itemStack) {
@@ -513,9 +517,11 @@ public class Storage {
      * @param slot The slot number to be cleared on the page.
      */
     public void clearSlotWithRestrictions(int page, int slot) {
-        if(isItemInterfaceSlot(page,slot,getStorageConfig()) && !PlaceholderItemInterface.isPlaceholderItem(getItem(slot, page))) return;
+        if (isItemInterfaceSlot(page, slot, getStorageConfig()) && !PlaceholderItemInterface.isPlaceholderItem(getItem(slot, page)))
+            return;
         clearSlotPage(page, slot);
     }
+
     /**
      * Clears the slot on a specific page in the inventory.
      * If the page exists, the slot on that page is cleared.
@@ -530,16 +536,15 @@ public class Storage {
             Inventory inventory = storageInventory.getInventory();
             inventory.clear(slot);
             StorageConfig storageConfig = getStorageConfig();
-            if(isItemInterfaceSlot(page, slot, storageConfig)){
-                if(storageConfig.isStorageItemsInterfaceEnabled()){
+            if (isItemInterfaceSlot(page, slot, storageConfig)) {
+                if (storageConfig.isStorageItemsInterfaceEnabled()) {
                     getStorageItemInterfaceConfig(page, slot).ifPresent(storageItemInterfaceConfig -> {
                         inventory.setItem(slot, storageItemInterfaceConfig.getItemInterface().getItemStack());
                     });
                 }
             }
-        }
-        else {
-            ItemStack[] contents = items.getOrDefault(page,null);
+        } else {
+            ItemStack[] contents = items.getOrDefault(page, null);
             if (contents != null) {
                 contents[slot] = null;
             }
@@ -553,9 +558,9 @@ public class Storage {
      * @param slot The slot number to search for.
      * @return An Optional object containing the StorageItemInterfaceConfig, or an empty Optional if not found.
      */
-    public Optional<StorageItemInterfaceConfig> getStorageItemInterfaceConfig(int page, int slot){
-        if(!getStorageConfig().getStorageItemsInterfaceConfig().containsKey(page)) return Optional.empty();
-        if(!getStorageConfig().getStorageItemsInterfaceConfig().get(page).containsKey(slot)) return Optional.empty();
+    public Optional<StorageItemInterfaceConfig> getStorageItemInterfaceConfig(int page, int slot) {
+        if (!getStorageConfig().getStorageItemsInterfaceConfig().containsKey(page)) return Optional.empty();
+        if (!getStorageConfig().getStorageItemsInterfaceConfig().get(page).containsKey(slot)) return Optional.empty();
         return Optional.of(getStorageConfig().getStorageItemsInterfaceConfig().get(page).get(slot));
     }
 
@@ -567,21 +572,22 @@ public class Storage {
      * @param sync   whether the drop should be synchronized or asynchronous
      * @param remove whether to remove the item with restrictions
      */
-    public void dropItem(StorageItemDataInfo item, Location loc, boolean sync, boolean remove){
-        if(remove) item.removeWithRestrictions();
+    public void dropItem(StorageItemDataInfo item, Location loc, boolean sync, boolean remove) {
+        if (remove) item.removeWithRestrictions();
         Runnable runnable = () -> {
             loc.getWorld().dropItem(loc, item.getItemStack());
         };
-        if(!sync) runnable.run();
+        if (!sync) runnable.run();
         else Bukkit.getScheduler().runTask(StorageMechanic.getInstance(), runnable);
     }
+
     /**
      * Drops an item from storage at the specified location in the world.
      *
      * @param item The storage item data information.
-     * @param loc The location where the item will be dropped.
+     * @param loc  The location where the item will be dropped.
      */
-    public void dropItem(StorageItemDataInfo item, Location loc){
+    public void dropItem(StorageItemDataInfo item, Location loc) {
         loc.getWorld().dropItem(loc, item.getItemStack());
     }
 
@@ -589,22 +595,22 @@ public class Storage {
      * Drops a list of items at the specified location.
      *
      * @param items The list of StorageItemDataInfo objects to drop.
-     * @param loc The location where the items will be dropped.
+     * @param loc   The location where the items will be dropped.
      */
-    public void dropItems(List<StorageItemDataInfo> items, Location loc){
-        for(StorageItemDataInfo item : items){
-            dropItem(item,loc);
+    public void dropItems(List<StorageItemDataInfo> items, Location loc) {
+        for (StorageItemDataInfo item : items) {
+            dropItem(item, loc);
         }
     }
 
-    public void dropItems(List<StorageItemDataInfo> items, Location loc, boolean sync, boolean remove){
-        if(remove) items.forEach(StorageItemDataInfo::removeWithRestrictions);
+    public void dropItems(List<StorageItemDataInfo> items, Location loc, boolean sync, boolean remove) {
+        if (remove) items.forEach(StorageItemDataInfo::removeWithRestrictions);
         Runnable runnable = () -> {
-            for(StorageItemDataInfo item : items){
-                dropItem(item,loc);
+            for (StorageItemDataInfo item : items) {
+                dropItem(item, loc);
             }
         };
-        if(!sync) runnable.run();
+        if (!sync) runnable.run();
         else Bukkit.getScheduler().runTask(StorageMechanic.getInstance(), runnable);
     }
 
@@ -619,10 +625,10 @@ public class Storage {
                 removeItemStack(page, item);
             }
         }
-        Bukkit.getScheduler().runTask(StorageMechanic.getInstance(),() -> {
-            for(ItemStack item : itemStacks){
-                if(PlaceholderItemInterface.isPlaceholderItem(item)){
-                    new ItemBuilderMechanic(item).meta( meta -> {
+        Bukkit.getScheduler().runTask(StorageMechanic.getInstance(), () -> {
+            for (ItemStack item : itemStacks) {
+                if (PlaceholderItemInterface.isPlaceholderItem(item)) {
+                    new ItemBuilderMechanic(item).meta(meta -> {
                         PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
                         itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
                         itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
@@ -632,67 +638,69 @@ public class Storage {
             }
         });
     }
-    public ArrayList<Object> isBlocked(int slot, int page, StorageConfig storageConfig){ //1: true or false 2:messsage
-        ArrayList<Object> objects = new ArrayList<>();
-        if(!storageConfig.isStorageBlockItemEnabled()){
-            objects.add(false);
-            return objects;
+
+    public StorageBlockItemConfig getStorageBlockItem(int slot, int page)
+
+    public boolean isBlocked(int slot, int page) { //1: true or false 2:messsage
+        StorageConfig storageConfig = getStorageConfig();
+        if (!storageConfig.isStorageBlockItemEnabled()) {
+            return false;
         }
-        for(StorageBlockItemConfig storageBlockItemConfig : storageConfig.getStorageBlockedItemsConfig()){
-            if(!storageBlockItemConfig.getPagesToSlots().containsKey(page)){
+        for (StorageBlockItemConfig storageBlockItemConfig : storageConfig.getStorageBlockedItemsConfig()) {
+            if (!storageBlockItemConfig.getPagesToSlots().containsKey(page)) {
                 continue;
             }
             Set<Integer> slots = storageBlockItemConfig.getPagesToSlots().get(page);
-            if(slots != null){
-                if(slots.contains(slot)){
-                    objects.add(true);
-                    objects.add(storageBlockItemConfig.getMessage());
-                    return objects;
+            if (slots != null) {
+                if (slots.contains(slot)) {
+                    return true;
                 }
             }
         }
-        objects.add(false);
-        return objects;
+        return false;
     }
+
     /**
      * Determines whether an item can be placed in the storage at the specified page and slot.
      *
-     * @param item The item to be placed.
-     * @param page The page of the storage.
-     * @param slot The slot on the page.
+     * @param item          The item to be placed.
+     * @param page          The page of the storage.
+     * @param slot          The slot on the page.
      * @param storageConfig The configuration of the storage.
      * @return True if the item can be placed, false otherwise.
      */
-    public boolean canBePlaced(ItemStack item, int page, int slot, StorageConfig storageConfig){
-        return (!isItemInterfaceSlot(page,slot,storageConfig) && !((boolean)isBlocked(slot,page,storageConfig).get(0)) && !isItemInList(item,slot,page,ListType.BLACKLIST,storageConfig) && isItemInList(item,slot,page,ListType.WHITELIST,storageConfig));
+    public boolean canBePlaced(ItemStack item, int page, int slot, StorageConfig storageConfig) {
+        return (!isItemInterfaceSlot(page, slot, storageConfig) && !((boolean) isBlocked(slot, page, storageConfig).get(0)) && !isItemInList(item, slot, page, ListType.BLACKLIST, storageConfig) && isItemInList(item, slot, page, ListType.WHITELIST, storageConfig));
     }
-    public boolean isItemInterfaceSlot(int page, int slot, StorageConfig storageConfig){
-        if(!storageConfig.getStorageItemsInterfaceConfig().containsKey(page)) return false;
-        if(getStorageInventory(page).getCurrentStage() != null){
+
+    public boolean isItemInterfaceSlot(int page, int slot, StorageConfig storageConfig) {
+        if (!storageConfig.getStorageItemsInterfaceConfig().containsKey(page)) return false;
+        if (getStorageInventory(page).getCurrentStage() != null) {
             StageStorage stage = getStorageInventory(page).getCurrentStage();
-            if(stage.getStorageItemsInterfaceConfig().containsKey(page)){
-                HashMap<Integer,StorageItemInterfaceConfig> hashMap = stage.getStorageItemsInterfaceConfig().get(page);
+            if (stage.getStorageItemsInterfaceConfig().containsKey(page)) {
+                HashMap<Integer, StorageItemInterfaceConfig> hashMap = stage.getStorageItemsInterfaceConfig().get(page);
                 return hashMap.containsKey(slot);
             }
         }
-        HashMap<Integer,StorageItemInterfaceConfig> hashMap = storageConfig.getStorageItemsInterfaceConfig().get(page);
+        HashMap<Integer, StorageItemInterfaceConfig> hashMap = storageConfig.getStorageItemsInterfaceConfig().get(page);
         return hashMap.containsKey(slot);
     }
-    public boolean isItemInList(ItemStack itemStack, int slot, int page, ListType listType, StorageConfig storageConfig){
+
+    public boolean isItemInList(ItemStack itemStack, int slot, int page, ListType listType, StorageConfig storageConfig) {
         String itemId = Adapter.getInstance().getAdapterID(itemStack);
-        switch (listType){
+        switch (listType) {
 
             case BLACKLIST -> {
-                if(!storageConfig.isStorageBlockItemEnabled()) return false;
-                for(StorageItemConfig storageItemConfig : storageConfig.getStorageItemsBlackListConfig()){
+                if (!storageConfig.isStorageBlockItemEnabled()) return false;
+                for (StorageItemConfig storageItemConfig : storageConfig.getStorageItemsBlackListConfig()) {
 
-                    if(!storageItemConfig.getPagesToSlots().containsKey(page)){
+                    if (!storageItemConfig.getPagesToSlots().containsKey(page)) {
                         continue;
                     }
 
                     Set<Integer> slots = storageItemConfig.getPagesToSlots().get(page);
-                    if(slots != null){
-                        if(!slots.contains(slot)){
+                    if (slots != null) {
+                        if (!slots.contains(slot)) {
                             continue;
                         }
                     }
@@ -705,15 +713,15 @@ public class Storage {
                 return false;
             }
             case WHITELIST -> {
-                if(!storageConfig.isStorageItemsWhiteListEnabled()) return true;
-                for(StorageItemConfig storageItemConfig : storageConfig.getStorageItemsWhiteListConfig()){
-                    if(!storageItemConfig.getPagesToSlots().containsKey(page)){
+                if (!storageConfig.isStorageItemsWhiteListEnabled()) return true;
+                for (StorageItemConfig storageItemConfig : storageConfig.getStorageItemsWhiteListConfig()) {
+                    if (!storageItemConfig.getPagesToSlots().containsKey(page)) {
                         continue;
                     }
 
                     Set<Integer> slots = storageItemConfig.getPagesToSlots().get(page);
-                    if(slots != null){
-                        if(!slots.contains(slot)){
+                    if (slots != null) {
+                        if (!slots.contains(slot)) {
                             continue;
                         }
                     }
@@ -732,17 +740,17 @@ public class Storage {
      * Searches for storage items that match the given filter.
      *
      * @param filter The filter to apply when searching for items. The filter is a function that takes three parameters: the page number (Integer), the slot number (Integer), and
-     * the item stack (ItemStack). It should return true if the item matches the filter, and false otherwise.
+     *               the item stack (ItemStack). It should return true if the item matches the filter, and false otherwise.
      * @return A list of StorageItemDataInfo objects that match the filter.
      */
-    public List<StorageItemDataInfo> searchItems(TriFunction<Integer, Integer, ItemStack, Boolean> filter){
+    public List<StorageItemDataInfo> searchItems(TriFunction<Integer, Integer, ItemStack, Boolean> filter) {
         List<StorageItemDataInfo> list = new ArrayList<>();
-        for(int i=0;i<getTotalPages();i++){
-            HashMap<Integer,ItemStack> pageItemsMap = getMapItemsFromPage(i);
-            for(Map.Entry<Integer,ItemStack> entry : pageItemsMap.entrySet()){
-                if(entry.getValue().getType().equals(Material.AIR)) continue;
-                if(filter.apply(i, entry.getKey(), entry.getValue())){
-                    list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+        for (int i = 0; i < getTotalPages(); i++) {
+            HashMap<Integer, ItemStack> pageItemsMap = getMapItemsFromPage(i);
+            for (Map.Entry<Integer, ItemStack> entry : pageItemsMap.entrySet()) {
+                if (entry.getValue().getType().equals(Material.AIR)) continue;
+                if (filter.apply(i, entry.getKey(), entry.getValue())) {
+                    list.add(new StorageItemDataInfo(entry.getValue(), i, entry.getKey(), this));
                 }
             }
         }
@@ -750,48 +758,24 @@ public class Storage {
     }
 
 
-    public List<StorageItemDataInfo> searchItemsByName(String s, boolean exact){
+    public List<StorageItemDataInfo> searchItemsByName(String s, boolean exact) {
         s = s.toUpperCase(Locale.ENGLISH).trim();
         List<StorageItemDataInfo> list = new ArrayList<>();
-        if(s.isEmpty()) return list;
-        for(int i=0;i<getTotalPages();i++){
-            HashMap<Integer,ItemStack> pageItemsMap = getMapItemsFromPage(i);
-            for(Map.Entry<Integer,ItemStack> entry : pageItemsMap.entrySet()){
-                if(entry.getValue().getType().equals(Material.AIR)) continue;
+        if (s.isEmpty()) return list;
+        for (int i = 0; i < getTotalPages(); i++) {
+            HashMap<Integer, ItemStack> pageItemsMap = getMapItemsFromPage(i);
+            for (Map.Entry<Integer, ItemStack> entry : pageItemsMap.entrySet()) {
+                if (entry.getValue().getType().equals(Material.AIR)) continue;
                 String name = entry.getValue().getItemMeta().getDisplayName() != null ? entry.getValue().getItemMeta().getDisplayName().trim() : null;
-                if(name == null || name.isEmpty()) name = entry.getValue().getType().toString();
+                if (name == null || name.isEmpty()) name = entry.getValue().getType().toString();
                 name = name.toUpperCase(Locale.ENGLISH);
-                if(exact){
-                    if(name.equals(s)){
-                        list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                if (exact) {
+                    if (name.equals(s)) {
+                        list.add(new StorageItemDataInfo(entry.getValue(), i, entry.getKey(), this));
                     }
-                }
-                else {
-                    if(name.contains(s)){
-                        list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
-                    }
-                }
-            }
-        }
-        return list;
-    }
-
-    public List<StorageItemDataInfo> searchItemsByMaterial(String s, boolean exact){
-        s = s.toUpperCase(Locale.ENGLISH).trim();
-        List<StorageItemDataInfo> list = new ArrayList<>();
-        if(s.isEmpty()) return list;
-        for(int i=0;i<getTotalPages();i++){
-            HashMap<Integer,ItemStack> pageItemsMap = getMapItemsFromPage(i);
-            for(Map.Entry<Integer,ItemStack> entry : pageItemsMap.entrySet()){
-                if(entry.getValue().getType().equals(Material.AIR)) continue;
-                if(exact){
-                    if(entry.getValue().getType().toString().toUpperCase(Locale.ENGLISH).equals(s)){
-                        list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
-                    }
-                }
-                else {
-                    if(entry.getValue().getType().toString().toUpperCase(Locale.ENGLISH).contains(s)){
-                        list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                } else {
+                    if (name.contains(s)) {
+                        list.add(new StorageItemDataInfo(entry.getValue(), i, entry.getKey(), this));
                     }
                 }
             }
@@ -799,18 +783,40 @@ public class Storage {
         return list;
     }
 
-    public List<StorageItemDataInfo> searchItemsByAdapterId(String s, boolean exact){
-        if(exact) s = Adapter.getInstance().computeAdapterId(s);
+    public List<StorageItemDataInfo> searchItemsByMaterial(String s, boolean exact) {
         s = s.toUpperCase(Locale.ENGLISH).trim();
         List<StorageItemDataInfo> list = new ArrayList<>();
-        if(s.isEmpty()) return list;
-        for(int i=0;i<getTotalPages();i++){
-            HashMap<Integer,ItemStack> pageItemsMap = getMapItemsFromPage(i);
-            for(Map.Entry<Integer,ItemStack> entry : pageItemsMap.entrySet()){
-                if(entry.getValue().getType().equals(Material.AIR)) continue;
+        if (s.isEmpty()) return list;
+        for (int i = 0; i < getTotalPages(); i++) {
+            HashMap<Integer, ItemStack> pageItemsMap = getMapItemsFromPage(i);
+            for (Map.Entry<Integer, ItemStack> entry : pageItemsMap.entrySet()) {
+                if (entry.getValue().getType().equals(Material.AIR)) continue;
+                if (exact) {
+                    if (entry.getValue().getType().toString().toUpperCase(Locale.ENGLISH).equals(s)) {
+                        list.add(new StorageItemDataInfo(entry.getValue(), i, entry.getKey(), this));
+                    }
+                } else {
+                    if (entry.getValue().getType().toString().toUpperCase(Locale.ENGLISH).contains(s)) {
+                        list.add(new StorageItemDataInfo(entry.getValue(), i, entry.getKey(), this));
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    public List<StorageItemDataInfo> searchItemsByAdapterId(String s, boolean exact) {
+        if (exact) s = Adapter.getInstance().computeAdapterId(s);
+        s = s.toUpperCase(Locale.ENGLISH).trim();
+        List<StorageItemDataInfo> list = new ArrayList<>();
+        if (s.isEmpty()) return list;
+        for (int i = 0; i < getTotalPages(); i++) {
+            HashMap<Integer, ItemStack> pageItemsMap = getMapItemsFromPage(i);
+            for (Map.Entry<Integer, ItemStack> entry : pageItemsMap.entrySet()) {
+                if (entry.getValue().getType().equals(Material.AIR)) continue;
                 String adapterId = Adapter.getInstance().getAdapterID(entry.getValue()).toUpperCase(Locale.ENGLISH);
-                if(adapterId.contains(s)){
-                    list.add(new StorageItemDataInfo(entry.getValue(),i,entry.getKey(), this));
+                if (adapterId.contains(s)) {
+                    list.add(new StorageItemDataInfo(entry.getValue(), i, entry.getKey(), this));
                 }
             }
         }
@@ -821,7 +827,7 @@ public class Storage {
     public void dropAllItems(Location dropLocation) {
         World world = dropLocation.getWorld();
         for (int p = 0; p < getTotalPages(); p++) {
-            dropItemsFromPage(dropLocation,p);
+            dropItemsFromPage(dropLocation, p);
         }
     }
 
@@ -887,17 +893,18 @@ public class Storage {
 
         return notAddedItems;
     }
+
     public List<ItemStack> addItemStackToAllPages(ItemStack itemStack) {
         List<ItemStack> noAddedItems = new ArrayList<>();
         noAddedItems.add(itemStack);
         for (int i = 0; i < getTotalPages(); i++) {
             List<ItemStack> noAddedPage = new ArrayList<>();
-            while (!noAddedItems.isEmpty()){
+            while (!noAddedItems.isEmpty()) {
                 List<ItemStack> noAdded = addItemStack(i, noAddedItems.get(0));
                 noAddedItems.remove(0);
-                if(noAdded.size()>0) noAddedPage.addAll(noAdded);
+                if (noAdded.size() > 0) noAddedPage.addAll(noAdded);
             }
-            if(noAddedPage.size()==0) break;
+            if (noAddedPage.size() == 0) break;
             noAddedItems.addAll(noAddedPage);
         }
         return noAddedItems;
@@ -908,16 +915,17 @@ public class Storage {
         noAddedItems.add(itemStack);
         for (int i = 0; i < getTotalPages(); i++) {
             List<ItemStack> noAddedPage = new ArrayList<>();
-            while (!noAddedItems.isEmpty()){
+            while (!noAddedItems.isEmpty()) {
                 List<ItemStack> noAdded = addItemStackWithRestrictions(i, noAddedItems.get(0));
                 noAddedItems.remove(0);
-                if(noAdded.size()>0) noAddedPage.addAll(noAdded);
+                if (noAdded.size() > 0) noAddedPage.addAll(noAdded);
             }
-            if(noAddedPage.size()==0) break;
+            if (noAddedPage.size() == 0) break;
             noAddedItems.addAll(noAddedPage);
         }
         return noAddedItems;
     }
+
     public void removeItemStackFromAllPages(ItemStack itemStack) {
         for (int i = 0; i < getTotalPages(); i++) {
             removeItemStack(i, itemStack);
@@ -928,6 +936,7 @@ public class Storage {
         StorageConfig storageConfig = getStorageConfig();
         return storageConfig.getPages();
     }
+
     public void removeAllItems() {
         items.clear();
         for (Integer key : inventories.keySet()) {
@@ -935,6 +944,7 @@ public class Storage {
             storageInventory.getInventory().clear();
         }
     }
+
     public boolean isEmpty() {
         for (Integer page : items.keySet()) {
             if (inventories.containsKey(page)) {
@@ -954,6 +964,7 @@ public class Storage {
 
         return true;
     }
+
     public int getItemCount(ItemStack itemStackToCount) {
         int totalCount = 0;
         for (ItemStack[] contents : items.values()) {
@@ -965,6 +976,7 @@ public class Storage {
         }
         return totalCount;
     }
+
     public boolean containsItem(ItemStack itemStackToFind) {
         for (ItemStack[] contents : items.values()) {
             for (ItemStack itemStack : contents) {
@@ -975,6 +987,7 @@ public class Storage {
         }
         return false;
     }
+
     public void copyPage(int sourcePage, int destinationPage) {
         if (items.containsKey(sourcePage)) {
             ItemStack[] sourceContents = items.get(sourcePage);
@@ -987,12 +1000,14 @@ public class Storage {
             items.put(destinationPage, destinationContents);
         }
     }
+
     public void movePage(int sourcePage, int destinationPage) {
         if (items.containsKey(sourcePage)) {
             items.put(destinationPage, items.get(sourcePage));
             items.remove(sourcePage);
         }
     }
+
     public boolean hasSpaceForItem(ItemStack itemStackToCheck) {
         int totalFreeSpace = 0;
         for (ItemStack[] contents : items.values()) {
@@ -1006,6 +1021,7 @@ public class Storage {
         }
         return totalFreeSpace >= itemStackToCheck.getAmount();
     }
+
     public int getFreeSlotsCount() {
         int freeSlots = 0;
         for (ItemStack[] contents : items.values()) {
@@ -1017,6 +1033,7 @@ public class Storage {
         }
         return freeSlots;
     }
+
     public int getTotalSlots() {
         StorageConfig storageConfig = getStorageConfig();
         int slotsPerPage = storageConfig.getInventoryType().getSize();
@@ -1025,6 +1042,7 @@ public class Storage {
         }
         return slotsPerPage * getTotalPages();
     }
+
     public int getOccupiedSlotsCount() {
         int occupiedSlots = 0;
         for (ItemStack[] contents : items.values()) {
@@ -1052,7 +1070,7 @@ public class Storage {
         return allViewers;
     }
 
-    public void setItemInSlotPage(int page, int slot, ItemStack item){
+    public void setItemInSlotPage(int page, int slot, ItemStack item) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             storageInventory.getInventory().setItem(slot, item);
@@ -1064,7 +1082,7 @@ public class Storage {
         }
     }
 
-    public ItemStack getItem(int slot, int page){
+    public ItemStack getItem(int slot, int page) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             return storageInventory.getInventory().getItem(slot);
@@ -1077,7 +1095,7 @@ public class Storage {
         return null;
     }
 
-    public ItemStack[] getItemsFromPageInventory(int page){
+    public ItemStack[] getItemsFromPageInventory(int page) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             ItemStack[] contents = storageInventory.getInventory().getContents();
@@ -1092,14 +1110,15 @@ public class Storage {
         return null;
     }
 
-    public ItemStack[] getItemsFromPageStorage(int page){
+    public ItemStack[] getItemsFromPageStorage(int page) {
         if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
             return contents;
         }
         return null;
     }
-    public ItemStack[] getItemsFromPageSlots(int page){
+
+    public ItemStack[] getItemsFromPageSlots(int page) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             ItemStack[] contents = storageInventory.getInventory().getContents();
@@ -1139,42 +1158,42 @@ public class Storage {
         return itemsList;
     }
 
-    public HashMap<Integer,ItemStack> getMapItemsFromPage(int page) {
-        HashMap<Integer,ItemStack> itemsList = new HashMap<>();
+    public HashMap<Integer, ItemStack> getMapItemsFromPage(int page) {
+        HashMap<Integer, ItemStack> itemsList = new HashMap<>();
 
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             ItemStack[] contents = storageInventory.getInventory().getContents();
-            for(int i=0;i<contents.length;i++){
+            for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null) {
-                    if(PlaceholderItemInterface.isPlaceholderItem(contents[i])){
-                        ItemStack item = ItemBuilderMechanic.copyOf(contents[i]).meta( meta -> {
+                    if (PlaceholderItemInterface.isPlaceholderItem(contents[i])) {
+                        ItemStack item = ItemBuilderMechanic.copyOf(contents[i]).meta(meta -> {
                             PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
                             itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
                             itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
                         }).build();
-                        itemsList.put(i,item);
+                        itemsList.put(i, item);
                         continue;
                     }
-                    itemsList.put(i,contents[i]);
+                    itemsList.put(i, contents[i]);
                 }
             }
         }
 
         if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
-            for(int i=0;i<contents.length;i++){
+            for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null) {
-                    if(PlaceholderItemInterface.isPlaceholderItem(contents[i])){
-                        ItemStack item = ItemBuilderMechanic.copyOf(contents[i]).meta( meta -> {
+                    if (PlaceholderItemInterface.isPlaceholderItem(contents[i])) {
+                        ItemStack item = ItemBuilderMechanic.copyOf(contents[i]).meta(meta -> {
                             PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
                             itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
                             itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
                         }).build();
-                        itemsList.put(i,item);
+                        itemsList.put(i, item);
                         continue;
                     }
-                    itemsList.put(i,contents[i]);
+                    itemsList.put(i, contents[i]);
                 }
             }
         }
@@ -1182,69 +1201,71 @@ public class Storage {
         return itemsList;
     }
 
-    public StorageItemDataInfo getFirstItemStack(){
-        for(int i=0;i<getTotalPages();i++){
+    public StorageItemDataInfo getFirstItemStack() {
+        for (int i = 0; i < getTotalPages(); i++) {
             if (inventories.containsKey(i)) {
                 StorageInventory storageInventory = inventories.get(i);
                 ItemStack[] contents = storageInventory.getInventory().getContents();
-                for(int k=0;k<contents.length;k++){
+                for (int k = 0; k < contents.length; k++) {
                     ItemStack item = contents[k];
                     if (item != null && !item.getType().isAir() && !core.getManagers().getItemInterfaceManager().isItemInterface(item)) {
-                        return new StorageItemDataInfo(item,i,k,this);
+                        return new StorageItemDataInfo(item, i, k, this);
                     }
                 }
-            }
-            else if (items.containsKey(i)) {
+            } else if (items.containsKey(i)) {
                 ItemStack[] contents = items.get(i);
-                for(int k=0;k<contents.length;k++){
+                for (int k = 0; k < contents.length; k++) {
                     ItemStack item = contents[k];
                     if (item != null && !item.getType().isAir()) {
-                        return new StorageItemDataInfo(item,i,k,this);
+                        return new StorageItemDataInfo(item, i, k, this);
                     }
                 }
             }
         }
         return null;
     }
-    public StorageItemDataInfo getFirstItemStackSimilar(ItemStack similar){
-        for(int i=0;i<getTotalPages();i++){
+
+    public StorageItemDataInfo getFirstItemStackSimilar(ItemStack similar) {
+        for (int i = 0; i < getTotalPages(); i++) {
             if (inventories.containsKey(i)) {
                 StorageInventory storageInventory = inventories.get(i);
                 ItemStack[] contents = storageInventory.getInventory().getContents();
-                for(int k=0;k<contents.length;k++){
+                for (int k = 0; k < contents.length; k++) {
                     ItemStack item = contents[k];
-                    if (item != null && !item.getType().isAir() && item.isSimilar(similar)) return new StorageItemDataInfo(item,i,k,this);
+                    if (item != null && !item.getType().isAir() && item.isSimilar(similar))
+                        return new StorageItemDataInfo(item, i, k, this);
                 }
-            }
-            else if (items.containsKey(i)) {
+            } else if (items.containsKey(i)) {
                 ItemStack[] contents = items.get(i);
-                for(int k=0;k<contents.length;k++){
+                for (int k = 0; k < contents.length; k++) {
                     ItemStack item = contents[k];
-                    if (item != null && !item.getType().isAir() && item.isSimilar(similar)) return new StorageItemDataInfo(item,i,k,this);
+                    if (item != null && !item.getType().isAir() && item.isSimilar(similar))
+                        return new StorageItemDataInfo(item, i, k, this);
                 }
             }
         }
         return null;
     }
-    public int firstSlotEmptyPage(int page){
+
+    public int firstSlotEmptyPage(int page) {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             return storageInventory.getInventory().firstEmpty();
-        }
-        else if (items.containsKey(page)) {
+        } else if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
-            for(int k=0;k<contents.length;k++){
+            for (int k = 0; k < contents.length; k++) {
                 ItemStack item = contents[k];
-                if(item == null || item.getType().equals(Material.AIR)) return k;
+                if (item == null || item.getType().equals(Material.AIR)) return k;
             }
             return -1;
         }
         return -1;
     }
-    public int firstSlotEmpty(){
-        for(int i=0;i<getTotalPages();i++){
+
+    public int firstSlotEmpty() {
+        for (int i = 0; i < getTotalPages(); i++) {
             int num = firstSlotEmptyPage(i);
-            if(num == -1) continue;
+            if (num == -1) continue;
             return num;
         }
         return -1;
@@ -1259,29 +1280,34 @@ public class Storage {
 
         return allItems;
     }
+
     public void removeAllItemsOfType(ItemStack itemStackToRemove) {
         for (int i = 0; i < getTotalPages(); i++) {
             removeItemStack(i, itemStackToRemove);
         }
     }
+
     public List<ItemStack> addItemStackListToAllPages(List<ItemStack> itemStackList) {
         List<ItemStack> noAddedItems = new ArrayList<>();
         for (ItemStack itemStack : itemStackList) {
             List<ItemStack> noAdded = addItemStackToAllPages(itemStack);
-            if(noAdded.size()==0) break;
+            if (noAdded.size() == 0) break;
             noAddedItems.addAll(noAdded);
         }
         return noAddedItems;
     }
+
     public void removeItemStackListFromAllPages(List<ItemStack> itemStackList) {
         for (ItemStack itemStack : itemStackList) {
             removeItemStackFromAllPages(itemStack);
         }
     }
+
     public boolean containsAtLeast(ItemStack itemStackToCheck, int amount) {
         int itemCount = getItemCount(itemStackToCheck);
         return itemCount >= amount;
     }
+
     public void addItemStackFromInventory(Inventory inventory) {
         for (ItemStack itemStack : inventory.getContents()) {
             if (itemStack != null && itemStack.getAmount() > 0) {
@@ -1289,6 +1315,7 @@ public class Storage {
             }
         }
     }
+
     public void removeItemStackFromInventory(Inventory inventory) {
         for (ItemStack itemStack : inventory.getContents()) {
             if (itemStack != null && itemStack.getAmount() > 0) {
@@ -1315,43 +1342,46 @@ public class Storage {
     }
 
 
-    public int getTotalAmountFromList(List<StorageItemDataInfo> l){
-        if(l.size()==0) return -1;
+    public int getTotalAmountFromList(List<StorageItemDataInfo> l) {
+        if (l.size() == 0) return -1;
         int totalAmount = 0;
-        for(StorageItemDataInfo storageIData : l){
+        for (StorageItemDataInfo storageIData : l) {
             totalAmount += storageIData.getItemStack().getAmount();
         }
         return totalAmount;
     }
 
-    public List<StorageItemDataInfo> getAllItemsSimilarFromAllPages(ItemStack similar){
+    public List<StorageItemDataInfo> getAllItemsSimilarFromAllPages(ItemStack similar) {
         List<StorageItemDataInfo> list = new ArrayList<>();
-        for(int i=0;i<getTotalPages();i++){
+        for (int i = 0; i < getTotalPages(); i++) {
             list.addAll(getAllItemsSimilarFromPage(i, similar));
         }
         return list;
     }
-    public List<StorageItemDataInfo> getAllItemsSimilarFromPage(int page, ItemStack similar){
+
+    public List<StorageItemDataInfo> getAllItemsSimilarFromPage(int page, ItemStack similar) {
         List<StorageItemDataInfo> list = new ArrayList<>();
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             ItemStack[] contents = storageInventory.getInventory().getContents();
-            for(int k=0;k<contents.length;k++){
+            for (int k = 0; k < contents.length; k++) {
                 ItemStack item = contents[k];
-                if (item != null && !item.getType().isAir() && item.isSimilar(similar)) list.add(new StorageItemDataInfo(item,page,k,this));
+                if (item != null && !item.getType().isAir() && item.isSimilar(similar))
+                    list.add(new StorageItemDataInfo(item, page, k, this));
             }
         }
         if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
-            for(int k=0;k<contents.length;k++){
+            for (int k = 0; k < contents.length; k++) {
                 ItemStack item = contents[k];
-                if (item != null && !item.getType().isAir() && item.isSimilar(similar)) list.add(new StorageItemDataInfo(item,page,k,this));
+                if (item != null && !item.getType().isAir() && item.isSimilar(similar))
+                    list.add(new StorageItemDataInfo(item, page, k, this));
             }
         }
         return list;
     }
 
-    public StorageConfig getStorageConfig(){
+    public StorageConfig getStorageConfig() {
         return StorageMechanic.getInstance().getManagers().getStorageConfigManager().getStorageConfigById(storageIdConfig);
     }
 
@@ -1401,19 +1431,19 @@ public class Storage {
         return lastAccess;
     }
 
-    public StorageInventory getStorageInventory(int page){
+    public StorageInventory getStorageInventory(int page) {
         return inventories.get(page);
     }
 
-    public void setStorageInventory(int page, StorageInventory storageInventory){
-        inventories.put(page,storageInventory);
+    public void setStorageInventory(int page, StorageInventory storageInventory) {
+        inventories.put(page, storageInventory);
     }
 
-    public void removeStorageInventory(int page){
+    public void removeStorageInventory(int page) {
         inventories.remove(page);
     }
 
-    public boolean existsStorageInventory(int page){
+    public boolean existsStorageInventory(int page) {
         return inventories.containsKey(page);
     }
 }

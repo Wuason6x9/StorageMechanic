@@ -1,0 +1,60 @@
+storage:
+  item:
+    backpack:
+      storage_id: storage1
+      item: "sm:backpack"
+      open: RIGHT
+      properties:
+        isStorageable: true
+    backpackDiamonds:
+      storage_id: storageDiamonds
+      item: "sm:backpackDiamonds"
+      open: RIGHT
+      properties:
+        isStorageable: true
+    backpackMinerals:
+      storage_id: storageMinerals
+      item: "sm:backpackMinerals"
+      open: RIGHT
+      properties:
+        isStorageable: true
+    backpackEnderPerl:
+      storage_id: storageItemsMisc
+      item: "sm:backpackMisc"
+      open: RIGHT
+      properties:
+        isStorageable: true
+  block:
+    blockstorage1:
+      storage_id: storage1
+      block: "sm:randomShulker"
+      open: RIGHT
+      type: SHULKER
+      properties:
+        isBreakable: true
+        isStorageable: false
+      mechanics:
+        hopper_mechanic:
+          enabled: true
+    blockstorage2:
+      storage_id: storage1
+      block: "sm:randomChest"
+      open: RIGHT
+      type: CHEST
+      properties:
+        isBreakable: true
+        isStorageable: false
+      mechanics:
+        hopper_mechanic:
+          enabled: true
+    blockstorage3:
+      storage_id: storageRGB
+      block: "sm:randomChestRgb"
+      open: RIGHT
+      type: CHEST
+      properties:
+        isBreakable: true
+        isStorageable: false
+      mechanics:
+        hopper_mechanic:
+          enabled: true

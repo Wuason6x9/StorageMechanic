@@ -1,0 +1,64 @@
+Items:
+  item1:
+    itemType: blocked_item
+    item: 'or:blocked_item'
+    displayName: '<red> '
+  item3:
+    itemType: next_page
+    item: 'or:next_page'
+    displayName: '<gold>Next >>'
+  item4:
+    itemType: back_page
+    item: 'or:back_page'
+    displayName: '<gold><< Back'
+  item5:
+    itemType: search_page
+    item: 'mc:paper'
+    displayName: '<gold>Go to page'
+  itemSearch:
+    itemType: SEARCH_ITEM
+    item: 'or:search_item'
+    displayName: '<gold>Search items'
+    properties:
+      inv_id: searchItemAnvil
+      inv_result_id: searchItemAnvilResult
+      type: name
+  itemPlaceHolderEnder:
+    itemType: PLACEHOLDER
+    item: 'mc:yellow_stained_glass'
+    displayName: '<red>Only ender pearls.'
+    properties:
+      whitelist:
+        enabled: true
+        list:
+          - mc:ender_pearl #itemID
+  itemPlaceHolderSlime:
+    itemType: PLACEHOLDER
+    item: 'mc:yellow_stained_glass'
+    displayName: '<red>Only slime Balls.'
+    properties:
+      whitelist:
+        enabled: true
+        list:
+          - mc:slime_ball #itemID
+  itemPlaceHolderFlintBone:
+    itemType: PLACEHOLDER
+    item: 'mc:yellow_stained_glass'
+    displayName: '<red>Only flint and bone.'
+    properties:
+      whitelist:
+        enabled: true
+        list:
+          - mc:bone #itemID
+          - mc:flint
+  itemPlaceHolderGunPowder:
+    itemType: PLACEHOLDER
+    item: 'mc:yellow_stained_glass'
+    displayName: '<red>Only glowstone, sugar and gunpowder.'
+    properties:
+      whitelist:
+        enabled: true
+        list:
+          - mc:glowstone_dust
+          - mc:sugar
+          - mc:gunpowder

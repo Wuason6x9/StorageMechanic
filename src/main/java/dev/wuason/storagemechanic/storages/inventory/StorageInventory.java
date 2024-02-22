@@ -87,7 +87,7 @@ public class StorageInventory implements InventoryHolder {
     //*********************************
 
 
-    public void onClose(CloseEvent event) { //TODO: Add close event
+    public void onClose(CloseEvent event) {
 
         StorageConfig storageConfig = this.storage.getStorageConfig();
         Player player = (Player) event.getEvent().getPlayer();
