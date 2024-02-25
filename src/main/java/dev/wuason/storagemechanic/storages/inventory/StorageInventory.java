@@ -101,7 +101,7 @@ public class StorageInventory implements InventoryHolder {
 
 
         //Hopper event
-        if (this.storage.getStorageOriginContext().getContext().equals(StorageOriginContext.Context.BLOCK_STORAGE)) {
+        if (this.storage.getStorageOriginContext().getContext().isBlockStorage()) {
             List<String> list = this.storage.getStorageOriginContext().getData();
             BlockMechanicManager.HOPPER_BLOCK_MECHANIC.checkBlockStorageAndTransfer(new String[]{list.get(1), list.get(0), list.get(2)});
         }
@@ -118,7 +118,7 @@ public class StorageInventory implements InventoryHolder {
         }
     }
 
-    public void onClick(InventoryClickEvent event) { //TODO: Add click event
+    public void onClick(InventoryClickEvent event) {
         StorageConfig storageConfig = this.storage.getStorageConfig();
         Player player = (Player) event.getWhoClicked();
         if (storageConfig.isStorageSoundEnabled()) {
@@ -174,7 +174,7 @@ public class StorageInventory implements InventoryHolder {
         Bukkit.getPluginManager().callEvent(clickPageStorageEvent);
     }
 
-    public void onDrag(InventoryDragEvent event) { //TODO: Add drag event
+    public void onDrag(InventoryDragEvent event) {
         StorageConfig storageConfig = storage.getStorageConfig();
         dragItemCheck(event);
         if (storageConfig.isStorageBlockItemEnabled()) {
@@ -218,10 +218,10 @@ public class StorageInventory implements InventoryHolder {
         StorageConfig storageConfig = this.storage.getStorageConfig();
         if (cursor != null && !cursor.getType().isAir()) {
             if (storageConfig.isStorageBlockItemEnabled()) {
-                ArrayList<Object> objects = this.storage.isBlocked(event.getSlot(), this.page, storageConfig);
-                if ((boolean) objects.get(0)) {
-                    if (objects.get(1) != null) {
-                        AdventureUtils.playerMessage((String) objects.get(1), player);
+                StorageBlockItemConfig storageBlockItemConfig = this.storage.getStorageBlockItemConfig(event.getSlot(), this.page);
+                if (storageBlockItemConfig != null) {
+                    if (storageBlockItemConfig.getMessage() != null) {
+                        AdventureUtils.playerMessage(storageBlockItemConfig.getMessage(), player);
                     }
                     event.setCancelled(true);
                 }
@@ -362,10 +362,10 @@ public class StorageInventory implements InventoryHolder {
         StorageConfig storageConfig = this.storage.getStorageConfig();
         if (!clickedItem.getType().isAir()) {
             if (storageConfig.isStorageBlockItemEnabled()) {
-                ArrayList<Object> objects = storage.isBlocked(slotFree, this.page, storageConfig);
-                if ((boolean) objects.get(0)) {
-                    if (objects.get(1) != null) {
-                        AdventureUtils.playerMessage((String) objects.get(1), player); //TODO: CAMBIAR ESTO
+                StorageBlockItemConfig storageBlockItemConfig = this.storage.getStorageBlockItemConfig(slotFree, this.page);
+                if (storageBlockItemConfig != null) {
+                    if (storageBlockItemConfig.getMessage() != null) {
+                        AdventureUtils.playerMessage(storageBlockItemConfig.getMessage(), player);
                     }
                     event.setCancelled(true);
                 }
@@ -429,10 +429,10 @@ public class StorageInventory implements InventoryHolder {
         if (cursor != null && !cursor.getType().equals(Material.AIR)) {
             if (storageConfig.isStorageBlockItemEnabled()) {
                 for (Integer s : event.getRawSlots()) {
-                    ArrayList<Object> objects = this.storage.isBlocked(s, this.page, storageConfig);
-                    if ((boolean) objects.get(0)) {
-                        if (objects.get(1) != null) {
-                            AdventureUtils.playerMessage((String) objects.get(1), player);
+                    StorageBlockItemConfig storageBlockItemConfig = this.storage.getStorageBlockItemConfig(s, this.page);
+                    if (storageBlockItemConfig != null) {
+                        if (storageBlockItemConfig.getMessage() != null) {
+                            AdventureUtils.playerMessage(storageBlockItemConfig.getMessage(), player);
                         }
                         event.setCancelled(true);
                     }

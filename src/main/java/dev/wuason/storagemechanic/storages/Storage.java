@@ -148,6 +148,7 @@ public class Storage {
      * @return True if the storage was successfully opened, false otherwise.
      */
     public boolean openStorage(Player player, int page) {
+
         StorageConfig storageConfig = getStorageConfig();
 
         if (storageConfig.getMaxViewers() != -1) {
@@ -639,25 +640,30 @@ public class Storage {
         });
     }
 
-    public StorageBlockItemConfig getStorageBlockItem(int slot, int page)
+    public StorageBlockItemConfig getStorageBlockItemConfig(int slot, int page){
+        StorageConfig storageConfig = getStorageConfig();
+        for (StorageBlockItemConfig storageBlockItemConfig : storageConfig.getStorageBlockedItemsConfig()) {
+            if (!storageBlockItemConfig.getPagesToSlots().containsKey(page)) {
+                continue;
+            }
+
+            Set<Integer> slots = storageBlockItemConfig.getPagesToSlots().get(page);
+
+            if (slots != null) {
+                if (slots.contains(slot)) {
+                    return storageBlockItemConfig;
+                }
+            }
+        }
+        return null;
+    }
 
     public boolean isBlocked(int slot, int page) { //1: true or false 2:messsage
         StorageConfig storageConfig = getStorageConfig();
         if (!storageConfig.isStorageBlockItemEnabled()) {
             return false;
         }
-        for (StorageBlockItemConfig storageBlockItemConfig : storageConfig.getStorageBlockedItemsConfig()) {
-            if (!storageBlockItemConfig.getPagesToSlots().containsKey(page)) {
-                continue;
-            }
-            Set<Integer> slots = storageBlockItemConfig.getPagesToSlots().get(page);
-            if (slots != null) {
-                if (slots.contains(slot)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return getStorageBlockItemConfig(slot, page) != null;
     }
 
     /**
@@ -670,7 +676,7 @@ public class Storage {
      * @return True if the item can be placed, false otherwise.
      */
     public boolean canBePlaced(ItemStack item, int page, int slot, StorageConfig storageConfig) {
-        return (!isItemInterfaceSlot(page, slot, storageConfig) && !((boolean) isBlocked(slot, page, storageConfig).get(0)) && !isItemInList(item, slot, page, ListType.BLACKLIST, storageConfig) && isItemInList(item, slot, page, ListType.WHITELIST, storageConfig));
+        return (!isItemInterfaceSlot(page, slot, storageConfig) && !((boolean) isBlocked(slot, page)) && !isItemInList(item, slot, page, ListType.BLACKLIST, storageConfig) && isItemInList(item, slot, page, ListType.WHITELIST, storageConfig));
     }
 
     public boolean isItemInterfaceSlot(int page, int slot, StorageConfig storageConfig) {

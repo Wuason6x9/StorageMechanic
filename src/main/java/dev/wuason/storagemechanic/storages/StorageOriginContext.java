@@ -26,6 +26,31 @@ public class StorageOriginContext implements Serializable {
         ENTITY_STORAGE,
         ITEM_STORAGE,
         API,
-        STORAGE
+        STORAGE;
+
+
+        public boolean isBlockStorage() {
+            return this == BLOCK_STORAGE;
+        }
+
+        public boolean isFurnitureStorage() {
+            return this == FURNITURE_STORAGE;
+        }
+
+        public boolean isEntityStorage() {
+            return this == ENTITY_STORAGE;
+        }
+
+        public boolean isItemStorage() {
+            return this == ITEM_STORAGE;
+        }
+
+        public boolean isApi() {
+            return this == API;
+        }
+
+        public boolean isStorage() {
+            return this == STORAGE;
+        }
     }
 }
