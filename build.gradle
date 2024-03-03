@@ -48,6 +48,7 @@ dependencies {
 
 shadowJar {
     archiveFileName.set("StorageMechanic-${archiveVersion.get()}.jar")
+    destinationDirectory.set(file("$rootDir/plugin"))
 }
 
 

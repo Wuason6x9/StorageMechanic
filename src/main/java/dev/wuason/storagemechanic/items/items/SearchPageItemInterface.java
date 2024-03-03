@@ -19,14 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SearchPageItemInterface extends ItemInterface {
-
-    private Map<UUID, WaitingInputData> waitingInput = new ConcurrentHashMap<>();
-    private final StorageMechanic core;
+    private final StorageMechanic core = StorageMechanic.getInstance();
     private final double maxDistance;
 
     public SearchPageItemInterface(String item, String displayName, List<String> lore, double maxDistance, String id) {
         super(item, displayName, lore, id, "SEARCH_PAGE");
-        this.core = StorageMechanic.getInstance();
         this.maxDistance = maxDistance;
     }
 
@@ -36,11 +33,11 @@ public class SearchPageItemInterface extends ItemInterface {
         player.closeInventory();
         player.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.storage.search_page_enter"),null));
         UUID playerId = player.getUniqueId();
-        waitingInput.put(playerId, new WaitingInputData(storage, storageInventory.getPage(), player.getLocation(), this));
+        getWaitingInput().put(playerId, new WaitingInputData(storage, storageInventory.getPage(), player.getLocation(), this));
         AtomicLong timer = new AtomicLong(0);
         Bukkit.getScheduler().runTaskTimerAsynchronously(core, task -> {
-            if (timer.incrementAndGet() >= 20 * 10 || !waitingInput.containsKey(playerId)) {
-                waitingInput.remove(playerId);
+            if (timer.incrementAndGet() >= 20 * 10 || !getWaitingInput().containsKey(playerId)) {
+                getWaitingInput().remove(playerId);
                 task.cancel();
             }
         }, 0L, 3L);
@@ -48,5 +45,9 @@ public class SearchPageItemInterface extends ItemInterface {
 
     public double getMaxDistance() {
         return maxDistance;
+    }
+
+    private Map<UUID, WaitingInputData> getWaitingInput() {
+        return core.getManagers().getStorageManager().getWaitingInput();
     }
 }

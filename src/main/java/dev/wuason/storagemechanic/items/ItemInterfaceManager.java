@@ -57,7 +57,8 @@ public class ItemInterfaceManager {
 
             YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-            ConfigurationSection sectionItemsInterfaces = config.getConfigurationSection("Items");
+            ConfigurationSection sectionItemsInterfaces = config.getConfigurationSection("items");
+            if(sectionItemsInterfaces == null) sectionItemsInterfaces = config.getConfigurationSection("Items");
 
             if(sectionItemsInterfaces != null){
                 for(String key : sectionItemsInterfaces.getKeys(false)){

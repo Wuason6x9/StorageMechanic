@@ -42,7 +42,6 @@ public class StorageInventory implements InventoryHolder {
     private int page;
     private BukkitTask animationStagesTask;
     private StageStorage currentStage;
-    private AtomicBoolean closed = new AtomicBoolean(false);
 
 
     public StorageInventory(StorageConfig storageConfig, Storage storage, int page) {
@@ -94,6 +93,11 @@ public class StorageInventory implements InventoryHolder {
 
         //SAVE STORAGE
         this.storage.closeStorage(this.page, player); //TODO: Modify this method
+
+        //call method to close the storage bug
+        if(storageConfig.getRefreshTimeStages() > 0){
+            NMSManager.getVersionWrapper().sendCloseInventoryPacket(player);
+        }
 
         //events
         CloseStoragePageActionEvent closeStoragePageActionEvent = new CloseStoragePageActionEvent(this, event.getEvent()); //TODO: Modify this event
@@ -571,13 +575,12 @@ public class StorageInventory implements InventoryHolder {
 
     public void startAnimationStages() {
 
+        if (animationStagesTask != null && !animationStagesTask.isCancelled()) return;
         StorageConfig storageConfig = storage.getStorageConfig();
         ArrayList<StageStorage> stages = storageConfig.getStagesOrder();
         if (storageConfig.getRefreshTimeStages() < 1 || stages.isEmpty()) return;
 
         BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(StorageMechanic.getInstance(), () -> {
-            System.out.println(isClosed());
-            if (isClosed()) return;
             if (currentStage != null && (stages.indexOf(currentStage) + 1) < stages.size())
                 currentStage = stages.get(stages.indexOf(currentStage) + 1);
             else currentStage = stages.get(0);
@@ -622,14 +625,6 @@ public class StorageInventory implements InventoryHolder {
 
     public StageStorage getCurrentStage() {
         return currentStage;
-    }
-
-    public void setClosed(boolean closed) {
-        this.closed.set(closed);
-    }
-
-    public boolean isClosed() {
-        return closed.get();
     }
 
 

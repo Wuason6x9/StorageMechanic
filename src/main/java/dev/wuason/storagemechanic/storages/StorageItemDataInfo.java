@@ -20,12 +20,12 @@ public class StorageItemDataInfo {
         this.id = UUID.randomUUID();
     }
 
-    public void removeWithRestrictions(){
-        storage.clearSlotWithRestrictions(page,slot);
+    public void removeWithRestrictions() {
+        storage.clearSlotWithRestrictions(page, slot);
     }
 
-    public void remove(){
-        storage.clearSlotPage(page,slot);
+    public void remove() {
+        storage.clearSlotPage(page, slot);
     }
 
     public ItemStack getItemStack() {
@@ -36,15 +36,15 @@ public class StorageItemDataInfo {
         return itemStack.clone();
     }
 
-    public boolean isSimilar(ItemStack itemStack){
+    public boolean isSimilar(ItemStack itemStack) {
         return this.itemStack.isSimilar(itemStack);
     }
 
-    public boolean exists(){
-        if(storage.getItem(slot,page) == null) return false;
-        if(storage.getItem(slot, page) == itemStack) return true;
-        if(PlaceholderItemInterface.isPlaceholderItem(storage.getItem(slot,page))){
-            return itemStack.equals(PlaceholderItemInterface.getOriginalItemStack(storage.getItem(slot,page)));
+    public boolean exists() {
+        if (storage.getItem(slot, page) == null) return false;
+        if (storage.getItem(slot, page).isSimilar(itemStack)) return true;
+        if (PlaceholderItemInterface.isPlaceholderItem(storage.getItem(slot, page))) {
+            return itemStack.equals(PlaceholderItemInterface.getOriginalItemStack(storage.getItem(slot, page)));
         }
         return false;
     }

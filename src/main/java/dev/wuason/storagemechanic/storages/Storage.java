@@ -4,6 +4,7 @@ import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
+import dev.wuason.nms.wrappers.NMSManager;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.api.events.storage.CloseStorageEvent;
 import dev.wuason.storagemechanic.api.events.storage.OpenStorageEvent;
@@ -96,7 +97,6 @@ public class Storage {
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             if (storageInventory.getInventory().getViewers().size() <= 1) { // <= 1 because the current player is still in the viewer list
-                storageInventory.setClosed(true);
                 ItemStack[] contents = storageInventory.getInventory().getContents();
                 ItemInterfaceManager itemInterfaceManager = StorageMechanic.getInstance().getManagers().getItemInterfaceManager();
 
@@ -681,7 +681,7 @@ public class Storage {
 
     public boolean isItemInterfaceSlot(int page, int slot, StorageConfig storageConfig) {
         if (!storageConfig.getStorageItemsInterfaceConfig().containsKey(page)) return false;
-        if (getStorageInventory(page).getCurrentStage() != null) {
+        if (getStorageInventory(page) != null && getStorageInventory(page).getCurrentStage() != null) {
             StageStorage stage = getStorageInventory(page).getCurrentStage();
             if (stage.getStorageItemsInterfaceConfig().containsKey(page)) {
                 HashMap<Integer, StorageItemInterfaceConfig> hashMap = stage.getStorageItemsInterfaceConfig().get(page);
@@ -1146,8 +1146,14 @@ public class Storage {
             StorageInventory storageInventory = inventories.get(page);
             ItemStack[] contents = storageInventory.getInventory().getContents();
             for (ItemStack item : contents) {
-                if (item != null) {
-                    itemsList.add(item);
+                if (item != null && !item.getType().isAir()) {
+                    if(core.getManagers().getItemInterfaceManager().isItemInterface(item) && PlaceholderItemInterface.isPlaceholderItem(item)){
+                        itemsList.add(PlaceholderItemInterface.getOriginalItemStack(item));
+                        continue;
+                    }
+                    else if (!core.getManagers().getItemInterfaceManager().isItemInterface(item)) {
+                        itemsList.add(item);
+                    }
                 }
             }
         }
@@ -1156,6 +1162,10 @@ public class Storage {
             ItemStack[] contents = items.get(page);
             for (ItemStack item : contents) {
                 if (item != null) {
+                    if(PlaceholderItemInterface.isPlaceholderItem(item)){
+                        itemsList.add(PlaceholderItemInterface.getOriginalItemStack(item));
+                        continue;
+                    }
                     itemsList.add(item);
                 }
             }
@@ -1181,7 +1191,9 @@ public class Storage {
                         itemsList.put(i, item);
                         continue;
                     }
-                    itemsList.put(i, contents[i]);
+                    if (!core.getManagers().getItemInterfaceManager().isItemInterface(contents[i])) {
+                        itemsList.put(i, contents[i]);
+                    }
                 }
             }
         }

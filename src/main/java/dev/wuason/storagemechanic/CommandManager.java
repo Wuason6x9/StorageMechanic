@@ -61,6 +61,23 @@ public class CommandManager {
         new CommandAPICommand("StorageMechanic")
                 .withPermission("sm.command")
                 .withAliases("sm", "storagem")
+                .withSubcommand(new CommandAPICommand("actions")
+                        .withPermission("sm.command.actions")
+                        .withSubcommand(new CommandAPICommand("power")
+                                .withPermission("sm.command.actions.disableActionYML")
+                                .executes((sender, args) -> {
+                                    core.getManagers().getActionManager().setEnabled(!core.getManagers().getActionManager().isEnabled());
+                                    AdventureUtils.sendMessage(sender, "Power now: " + core.getManagers().getActionManager().isEnabled());
+                                })
+                        )
+                        //status
+                        .withSubcommand(new CommandAPICommand("status")
+                                .withPermission("sm.command.actions.status")
+                                .executes((sender, args) -> {
+                                    AdventureUtils.sendMessage(sender, "Power: " + core.getManagers().getActionManager().isEnabled());
+                                })
+                        )
+                )
                 .withSubcommand(new CommandAPICommand("api")
                         .withPermission("sm.command.api")
                         .withSubcommand(new CommandAPICommand("create")
@@ -710,11 +727,11 @@ public class CommandManager {
                                     return ids;
 
                                 })))
-                                .withArguments(new IntegerArgument("amount"))
+                                .withArguments(new IntegerArgument("amount").setOptional(true))
                                 .executes((sender, args) -> {
 
                                     Player player = (Player) sender;
-                                    int quantity = (int) args.get(1);
+                                    int quantity = (int) args.getOrDefault(1, 1);
                                     String id = (String) args.get(0);
                                     CustomItem customItem = core.getManagers().getCustomItemsManager().getCustomItemById(id);
                                     if (quantity < 1 || quantity > 64) quantity = 64;
@@ -744,11 +761,11 @@ public class CommandManager {
                                     return ids;
 
                                 })))
-                                .withArguments(new IntegerArgument("amount"))
+                                .withArguments(new IntegerArgument("amount").setOptional(true))
                                 .executes((sender, args) -> {
                                     Collection<Player> players = (Collection<Player>) args.get(0);
                                     if (players.isEmpty()) return;
-                                    int quantity = (int) args.get(2);
+                                    int quantity = (int) args.getOrDefault(2, 1);
                                     String id = (String) args.get(1);
                                     CustomItem customItem = core.getManagers().getCustomItemsManager().getCustomItemById(id);
                                     if (quantity < 1 || quantity > 64) quantity = 64;

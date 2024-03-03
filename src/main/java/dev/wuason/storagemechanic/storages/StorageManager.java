@@ -272,4 +272,8 @@ public class StorageManager implements Listener {
     public Map<String, Storage> getStorageMap() {
         return storageMap;
     }
+
+    public Map<UUID, WaitingInputData> getWaitingInput() {
+        return waitingInput;
+    }
 }

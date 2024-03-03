@@ -1,6 +1,7 @@
 package dev.wuason.storagemechanic.items.items;
 
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
+import dev.wuason.mechanics.items.ItemBuilderMechanic;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.items.ItemInterfaceManager;
@@ -45,12 +46,11 @@ public class PlaceholderItemInterface extends ItemInterface {
 
     public static ItemStack getOriginalItemStack(ItemStack itemStack){
         if(itemStack == null || itemStack.getType().equals(Material.AIR)) return null;
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        PersistentDataContainer itemPersistentDataContainer = itemMeta.getPersistentDataContainer();
-        itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
-        itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
-        itemStack.setItemMeta(itemMeta);
-        return itemStack;
+        return ItemBuilderMechanic.copyOf(itemStack).meta(meta -> {
+            PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
+            itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
+            itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
+        }).build();
     }
 
     @Override

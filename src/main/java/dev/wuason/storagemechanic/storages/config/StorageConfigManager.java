@@ -76,7 +76,7 @@ public class StorageConfigManager {
                     //Storage properties
 
                     boolean tempStorage = sectionStorage.getBoolean("storage.properties.isTempStorage",false);
-                    boolean dropItemsPageOnClose = sectionStorage.getBoolean("storage.properties.dropItemsPageOnClose",false);;
+                    boolean dropItemsPageOnClose = sectionStorage.getBoolean("storage.properties.dropItemsPageOnClose",false);
 
                     StorageProperties storageProperties = new StorageProperties(tempStorage, dropItemsPageOnClose);
 
