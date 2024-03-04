@@ -4,31 +4,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class StorageConfig {
-    private String id;
-    private int rows;
-    private int pages;
-    private StorageProperties storageProperties;
-    private StorageInventoryTypeConfig inventoryType;
-    private String title;
-    private HashMap<String, StageStorage> stagesHashMap = new HashMap<>();
-    private ArrayList<StageStorage> stagesOrder = new ArrayList<>();
-    private long refreshTimeStages = 0L;
-    private ArrayList<StorageSoundConfig> storageSounds = new ArrayList<>();
-    private boolean storageSoundEnabled = false;
-    private ArrayList<StorageItemConfig> storageItemsDefaultConfig = new ArrayList<>();
-    private boolean storageItemsDefaultEnabled = false;
-    private ArrayList<StorageItemConfig> storageItemsWhiteListConfig = new ArrayList<>();
-    private boolean storageItemsWhiteListEnabled = false;
-    private ArrayList<StorageItemConfig> storageItemsBlackListConfig = new ArrayList<>();
-    private boolean storageItemsBlackListEnabled = false;
-    private HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig = new HashMap<>();
-    private boolean storageItemsInterfaceEnabled = false;
+    private final String id;
+    private final int rows;
+    private final int pages;
+    private final StorageProperties storageProperties;
+    private final StorageInventoryTypeConfig inventoryType;
+    private final String title;
+    private final HashMap<String, StageStorage> stagesHashMap;
+    private final ArrayList<StageStorage> stagesOrder;
+    private final long refreshTimeStages;
+    private final ArrayList<StorageSoundConfig> storageSounds;
+    private final boolean storageSoundEnabled;
+    private final ArrayList<StorageItemConfig> storageItemsDefaultConfig;
+    private final boolean storageItemsDefaultEnabled;
+    private final ArrayList<StorageItemConfig> storageItemsWhiteListConfig;
+    private final boolean storageItemsWhiteListEnabled;
+    private final ArrayList<StorageItemConfig> storageItemsBlackListConfig;
+    private final boolean storageItemsBlackListEnabled;
+    private final HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig;
+    private final boolean storageItemsInterfaceEnabled;
 
-    private ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig = new ArrayList<>();
-    private boolean storageBlockItemEnabled = false;
-    private String whiteListMessage = null;
-    private String blackListMessage = null;
-    private int maxViewers = -1;
+    private final ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig;
+    private final boolean storageBlockItemEnabled;
+    private final String whiteListMessage;
+    private final String blackListMessage;
+    private final int maxViewers;
 
 
     public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled, StorageProperties storageProperties, ArrayList<StageStorage> stagesOrder, long refreshTimeStages, HashMap<String, StageStorage> stagesHashMap, int maxViewers) {

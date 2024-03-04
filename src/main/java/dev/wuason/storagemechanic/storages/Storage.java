@@ -697,7 +697,7 @@ public class Storage {
         switch (listType) {
 
             case BLACKLIST -> {
-                if (!storageConfig.isStorageBlockItemEnabled()) return false;
+                if (!storageConfig.isStorageItemsBlackListEnabled()) return false;
                 for (StorageItemConfig storageItemConfig : storageConfig.getStorageItemsBlackListConfig()) {
 
                     if (!storageItemConfig.getPagesToSlots().containsKey(page)) {

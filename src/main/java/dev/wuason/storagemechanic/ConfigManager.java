@@ -110,7 +110,7 @@ public class ConfigManager {
         core.getManagers().getFurnitureStorageConfigManager().loadFurnitureStorageConfigs();
         core.getManagers().getInventoryConfigManager().load();
         AdventureUtils.sendMessagePluginConsole(core, "<aqua> Inventories loaded: <yellow>" + core.getManagers().getInventoryConfigManager().getInventories().size());
-        core.getManagers().getRecipesManager().loadRecipes();
+        Bukkit.getScheduler().runTask(core, () -> core.getManagers().getRecipesManager().loadRecipes());
         setConfigLoaded(true);
     }
 
