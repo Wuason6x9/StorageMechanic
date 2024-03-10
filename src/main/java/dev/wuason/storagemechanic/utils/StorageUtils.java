@@ -85,4 +85,12 @@ public class StorageUtils {
         String[] loc = id.split("_");
         return new Location(Bukkit.getWorld(UUID.fromString(loc[0])),Double.parseDouble(loc[1]),Double.parseDouble(loc[2]),Double.parseDouble(loc[3]));
     }
+
+
+    public static boolean numbersCheck(List<Integer> numbers, int maxNumber, int minNumber){
+        for(int number : numbers){
+            if(number>maxNumber || number<minNumber) return false;
+        }
+        return true;
+    }
 }

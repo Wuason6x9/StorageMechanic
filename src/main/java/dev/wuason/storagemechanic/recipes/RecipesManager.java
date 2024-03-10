@@ -12,6 +12,9 @@ import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
@@ -20,7 +23,7 @@ import org.bukkit.inventory.ShapelessRecipe;
 import java.io.File;
 import java.util.*;
 
-public class RecipesManager {
+public class RecipesManager implements Listener {
 
     private Set<NamespacedKey> recipesKeys = new HashSet<>();
 
@@ -243,6 +246,11 @@ public class RecipesManager {
         }
 
         return 1;
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event){
+        if(core.getManagers().getConfigManager().getMainConfig().getBoolean("config.get_all_recipes_on_join", true)) event.getPlayer().discoverRecipes(recipesKeys);
     }
 
 

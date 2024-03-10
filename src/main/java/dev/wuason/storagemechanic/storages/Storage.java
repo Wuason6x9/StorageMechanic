@@ -616,28 +616,20 @@ public class Storage {
     }
 
     public void dropItemsFromPage(Location dropLocation, int page) {
-        List<ItemStack> itemsList = getItemsFromPage(page);
+        List<StorageItemDataInfo> itemsList = getItemsFromPage(page);
         World world = dropLocation.getWorld();
-
-        ArrayList<ItemStack> itemStacks = new ArrayList<>();
-        for (ItemStack item : itemsList) {
-            if (item != null) {
-                itemStacks.add(item);
-                removeItemStack(page, item);
+        for (StorageItemDataInfo item : itemsList) {
+            if(!item.exists()) continue;
+            item.removeWithRestrictions();
+            if (PlaceholderItemInterface.isPlaceholderItem(item.getItemStack())) {
+                new ItemBuilderMechanic(item.getItemStack()).meta(meta -> {
+                    PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
+                    itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
+                    itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
+                }).build();
             }
+            world.dropItem(dropLocation, item.getItemStack());
         }
-        Bukkit.getScheduler().runTask(StorageMechanic.getInstance(), () -> {
-            for (ItemStack item : itemStacks) {
-                if (PlaceholderItemInterface.isPlaceholderItem(item)) {
-                    new ItemBuilderMechanic(item).meta(meta -> {
-                        PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
-                        itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
-                        itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
-                    }).build();
-                }
-                world.dropItem(dropLocation, item);
-            }
-        });
     }
 
     public StorageBlockItemConfig getStorageBlockItemConfig(int slot, int page){
@@ -1139,20 +1131,20 @@ public class Storage {
         return null;
     }
 
-    public List<ItemStack> getItemsFromPage(int page) {
-        List<ItemStack> itemsList = new ArrayList<>();
+    public List<StorageItemDataInfo> getItemsFromPage(int page) {
+        List<StorageItemDataInfo> itemsList = new ArrayList<>();
 
         if (inventories.containsKey(page)) {
             StorageInventory storageInventory = inventories.get(page);
             ItemStack[] contents = storageInventory.getInventory().getContents();
-            for (ItemStack item : contents) {
-                if (item != null && !item.getType().isAir()) {
-                    if(core.getManagers().getItemInterfaceManager().isItemInterface(item) && PlaceholderItemInterface.isPlaceholderItem(item)){
-                        itemsList.add(PlaceholderItemInterface.getOriginalItemStack(item));
+            for (int i = 0; i < contents.length; i++) {
+                if (contents[i] != null && !contents[i].getType().isAir()) {
+                    if(core.getManagers().getItemInterfaceManager().isItemInterface(contents[i]) && PlaceholderItemInterface.isPlaceholderItem(contents[i])){
+                        itemsList.add(new StorageItemDataInfo(PlaceholderItemInterface.getOriginalItemStack(contents[i]), page, i, this));
                         continue;
                     }
-                    else if (!core.getManagers().getItemInterfaceManager().isItemInterface(item)) {
-                        itemsList.add(item);
+                    else if (!core.getManagers().getItemInterfaceManager().isItemInterface(contents[i])) {
+                        itemsList.add(new StorageItemDataInfo(contents[i], page, i, this));
                     }
                 }
             }
@@ -1160,13 +1152,13 @@ public class Storage {
 
         if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
-            for (ItemStack item : contents) {
-                if (item != null) {
-                    if(PlaceholderItemInterface.isPlaceholderItem(item)){
-                        itemsList.add(PlaceholderItemInterface.getOriginalItemStack(item));
+            for (int i = 0; i < contents.length; i++) {
+                if (contents[i] != null) {
+                    if(PlaceholderItemInterface.isPlaceholderItem(contents[i])){
+                        itemsList.add(new StorageItemDataInfo(PlaceholderItemInterface.getOriginalItemStack(contents[i]), page, i, this));
                         continue;
                     }
-                    itemsList.add(item);
+                    itemsList.add(new StorageItemDataInfo(contents[i], page, i, this));
                 }
             }
         }
@@ -1289,8 +1281,8 @@ public class Storage {
         return -1;
     }
 
-    public List<ItemStack> getAllItems() {
-        List<ItemStack> allItems = new ArrayList<>();
+    public List<StorageItemDataInfo> getAllItems() {
+        List<StorageItemDataInfo> allItems = new ArrayList<>();
 
         for (int page : items.keySet()) {
             allItems.addAll(getItemsFromPage(page));

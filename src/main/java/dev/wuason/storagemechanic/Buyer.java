@@ -5,4 +5,5 @@ public class Buyer {
     public static String RESOURCE_ID = "%%__RESOURCE__%%";
     public static String BUYER_USERNAME = "%%__USERNAME__%%";
 
+
 }

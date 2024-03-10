@@ -46,7 +46,7 @@ public class SmRemoveMythicMechanic implements ITargetedEntitySkill {
         Bukkit.getScheduler().runTask(core,() -> storage.closeAllInventory());
         if(dropItems) {
             Location finalLoc = loc;
-            Bukkit.getScheduler().runTaskAsynchronously(core,() -> storage.dropAllItems(finalLoc));
+            Bukkit.getScheduler().runTask(core,() -> storage.dropAllItems(finalLoc));
         }
         storageManager.removeStorage(id);
         return null;

@@ -6,6 +6,7 @@ import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.utils.StorageUtils;
+import io.lumine.mythic.bukkit.utils.numbers.Numbers;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -252,49 +253,13 @@ public class StorageConfigManager {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Some slot is wrong the range of slots is: 0 - 63");
                     continue;
                 }
-                if(itemType.contains("default")){
-                    if(amount.contains("-")){
-                        if(Utils.isNumber((amount.split("-"))[0])){
-                            if((Integer.parseInt((amount.split("-"))[0])) > 64 || (Integer.parseInt((amount.split("-"))[0])) == 0){
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
-                                continue;
-                            }
-                        }
-                        else {
-                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
-                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
-                            continue;
-                        }
-                    }
-                    else {
-                        if(Utils.isNumber(amount)){
-                            if((Integer.parseInt(amount)) > 64 || (Integer.parseInt(amount)) == 0){
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
-                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
-                                continue;
-                            }
-                        }
-                        else {
-                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
-                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
-                            continue;
-                        }
-                    }
-                    //2
-                    if(amount.contains("-") && amount.split("-").length > 1 && Utils.isNumber((amount.split("-"))[1])){
-                        if((Integer.parseInt((amount.split("-"))[1])) > 64 || (Integer.parseInt((amount.split("-"))[1])) == 0){
-                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
-                            AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
-                            continue;
-                        }
-                    }
-                    else {
+                if(itemType.contains("default")) {
+                    if (!StorageUtils.numbersCheck(Utils.configFill(Collections.singletonList(amount)), 64, 1)) {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + " Item amount 1 - 64 your item amount is: " + amount);
-                        continue;
                     }
                 }
+
                 Adapter adapterManager = Adapter.getInstance();
                 if (!adapterManager.isItemsValid(items)) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());

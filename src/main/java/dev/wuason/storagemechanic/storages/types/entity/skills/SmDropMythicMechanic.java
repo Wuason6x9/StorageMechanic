@@ -44,7 +44,7 @@ public class SmDropMythicMechanic implements ITargetedEntitySkill {
         if(!storageManager.storageExists(id)) return SkillResult.ERROR;
         Storage storage = storageManager.getStorage(id);
         Location finalLocation = location;
-        Bukkit.getScheduler().runTaskAsynchronously(core,() -> storage.dropAllItems(finalLocation));
+        Bukkit.getScheduler().runTask(core,() -> storage.dropAllItems(finalLocation));
         return SkillResult.SUCCESS;
     }
 }

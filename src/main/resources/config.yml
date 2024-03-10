@@ -1,10 +1,11 @@
-config-version: 4
+config-version: 5
 config:
   lang: en
+  get_all_recipes_on_join: true
 logs:
   show_save_logs: true
 data:
-  save_all_data_in: 20 #in minutes
+  save_all_data_in: 5 #in minutes
   method: LOCAL #LOCAL OR DATABASE
   database_config:
     config_host:

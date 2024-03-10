@@ -155,19 +155,11 @@ public class DropItemsItemInterface extends ItemInterface {
     }
 
     public void byActualPage(Player player, StorageInventory storageInventory){
-        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
-
-            storageInventory.getStorage().dropItemsFromPage(player.getLocation(), storageInventory.getPage());
-
-        });
+        storageInventory.getStorage().dropItemsFromPage(player.getLocation(), storageInventory.getPage());
     }
 
     public void allPages(Player player, StorageInventory storageInventory){
-        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
-
-            storageInventory.getStorage().dropAllItems(player.getLocation());
-
-        });
+        storageInventory.getStorage().dropAllItems(player.getLocation());
     }
 
     public enum DropItemsType {

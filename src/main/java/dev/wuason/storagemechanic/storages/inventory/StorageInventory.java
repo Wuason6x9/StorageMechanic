@@ -219,6 +219,9 @@ public class StorageInventory implements InventoryHolder {
     public void clickItemBlocked(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         ItemStack cursor = event.getCursor();
+        if(event.getHotbarButton() != -1) {
+            cursor = player.getInventory().getItem(event.getHotbarButton());
+        }
         StorageConfig storageConfig = this.storage.getStorageConfig();
         if (cursor != null && !cursor.getType().isAir()) {
             if (storageConfig.isStorageBlockItemEnabled()) {
@@ -235,6 +238,9 @@ public class StorageInventory implements InventoryHolder {
 
     public void clickItemCheck(InventoryClickEvent event) {
         ItemStack cursor = event.getCursor();
+        if(event.getHotbarButton() != -1) {
+            cursor = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
+        }
         Managers managers = StorageMechanic.getInstance().getManagers();
         if (cursor != null && !cursor.getType().isAir()) {
             //ITEM STORAGE
@@ -275,6 +281,9 @@ public class StorageInventory implements InventoryHolder {
     public void clickItemCheckList(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         ItemStack cursor = event.getCursor();
+        if(event.getHotbarButton() != -1) {
+            cursor = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
+        }
         StorageConfig storageConfig = this.storage.getStorageConfig();
         if (cursor != null && !cursor.getType().isAir()) {
             if (storageConfig.isStorageItemsWhiteListEnabled()) {

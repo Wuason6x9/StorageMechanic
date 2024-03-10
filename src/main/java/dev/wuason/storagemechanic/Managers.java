@@ -124,6 +124,7 @@ public class Managers {
         pm.registerEvents(blockStorageManager, core);
         pm.registerEvents(itemStorageManager, core);
         pm.registerEvents(storageApiManager, core);
+        pm.registerEvents(recipesManager, core);
         if (Compatibilities.isMythicMobsLoaded()) {
             pm.registerEvents(mythicManager, core);
         }
