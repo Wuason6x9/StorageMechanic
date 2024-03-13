@@ -34,7 +34,7 @@ api:
       - "<red>Depolama yapılandırma ID'si: <aqua>%storage_config_id%"
       - "<red>Depolama kökeni bağlamı: <aqua>%storage_origin_context%"
       - "<red>Depolama maksimum sayfaları: <aqua>%storage_max_pages%"
-      - "<red>Depolama görüntüleyicileri: <aqua>%storage_viewers%"
+      - "<red>Depolamayı görüntüleyenler: <aqua>%storage_viewers%"
       - "<red>Depolama ID'si: <aqua>%storage_id%"
 info:
   player:
@@ -55,7 +55,7 @@ info:
       - "<red>Depolama yapılandırma ID'si: <aqua>%storage_config_id%"
       - "<red>Depolama kökeni bağlamı: <aqua>%storage_origin_context%"
       - "<red>Depolama maksimum sayfaları: <aqua>%storage_max_pages%"
-      - "<red>Depolama görüntüleyicileri: <aqua>%storage_viewers%"
+      - "<red>Depolamayı görüntüleyenler: <aqua>%storage_viewers%"
   players:
     title: Oyuncu Seç / Bilgi Depolama
     storages:
@@ -75,7 +75,7 @@ info:
         - "<red>Depolama yapılandırma ID'si: <aqua>%storage_config_id%"
         - "<red>Depolama kökeni bağlamı: <aqua>%storage_origin_context%"
         - "<red>Depolama maksimum sayfaları: <aqua>%storage_max_pages%"
-        - "<red>Depolama görüntüleyicileri: <aqua>%storage_viewers%"
+        - "<red>Depolamayı görüntüleyenler: <aqua>%storage_viewers%"
     players:
       refresh_item_name: "<red>Yenile"
       remove_selection_item_name: "<red>Seçimi Kaldır"
