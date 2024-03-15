@@ -80,7 +80,7 @@ public class ItemInterfaceManager {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
                     }
-                    if(!Adapter.getInstance().existAdapterID(item)){
+                    if(!Adapter.isValidAdapterId(item)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
@@ -124,18 +124,17 @@ public class ItemInterfaceManager {
                             boolean blacklistEnabled = sectionItemInterface.getBoolean("properties.blacklist.enabled", false);
                             if(whitelistItems == null) whitelistEnabled = false;
                             if(blacklistItems == null) blacklistEnabled = false;
-                            Adapter adapterManager = Adapter.getInstance();
                             //COMPUTE ITEMS
                             List<String> itemsBlackListComputed = new ArrayList<>();
                             if(blacklistEnabled){
                                 for(String i : blacklistItems){
-                                    itemsBlackListComputed.add(adapterManager.getAdapterID(adapterManager.getItemStack(i)));
+                                    itemsBlackListComputed.add(Adapter.getAdapterId(Adapter.getItemStack(i)));
                                 }
                             }
                             List<String> itemsWhiteListComputed = new ArrayList<>();
                             if(whitelistEnabled){
                                 for(String i : whitelistItems){
-                                    itemsWhiteListComputed.add(adapterManager.getAdapterID(adapterManager.getItemStack(i)));
+                                    itemsWhiteListComputed.add(Adapter.getAdapterId(Adapter.getItemStack(i)));
                                 }
                             }
                             itemInterfaceHashMap.put(key, new PlaceholderItemInterface(item, displayName, lore, whitelistEnabled, blacklistEnabled, itemsWhiteListComputed, itemsBlackListComputed, key));

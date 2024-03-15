@@ -62,7 +62,7 @@ public class FunctionsStorage {
             fBuilder.addArguments(argBuilder -> {
                 argBuilder.addArgument(1, "item", (s, action, objects) -> {
                     if(s == null) return new ItemStack(Material.STONE);
-                    return Adapter.getInstance().getItemStack(s);
+                    return Adapter.getItemStack(s);
                 },
                 propertiesBuilder -> {
                     propertiesBuilder.setAutoGetPlaceholder(true);
@@ -150,7 +150,7 @@ public class FunctionsStorage {
             fBuilder.addArguments(argBuilder -> {
                 argBuilder.addArgument(0, "item", (s, action, objects) -> {
                     if(s == null) return new ItemStack(Material.STONE);
-                    return Adapter.getInstance().getItemStack(s);
+                    return Adapter.getItemStack(s);
                 },
                 propertiesBuilder -> {
                     propertiesBuilder.setAutoGetPlaceholder(true);

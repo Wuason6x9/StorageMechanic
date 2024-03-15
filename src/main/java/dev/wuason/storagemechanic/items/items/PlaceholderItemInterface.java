@@ -108,7 +108,7 @@ public class PlaceholderItemInterface extends ItemInterface {
         }
         if(event.getCursor() == null || event.getCursor().getType().equals(Material.AIR)) return;
         ItemStack itemCursor = event.getCursor();
-        String itemId = Adapter.getInstance().getAdapterID(itemCursor);
+        String itemId = Adapter.getAdapterId(itemCursor);
         if(whitelistEnabled && !whitelistItems.contains(itemId)) return;
         if(blacklistEnabled && blacklistItems.contains(itemId)) return;
         clickedItem.setType(itemCursor.getType());

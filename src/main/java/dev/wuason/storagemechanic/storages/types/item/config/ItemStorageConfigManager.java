@@ -70,7 +70,7 @@ public class ItemStorageConfigManager {
 
                     //ITEM ID
                     String itemId = sectionItemStorage.getString("item",".");
-                    if(itemId.equals(".") || !Adapter.getInstance().existAdapterID(itemId)){
+                    if(itemId.equals(".") || !Adapter.isValidAdapterId(itemId)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item storage Config! itemstorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Item is null or invalid");
                         continue;

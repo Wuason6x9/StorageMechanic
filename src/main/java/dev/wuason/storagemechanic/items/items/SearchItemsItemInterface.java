@@ -96,7 +96,7 @@ public class SearchItemsItemInterface extends ItemInterface {
 
                 dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invCustom.registerItemInterface(builder -> {
 
-                    builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    builder.setItemStack(Adapter.getItemStack(itemConfig.getItemId()));
                     builder.addData(itemConfig);
                     builder.onClick((e, inv) -> {
 
@@ -197,7 +197,7 @@ public class SearchItemsItemInterface extends ItemInterface {
                 }
             }
         };
-
+        invManagerAnvil.setPickupCancel(true);
         invManagerAnvil.savePlayerInventory();
         long refreshTicks = invConfig.getSection().getLong("refresh_ticks", 0L);
         if(refreshTicks>0){
@@ -212,22 +212,22 @@ public class SearchItemsItemInterface extends ItemInterface {
         invConfig.setOnItemLoad((inventoryConfig, configurationSection, itemConfig) -> {
             switch (itemConfig.getActionId()) {
                 case "NEXT_PAGE" -> {
-                    dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem nextPageItem = new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem nextPageItem = new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem(itemConfig.getSlots()[0], Adapter.getItemStack(itemConfig.getItemId()));
                     invManagerAnvil.setItemNext(nextPageItem);
                 }
                 case "BACK_PAGE" -> {
-                    dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem previousPageItem = new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem previousPageItem = new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem(itemConfig.getSlots()[0], Adapter.getItemStack(itemConfig.getItemId()));
                     invManagerAnvil.setItemBack(previousPageItem);
                 }
                 case "REPAIR_ITEM" -> {
-                    ItemStack itemStack = new ItemBuilderMechanic(Adapter.getInstance().getItemStack(itemConfig.getItemId()), 1).buildWithVoidName();
+                    ItemStack itemStack = new ItemBuilderMechanic(Adapter.getItemStack(itemConfig.getItemId()), 1).buildWithVoidName();
                     invManagerAnvil.setItemStackRename(itemStack);
                 }
                 case "RESEARCH_ITEM" -> {
 
                     dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invManagerAnvil.registerItemInterface(builder -> {
 
-                        builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                        builder.setItemStack(Adapter.getItemStack(itemConfig.getItemId()));
                         builder.addData(itemConfig);
                         builder.onClick((e, inv) -> {
 
@@ -258,7 +258,7 @@ public class SearchItemsItemInterface extends ItemInterface {
 
                     dev.wuason.libs.invmechaniclib.items.ItemInterface itemInterface = invManagerAnvil.registerItemInterface(builder -> {
 
-                        builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                        builder.setItemStack(Adapter.getItemStack(itemConfig.getItemId()));
                         builder.addData(itemConfig);
                         builder.onClick((e, inv) -> {
 
@@ -380,14 +380,14 @@ public class SearchItemsItemInterface extends ItemInterface {
         invConfig.setOnItemLoad((inventoryConfig, configurationSection, itemConfig) -> {
             switch (itemConfig.getActionId()) {
                 case "NEXT_PAGE" -> {
-                    NextPageItem nextPageItem = new NextPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    NextPageItem nextPageItem = new NextPageItem(itemConfig.getSlots()[0], Adapter.getItemStack(itemConfig.getItemId()));
                     invManager.setNextButton(nextPageItem);
                     invManager.addInventoryCustomPagesListenerCreate(invCustom -> {
                         invCustom.registerItemInterface(nextPageItem);
                     });
                 }
                 case "BACK_PAGE" -> {
-                    PreviousPageItem previousPageItem = new PreviousPageItem(itemConfig.getSlots()[0], Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    PreviousPageItem previousPageItem = new PreviousPageItem(itemConfig.getSlots()[0], Adapter.getItemStack(itemConfig.getItemId()));
                     invManager.setBackButton(previousPageItem);
                     invManager.addInventoryCustomPagesListenerCreate(invCustom -> {
                         invCustom.registerItemInterface(previousPageItem);

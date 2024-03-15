@@ -175,7 +175,7 @@ public class Storage {
                     for (String item : itemDefault.getItemsList()) {
                         for (int s : itemDefault.getPagesToSlots().get(page)) {
                             if (!MathUtils.chance(itemDefault.getChance())) continue;
-                            ItemStack itemStack = Adapter.getInstance().getItemStack(item);
+                            ItemStack itemStack = Adapter.getItemStack(item);
                             itemStack.setAmount(MathUtils.randomNumberString(itemDefault.getAmount()));
                             itemsInv[s] = itemStack;
 
@@ -685,7 +685,7 @@ public class Storage {
     }
 
     public boolean isItemInList(ItemStack itemStack, int slot, int page, ListType listType, StorageConfig storageConfig) {
-        String itemId = Adapter.getInstance().getAdapterID(itemStack);
+        String itemId = Adapter.getAdapterId(itemStack);
         switch (listType) {
 
             case BLACKLIST -> {
@@ -804,7 +804,7 @@ public class Storage {
     }
 
     public List<StorageItemDataInfo> searchItemsByAdapterId(String s, boolean exact) {
-        if (exact) s = Adapter.getInstance().computeAdapterId(s);
+        if (exact) s = Adapter.getAdapterIdBasic(s);
         s = s.toUpperCase(Locale.ENGLISH).trim();
         List<StorageItemDataInfo> list = new ArrayList<>();
         if (s.isEmpty()) return list;
@@ -812,7 +812,7 @@ public class Storage {
             HashMap<Integer, ItemStack> pageItemsMap = getMapItemsFromPage(i);
             for (Map.Entry<Integer, ItemStack> entry : pageItemsMap.entrySet()) {
                 if (entry.getValue().getType().equals(Material.AIR)) continue;
-                String adapterId = Adapter.getInstance().getAdapterID(entry.getValue()).toUpperCase(Locale.ENGLISH);
+                String adapterId = Adapter.getAdapterIdBasic(entry.getValue()).toUpperCase(Locale.ENGLISH);
                 if (adapterId.contains(s)) {
                     list.add(new StorageItemDataInfo(entry.getValue(), i, entry.getKey(), this));
                 }

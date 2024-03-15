@@ -260,15 +260,14 @@ public class StorageConfigManager {
                     }
                 }
 
-                Adapter adapterManager = Adapter.getInstance();
-                if (!adapterManager.isItemsValid(items)) {
+                if (!Adapter.isValidAdapterIds(items)) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + "Item is null or invalid");
                     continue;
                 }
                 List<String> itemsComputed = new ArrayList<>();
                 for(String i : items){
-                    itemsComputed.add(adapterManager.getAdapterID(adapterManager.getItemStack(i)));
+                    itemsComputed.add(Adapter.getAdapterId(Adapter.getItemStack(i)));
                 }
                 StorageItemConfig storageItemConfig = new StorageItemConfig((String) itemsKey, amount, itemsSlots, itemsPages, itemsComputed,chance);
                 storageItemsConfigs.add(storageItemConfig);

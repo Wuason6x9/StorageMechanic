@@ -82,7 +82,7 @@ public class BlockStorageConfigManager {
 
                     String block = sectionBlockStorage.getString("block",".");
 
-                    if(block.equals(".") || !Adapter.getInstance().existAdapterID(block)){
+                    if(block.equals(".") || !Adapter.isValidAdapterId(block)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Block storage Config! blockstorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Block is null or invalid");
                         continue;

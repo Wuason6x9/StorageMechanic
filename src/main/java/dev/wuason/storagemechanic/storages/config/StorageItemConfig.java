@@ -24,7 +24,7 @@ public class StorageItemConfig {
         //BUILD ITEMS
         items = new ItemStack[itemsList.size()];
         for(int i=0;i<itemsList.size();i++){
-            items[i] = Adapter.getInstance().getItemStack(itemsList.get(i));
+            items[i] = Adapter.getItemStack(itemsList.get(i));
         }
         for(Integer i : pages){
             pagesToSlots.put(i,hashSet);

@@ -352,7 +352,7 @@ public class FurnitureStorageManager {
                 }
                 case SHULKER -> { //GUARDAR EN DATA ✅
                     removeFurnitureStoragePersistence(entity.getLocation());
-                    ItemStack item = Adapter.getInstance().getItemStack(furnitureStorageConfig.getFurniture());
+                    ItemStack item = Adapter.getItemStack(furnitureStorageConfig.getFurniture());
                     ItemMeta itemMeta = item.getItemMeta();
                     itemMeta.getPersistentDataContainer().set(FURNITURE_SHULKER_NAMESPACEDKEY,PersistentDataType.STRING, furnitureStorage.getId() + ":" + furnitureStorageConfig.getId() + ":" + furnitureStorage.getOwnerUUID());
                     item.setItemMeta(itemMeta);

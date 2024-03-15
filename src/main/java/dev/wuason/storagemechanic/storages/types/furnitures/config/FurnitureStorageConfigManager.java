@@ -73,7 +73,7 @@ public class FurnitureStorageConfigManager {
 
                     String furniture = sectionFurnitureStorage.getString("furniture",".");
 
-                    if(furniture.equals(".") || !Adapter.getInstance().existAdapterID(furniture)){
+                    if(furniture.equals(".") || !Adapter.isValidAdapterId(furniture)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Furniture storage Config! FurnitureStorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Furniture is null or invalid");
                         continue;

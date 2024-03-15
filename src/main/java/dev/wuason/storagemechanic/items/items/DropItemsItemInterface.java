@@ -71,7 +71,7 @@ public class DropItemsItemInterface extends ItemInterface {
 
                 inv.setItemInterfaceInv( inv.registerItemInterface(builder -> {
 
-                    builder.setItemStack(Adapter.getInstance().getItemStack(itemConfig.getItemId()));
+                    builder.setItemStack(Adapter.getItemStack(itemConfig.getItemId()));
                     builder.addData(itemConfig);
                     builder.onClick((e, invC) -> {
 

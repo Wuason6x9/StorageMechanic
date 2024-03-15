@@ -68,7 +68,7 @@ public class ItemStorageManager implements Listener {
                 Bukkit.getScheduler().runTask(core,() -> storage.openStorageR(e.getPlayer(),0));
                 return;
             }
-            ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Adapter.getInstance().getAdapterID(e.getItem()));
+            ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Adapter.getAdapterId(e.getItem()));
             if(itemStorageConfig == null) return;
             if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
             if(e.getPlayer().isSneaking()) return;

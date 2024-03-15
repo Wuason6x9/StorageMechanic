@@ -286,7 +286,7 @@ public class BlockStorageManager implements Listener {
                     case SHULKER -> { //GUARDAR EN DATA ✅
                         removeBlockStoragePersistence(block);
                         blockStorage.removeLocation(block.getLocation());
-                        ItemStack item = Adapter.getInstance().getItemStack(blockStorageConfig.getBlock());
+                        ItemStack item = Adapter.getItemStack(blockStorageConfig.getBlock());
                         ItemMeta itemMeta = item.getItemMeta();
                         itemMeta.getPersistentDataContainer().set(new NamespacedKey(core,"blockStorageShulker"),PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorageConfig.getId() + ":" + blockStorage.getOwnerUUID());
                         item.setItemMeta(itemMeta);
@@ -333,7 +333,7 @@ public class BlockStorageManager implements Listener {
         if(event.getPlayer().isSneaking()) return;
         if(event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND)) return;
         if(event.getAction().toString().contains("AIR") || event.getAction().equals(Action.PHYSICAL)) return;
-        String adapterID = Adapter.getInstance().getAdapterID(event.getClickedBlock());
+        String adapterID = Adapter.getAdapterId(event.getClickedBlock());
         if(adapterID.contains("or:") && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         onBlockInteract(event.getClickedBlock(),event.getItem(),event.getPlayer(),event,event.getAction(),adapterID);
     }
