@@ -1,0 +1,88 @@
+config-version: 1 #DON'T CHANGE THIS
+messages:
+  commands:
+    custom_blocks:
+      get:
+        valid_id: "<green> %id% adet alındı."
+        invalid_id: "<red>Geçersiz ID"
+  storage:
+    search_page_invalid: "<red>Lütfen geçerli bir sayfa girin!"
+    search_page_enter: "<red>Lütfen geçerli bir sayfa girin!"
+    max_views: "<red>Depolama limitine ulaşıldı!"
+  type:
+    furniturestorage:
+      isBreakeable: "<red>Bu blokta bir öğe varken bloğu kıramazsınız!"
+    blockstorage:
+      isBreakeable: "<red>Bu blokta bir öğe varken bloğu kıramazsınız!"
+api:
+  panel:
+    title: "Depolama API <red>(%page%/%max_page%)"
+    next_page: "<red>Sonraki sayfa >>"
+    previous_page: "<red><< Önceki sayfa"
+    item_name: "<gold>ID: <aqua>%storage_api_id%"
+    item_lore:
+      - "<red>Sol tıklayarak depolamayı açın!"
+      - "<red>Sağ tıklayarak depolamayı kaydedin!"
+      - "<dark_red>Shift + Sağ tıklayarak depolamayı silin!"
+      - "<red>Shift + Sol tıklayarak güncelleyin!"
+      - ""
+      - "<red>Yüklenen Depolama: <aqua>%loaded_storage%"
+      - "<red>Yüklenen Depolama API: <aqua>%loaded_storage_api%"
+      - "<red>Toplam öğeler: <aqua>%total_items%"
+      - "<red>Oluşturma tarihi: <aqua>%creation_date%"
+      - "<red>Son açılış: <aqua>%last_open%"
+      - "<red>Depolama yapılandırma ID'si: <aqua>%storage_config_id%"
+      - "<red>Depolama kökeni bağlamı: <aqua>%storage_origin_context%"
+      - "<red>Depolama maksimum sayfaları: <aqua>%storage_max_pages%"
+      - "<red>Depolamayı görüntüleyenler: <aqua>%storage_viewers%"
+      - "<red>Depolama ID'si: <aqua>%storage_id%"
+info:
+  player:
+    title: "%player% adlı oyuncunun Depolamaları <red>(%page%/%max_page%)"
+    next_page: "<red>Sonraki sayfa >>"
+    previous_page: "<red><< Önceki sayfa"
+    item_name: "<red>ID: <aqua>%storage_id%"
+    lore:
+      - "<red>Sol tıklayarak depolamayı açın!"
+      - "<red>Sağ tıklayarak depolamayı kaydedin!"
+      - "<dark_red>Shift + Sağ tıklayarak depolamayı silin!"
+      - "<red>Shift + Sol tıklayarak güncelleyin!"
+      - ""
+      - "<red>Yüklenen: <aqua>%loaded%"
+      - "<red>Toplam öğeler: <aqua>%total_items%"
+      - "<red>Oluşturma tarihi: <aqua>%creation_date%"
+      - "<red>Son açılış: <aqua>%last_open%"
+      - "<red>Depolama yapılandırma ID'si: <aqua>%storage_config_id%"
+      - "<red>Depolama kökeni bağlamı: <aqua>%storage_origin_context%"
+      - "<red>Depolama maksimum sayfaları: <aqua>%storage_max_pages%"
+      - "<red>Depolamayı görüntüleyenler: <aqua>%storage_viewers%"
+  players:
+    title: Oyuncu Seç / Bilgi Depolama
+    storages:
+      refresh_item_name: "<red>Yenile"
+      next_page: "<red>Sonraki sayfa >>"
+      previous_page: "<red><< Önceki sayfa"
+      item_name: "<red>ID: <aqua>%storage_id%"
+      item_lore:
+        - "<red>Sol tıklayarak depolamayı açın!"
+        - "<red>Sağ tıklayarak depolamayı kaydedin!"
+        - "<dark_red>Shift + Sağ tıklayarak depolamayı silin!"
+        - ""
+        - "<red>Yüklenen: <aqua>%loaded%"
+        - "<red>Toplam öğeler: <aqua>%total_items%"
+        - "<red>Oluşturma tarihi: <aqua>%creation_date%"
+        - "<red>Son açılış: <aqua>%last_open%"
+        - "<red>Depolama yapılandırma ID'si: <aqua>%storage_config_id%"
+        - "<red>Depolama kökeni bağlamı: <aqua>%storage_origin_context%"
+        - "<red>Depolama maksimum sayfaları: <aqua>%storage_max_pages%"
+        - "<red>Depolamayı görüntüleyenler: <aqua>%storage_viewers%"
+    players:
+      refresh_item_name: "<red>Yenile"
+      remove_selection_item_name: "<red>Seçimi Kaldır"
+      next_page: "<red>Sonraki sayfa >>"
+      previous_page: "<red><< Önceki sayfa"
+      item_name: "<rainbow>%player%"
+      item_lore:
+        - "<red>Depolamalar: <aqua>%total_storages%"
+        - "<red>Blok Depolamaları: <aqua>%total_block_storages%"
+        - "<red>Mobilya Depolamaları: <aqua>%total_furniture_storages%"
