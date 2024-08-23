@@ -17,7 +17,7 @@ import dev.wuason.libs.invmechaniclib.types.pages.content.normal.events.ContentC
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.events.OpenPageEvent;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.NextPageItem;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.PreviousPageItem;
-import dev.wuason.mechanics.items.ItemBuilderMechanic;
+import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.mechanics.utils.StorageUtils;
@@ -209,8 +209,8 @@ public class CommandManager {
 
                                     InvCustomPagesContentManager<String> invManager = new InvCustomPagesContentManager<String>(
                                             IntStream.rangeClosed(0, 44).boxed().toList(),
-                                            new PreviousPageItem(45, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.previous_page", "INCORRECT")).build()),
-                                            new NextPageItem(53, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.next_page", "INCORRECT")).build()),
+                                            new PreviousPageItem(45, new ItemBuilder(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.previous_page", "INCORRECT")).build()),
+                                            new NextPageItem(53, new ItemBuilder(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.next_page", "INCORRECT")).build()),
                                             (inv, page) -> {
 
                                                 HashMap<String, String> replaces = new HashMap<>() {{
@@ -264,7 +264,7 @@ public class CommandManager {
                                             replaces.put("%storage_api_id%", content);
 
 
-                                            ItemStack item = new ItemBuilderMechanic(Material.CHEST).setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.item_name", "untitled"), replaces), player))
+                                            ItemStack item = new ItemBuilder(Material.CHEST).setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("api.panel.item_name", "untitled"), replaces), player))
                                                     .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("api.panel.item_lore", new ArrayList<>()), replaces), player))
                                                     .build();
                                             return item;
@@ -276,20 +276,20 @@ public class CommandManager {
                                             if (event.getEvent().isShiftClick()) {
                                                 if (event.getEvent().isLeftClick()) {
                                                     setContent(event.getInventoryCustomPagesContent().getPage());
-                                                    event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
+                                                    event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
                                                 }
                                                 if (event.getEvent().isRightClick()) {
                                                     core.getManagers().getStorageApiManager().removeStorageApi((String) event.getContent());
                                                     removeContent((String) event.getContent());
                                                     setContent(event.getInventoryCustomPagesContent().getPage());
-                                                    event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
+                                                    event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
                                                 }
                                             } else {
                                                 if (event.getEvent().isRightClick()) {
                                                     if (core.getManagers().getStorageApiManager().getStorageApis().containsKey((String) event.getContent())) {
                                                         core.getManagers().getStorageApiManager().saveStorageApi((String) event.getContent(), SaveCause.NORMAL_SAVE);
                                                         setContent(event.getInventoryCustomPagesContent().getPage());
-                                                        event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
+                                                        event.getInventoryCustomPagesContent().setSimpleItems(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
                                                     }
                                                 } else if (event.getEvent().isLeftClick()) {
                                                     core.getManagers().getStorageApiManager().getStorageApi((String) event.getContent()).getStorage().openStorageR(player, 0);
@@ -300,7 +300,7 @@ public class CommandManager {
 
                                         @Override
                                         public void onOpenPage(OpenPageEvent event) {
-                                            event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
+                                            event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
                                         }
                                     };
 
@@ -322,8 +322,8 @@ public class CommandManager {
                                             player,
                                             IntStream.rangeClosed(9, 35).boxed().toList(),
                                             ItemsAdder.getAllItems(),
-                                            new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem(0, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage("<red><< Previous page").build()),
-                                            new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem(8, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage("<red>Next page >>").build()),
+                                            new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.PreviousPageItem(0, new ItemBuilder(Material.ARROW).setNameWithMiniMessage("<red><< Previous page").build()),
+                                            new dev.wuason.libs.invmechaniclib.types.pages.content.anvil.items.NextPageItem(8, new ItemBuilder(Material.ARROW).setNameWithMiniMessage("<red>Next page >>").build()),
                                             new ItemStack(Material.BARRIER)
                                     ) {
                                         @Override
@@ -348,7 +348,7 @@ public class CommandManager {
                                         {
                                             savePlayerInventory();
                                             setRenameTextListener(1L);
-                                            ItemInterface itemInterface = new ItemInterface(1, new ItemBuilderMechanic(Material.COMPASS).setNameWithMiniMessage("<red>Search").build()) {
+                                            ItemInterface itemInterface = new ItemInterface(1, new ItemBuilder(Material.COMPASS).setNameWithMiniMessage("<red>Search").build()) {
 
                                                 @Override
                                                 public void onClick(InventoryClickEvent event, InvCustom inventoryCustom) {
@@ -440,15 +440,15 @@ public class CommandManager {
                                     StorageManagerData storageManagerData = core.getManagers().getDataManager().getStorageManagerData();
 
                                     PageCustomInfo<Player> pagePlayers = new PageCustomInfo<Player>(Arrays.asList(0, 1, 2, 3, 9, 10, 11, 12, 18, 19, 20, 21, 27, 28, 29, 30, 36, 37, 38, 39),
-                                            new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.PreviousPageItem(45, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.previous_page", "INCORRECT")).build()),
-                                            new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.NextPageItem(48, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.next_page", "INCORRECT")).build())
+                                            new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.PreviousPageItem(45, new ItemBuilder(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.previous_page", "INCORRECT")).build()),
+                                            new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.NextPageItem(48, new ItemBuilder(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.next_page", "INCORRECT")).build())
                                     );
 
                                     pagePlayers.setContentList(Bukkit.getOnlinePlayers().stream().map(p -> p.getPlayer()).toList());
 
                                     PageCustomInfo<String> pageStorages = new PageCustomInfo<String>(Arrays.asList(5, 6, 7, 8, 14, 15, 16, 17, 23, 24, 25, 26, 32, 33, 34, 35, 41, 42, 43, 44),
-                                            new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.PreviousPageItem(50, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage("<red>Previous page").build()),
-                                            new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.NextPageItem(53, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage("<red>Next page").build())
+                                            new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.PreviousPageItem(50, new ItemBuilder(Material.ARROW).setNameWithMiniMessage("<red>Previous page").build()),
+                                            new dev.wuason.libs.invmechaniclib.types.pages.content.multiple.items.NextPageItem(53, new ItemBuilder(Material.ARROW).setNameWithMiniMessage("<red>Next page").build())
                                     );
 
                                     InvCustomPagesContentMultiple invMultiple = new InvCustomPagesContentMultiple(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.title", "UNTITLED"), player), 54) {
@@ -478,7 +478,7 @@ public class CommandManager {
                                                     replaces.put("%total_block_storages%", objectiveData.getBlockStorages().size() + "");
                                                     replaces.put("%total_furniture_storages%", objectiveData.getFurnitureStorages().size() + "");
                                                 }
-                                                return new ItemBuilderMechanic(Material.PLAYER_HEAD).setNameWithMiniMessage(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.item_name", "INCORRECT"), replaces)).setSkullOwner((Player) content.getContent()).setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.players.players.item_lore", new ArrayList<>()), replaces), (Player) content.getContent())).build();
+                                                return new ItemBuilder(Material.PLAYER_HEAD).setNameWithMiniMessage(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.item_name", "INCORRECT"), replaces)).setSkullOwner((Player) content.getContent()).setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.players.players.item_lore", new ArrayList<>()), replaces), (Player) content.getContent())).build();
 
                                             }
 
@@ -506,7 +506,7 @@ public class CommandManager {
                                                 replaces.put("%player%", selectedPlayer.getName());
                                                 replaces.put("%storage_id%", storageId);
 
-                                                ItemStack item = new ItemBuilderMechanic(Material.CHEST)
+                                                ItemStack item = new ItemBuilder(Material.CHEST)
                                                         .setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.storages.item_name", "INCORRECT"), replaces), selectedPlayer))
                                                         .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.players.storages.item_lore", new ArrayList<>()), replaces), selectedPlayer))
                                                         .build();
@@ -554,11 +554,11 @@ public class CommandManager {
                                         }
 
                                         public void setItemsNotSelected() {
-                                            setSimpleItems(new int[]{4, 13, 22, 31, 40, 49}, new ItemBuilderMechanic(Material.RED_STAINED_GLASS_PANE).buildWithVoidName());
+                                            setSimpleItems(new int[]{4, 13, 22, 31, 40, 49}, new ItemBuilder(Material.RED_STAINED_GLASS_PANE).buildWithVoidName());
                                         }
 
                                         public void setItemsSelected() {
-                                            setSimpleItems(new int[]{4, 13, 22, 31, 40, 49}, new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
+                                            setSimpleItems(new int[]{4, 13, 22, 31, 40, 49}, new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName());
                                         }
 
 
@@ -573,19 +573,19 @@ public class CommandManager {
                                             addCustomPage(pageStorages);
 
                                             //set item refresh
-                                            setItem(46, new ItemBuilderMechanic(Material.COMPASS).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.refresh_item_name", "INCORRECT")).build(), e -> {
+                                            setItem(46, new ItemBuilder(Material.COMPASS).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.refresh_item_name", "INCORRECT")).build(), e -> {
                                                 pagePlayers.firstPage();
                                                 setContentAndButtons(pagePlayers);
                                                 if (selectedPlayer != null) setItemsSelected();
                                                 else setItemsNotSelected();
                                             });
-                                            setItem(51, new ItemBuilderMechanic(Material.COMPASS).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.storages.refresh_item_name", "INCORRECT")).build(), e -> {
+                                            setItem(51, new ItemBuilder(Material.COMPASS).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.storages.refresh_item_name", "INCORRECT")).build(), e -> {
                                                 if (selectedPlayer == null) return;
                                                 setItemsSelected();
                                                 pageStorages.firstPage();
                                                 setContentAndButtons(pageStorages);
                                             });
-                                            setItem(47, new ItemBuilderMechanic(Material.BARRIER).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.remove_selection_item_name", "INCORRECT")).build(), e -> {
+                                            setItem(47, new ItemBuilder(Material.BARRIER).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.players.players.remove_selection_item_name", "INCORRECT")).build(), e -> {
                                                 if (selectedPlayer == null) return;
                                                 selectedPlayer = null;
                                                 setItemsNotSelected();
@@ -618,7 +618,7 @@ public class CommandManager {
                                     Set<String> storages = playerData.getStorages().keySet();
                                     if (storages == null) return;
 
-                                    InvCustomPagesContentManager<String> invManager = new InvCustomPagesContentManager<String>(IntStream.rangeClosed(0, 44).boxed().toList(), new PreviousPageItem(45, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.previous_page", "INCORRECT")).build()), new NextPageItem(53, new ItemBuilderMechanic(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.next_page", "INCORRECT")).build()), (inv, page) ->
+                                    InvCustomPagesContentManager<String> invManager = new InvCustomPagesContentManager<String>(IntStream.rangeClosed(0, 44).boxed().toList(), new PreviousPageItem(45, new ItemBuilder(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.previous_page", "INCORRECT")).build()), new NextPageItem(53, new ItemBuilder(Material.ARROW).setNameWithMiniMessage(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.next_page", "INCORRECT")).build()), (inv, page) ->
                                     {
                                         HashMap<String, String> replaces = new HashMap<>() {{
                                             put("%player%", objective.getName());
@@ -658,7 +658,7 @@ public class CommandManager {
                                             replaces.put("%storage_id%", content);
 
 
-                                            ItemStack item = new ItemBuilderMechanic(Material.CHEST).setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.item_name", "untitled"), replaces), objective))
+                                            ItemStack item = new ItemBuilder(Material.CHEST).setName(AdventureUtils.deserializeLegacy(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getString("info.player.item_name", "untitled"), replaces), objective))
                                                     .setLore(AdventureUtils.deserializeLegacyList(Utils.replaceVariablesInsensitive(core.getManagers().getConfigManager().getLangDocumentYaml().getStringList("info.player.lore", new ArrayList<>()), replaces), objective))
                                                     .build();
                                             return item;
@@ -670,7 +670,7 @@ public class CommandManager {
                                             if (event.getEvent().isShiftClick()) {
                                                 if (event.getEvent().isLeftClick()) {
                                                     setContent(event.getInventoryCustomPagesContent().getPage());
-                                                    event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
+                                                    event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
                                                 }
                                                 if (event.getEvent().isRightClick()) {
                                                     core.getManagers().getStorageManager().getStorage((String) event.getContent()).removeAllItems();
@@ -681,7 +681,7 @@ public class CommandManager {
                                                     if (core.getManagers().getStorageManager().getStorageMap().containsKey((String) event.getContent())) {
                                                         core.getManagers().getStorageManager().saveStorage(core.getManagers().getStorageManager().getStorageMap().get((String) event.getContent()), SaveCause.NORMAL_SAVE);
                                                         setContent(event.getInventoryCustomPagesContent().getPage());
-                                                        event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
+                                                        event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
                                                     }
                                                 } else if (event.getEvent().isLeftClick()) {
                                                     core.getManagers().getStorageManager().getStorage((String) event.getContent()).openStorageR(player, 0);
@@ -692,7 +692,7 @@ public class CommandManager {
 
                                         @Override
                                         public void onOpenPage(OpenPageEvent event) {
-                                            event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilderMechanic(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
+                                            event.getInventoryCustomPagesContent().setItem(event.getInventoryCustomPagesContent().getSlotsFree(), new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).buildWithVoidName(), e -> e.setCancelled(true));
                                         }
                                     };
                                     invManager.open(player, 0);

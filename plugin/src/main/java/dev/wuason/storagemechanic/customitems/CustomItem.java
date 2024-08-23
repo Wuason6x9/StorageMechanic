@@ -1,6 +1,6 @@
 package dev.wuason.storagemechanic.customitems;
 
-import dev.wuason.mechanics.items.ItemBuilderMechanic;
+import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
@@ -21,15 +21,15 @@ public class CustomItem {
         this.id = id;
         this.item = item;
         this.customItemProperties = customItemProperties;
-        ItemBuilderMechanic itemBuilderMechanic = new ItemBuilderMechanic(item,1);
-        if(customItemProperties.getSkullTexture() != null) itemBuilderMechanic.setSkullOwner(customItemProperties.getSkullTexture());
+        ItemBuilder ItemBuilder = new ItemBuilder(item,1);
+        if(customItemProperties.getSkullTexture() != null) ItemBuilder.setSkullOwner(customItemProperties.getSkullTexture());
 
-        if(lore != null) itemBuilderMechanic.setLore(AdventureUtils.deserializeLegacyList(lore,null));
-        if(displayName != null) itemBuilderMechanic.setName(AdventureUtils.deserializeLegacy(displayName,null));
+        if(lore != null) ItemBuilder.setLore(AdventureUtils.deserializeLegacyList(lore,null));
+        if(displayName != null) ItemBuilder.setName(AdventureUtils.deserializeLegacy(displayName,null));
 
-        itemBuilderMechanic.addPersistentData(new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicb"),id);
+        ItemBuilder.addPersistentData(new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicb"),id);
 
-        itemStack = itemBuilderMechanic.build();
+        itemStack = ItemBuilder.build();
     }
 
     public ItemStack getItemStack() {

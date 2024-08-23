@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages;
 
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
-import dev.wuason.mechanics.items.ItemBuilderMechanic;
+import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
 import dev.wuason.storagemechanic.Debug;
@@ -629,7 +629,7 @@ public class Storage {
             if(!item.exists()) continue;
             item.removeWithRestrictions();
             if (PlaceholderItemInterface.isPlaceholderItem(item.getItemStack())) {
-                new ItemBuilderMechanic(item.getItemStack()).meta(meta -> {
+                new ItemBuilder(item.getItemStack()).meta(meta -> {
                     PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
                     itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
                     itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
@@ -1182,7 +1182,7 @@ public class Storage {
             for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null) {
                     if (PlaceholderItemInterface.isPlaceholderItem(contents[i])) {
-                        ItemStack item = ItemBuilderMechanic.copyOf(contents[i]).meta(meta -> {
+                        ItemStack item = ItemBuilder.copyOf(contents[i]).meta(meta -> {
                             PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
                             itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
                             itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
@@ -1202,7 +1202,7 @@ public class Storage {
             for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null) {
                     if (PlaceholderItemInterface.isPlaceholderItem(contents[i])) {
-                        ItemStack item = ItemBuilderMechanic.copyOf(contents[i]).meta(meta -> {
+                        ItemStack item = ItemBuilder.copyOf(contents[i]).meta(meta -> {
                             PersistentDataContainer itemPersistentDataContainer = meta.getPersistentDataContainer();
                             itemPersistentDataContainer.remove(PlaceholderItemInterface.NAMESPACED_KEY_PLACEHOLDER);
                             itemPersistentDataContainer.remove(ItemInterfaceManager.NAMESPACED_KEY);
