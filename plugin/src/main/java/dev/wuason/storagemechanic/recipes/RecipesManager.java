@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.recipes;
 
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.items.ItemBuilderMechanic;
+import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.types.block.config.*;
@@ -90,7 +90,7 @@ public class RecipesManager implements Listener {
                                 continue;
                             }
 
-                            ItemStack result = new ItemBuilderMechanic(getItem(resultStr), getAmount(resultStr)).build();
+                            ItemStack result = new ItemBuilder(getItem(resultStr), getAmount(resultStr)).build();
 
                             List<ItemStack> ingredients = new ArrayList<>();
 
@@ -100,7 +100,7 @@ public class RecipesManager implements Listener {
                                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: The Recipe ingredient is null or invalid!");
                                     continue;
                                 }
-                                ingredients.add(new ItemBuilderMechanic(ingredientStr, 1).build());
+                                ingredients.add(new ItemBuilder(ingredientStr, 1).build());
                             }
                             NamespacedKey namespacedKey = new NamespacedKey(core, key);
                             ShapelessRecipe shapelessRecipe = new ShapelessRecipe(namespacedKey, result);
@@ -122,7 +122,7 @@ public class RecipesManager implements Listener {
                                 continue;
                             }
 
-                            ItemStack result = new ItemBuilderMechanic(getItem(resultStr), getAmount(resultStr)).build();
+                            ItemStack result = new ItemBuilder(getItem(resultStr), getAmount(resultStr)).build();
 
                             HashMap<Character, ItemStack> ingredients = new HashMap<>();
 
@@ -140,7 +140,7 @@ public class RecipesManager implements Listener {
                                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: The Recipe ingredient is null or invalid!");
                                     continue;
                                 }
-                                ItemStack ingredient = new ItemBuilderMechanic(ingredientStr, 1).build();
+                                ItemStack ingredient = new ItemBuilder(ingredientStr, 1).build();
                                 ingredients.put(keyShape.charAt(0), ingredient);
                             }
 

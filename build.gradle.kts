@@ -5,8 +5,10 @@ plugins {
     id("io.github.goooler.shadow") version "8.1.7"
 }
 
-group = "dev.wuason"
-version = "1.0.1.11"
+allprojects {
+    group = "dev.wuason"
+    version = "1.0.2"
+}
 
 subprojects {
     apply(plugin = "java")
@@ -67,7 +69,8 @@ project(":plugin") {
         compileOnly("io.lumine:MythicCrucible-Dist:2.0.0-20240122.174338-17")
         compileOnly("io.th0rgal:oraxen:1.172.0")
         compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-        compileOnly(fileTree("libs").include("*.jar"))
+        compileOnly("com.github.Wuason6x9:mechanics:1.0.1.12a")
+        //compileOnly(fileTree("libs").include("*.jar"))
     }
 
     java {

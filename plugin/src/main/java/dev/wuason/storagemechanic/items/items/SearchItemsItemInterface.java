@@ -11,7 +11,7 @@ import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.NextPageI
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.PreviousPageItem;
 import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.configuration.inventories.InventoryConfig;
-import dev.wuason.mechanics.items.ItemBuilderMechanic;
+import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.mechanics.utils.*;
 import dev.wuason.mechanics.utils.functions.QuadConsumer;
 import dev.wuason.nms.wrappers.NMSManager;
@@ -164,7 +164,7 @@ public class SearchItemsItemInterface extends ItemInterface {
             public ItemStack onContentPage(int page, int slot, StorageItemDataInfo content) {
                 List<String> lore = invConfig.getSection().getStringList("result_lore");
                 if (lore == null) lore = new ArrayList<>();
-                ItemBuilderMechanic itemBuilder = ItemBuilderMechanic.copyOf(content.getItemStack());
+                ItemBuilder itemBuilder = ItemBuilder.copyOf(content.getItemStack());
                 Map<String, String> placeholders = Map.of("%SLOT%", content.getSlot() + "", "%PAGE%", content.getPage() + "");
                 for (String line : lore) {
                     itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(Utils.replaceVariables(line, placeholders)));
@@ -179,11 +179,11 @@ public class SearchItemsItemInterface extends ItemInterface {
 
                 if(toAddInventory.contains(event.getContent())) {
                     toAddInventory.remove(event.getContent());
-                    new ItemBuilderMechanic(event.getEvent().getCurrentItem()).removeLastLoreLine().build();
+                    new ItemBuilder(event.getEvent().getCurrentItem()).removeLastLoreLine().build();
                     return;
                 }
                 toAddInventory.add(event.getContent());
-                new ItemBuilderMechanic(event.getEvent().getCurrentItem()).addLoreLine(AdventureUtils.deserializeLegacy(invConfig.getSection().getString("added_to_inventory", "<green>ADDED!"))).build();
+                new ItemBuilder(event.getEvent().getCurrentItem()).addLoreLine(AdventureUtils.deserializeLegacy(invConfig.getSection().getString("added_to_inventory", "<green>ADDED!"))).build();
 
             }
 
@@ -219,7 +219,7 @@ public class SearchItemsItemInterface extends ItemInterface {
                     invManagerAnvil.setItemBack(previousPageItem);
                 }
                 case "REPAIR_ITEM" -> {
-                    ItemStack itemStack = new ItemBuilderMechanic(Adapter.getItemStack(itemConfig.getItemId()), 1).buildWithVoidName();
+                    ItemStack itemStack = new ItemBuilder(Adapter.getItemStack(itemConfig.getItemId()), 1).buildWithVoidName();
                     invManagerAnvil.setItemStackRename(itemStack);
                 }
                 case "RESEARCH_ITEM" -> {
@@ -310,7 +310,7 @@ public class SearchItemsItemInterface extends ItemInterface {
             public ItemStack onContentPage(int page, int slot, StorageItemDataInfo content) {
                 List<String> lore = invConfig.getSection().getStringList("result_lore");
                 if (lore == null) lore = new ArrayList<>();
-                ItemBuilderMechanic itemBuilder = ItemBuilderMechanic.copyOf(content.getItemStack());
+                ItemBuilder itemBuilder = ItemBuilder.copyOf(content.getItemStack());
                 Map<String, String> placeholders = Map.of("%SLOT%", content.getSlot() + "", "%PAGE%", content.getPage() + "");
                 for (String line : lore) {
                     itemBuilder.addLoreLine(AdventureUtils.deserializeLegacy(Utils.replaceVariables(line, placeholders)));

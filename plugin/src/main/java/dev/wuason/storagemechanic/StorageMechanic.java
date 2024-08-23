@@ -11,16 +11,16 @@ public final class StorageMechanic extends MechanicAddon {
     private Debug debug;
 
 
-    public StorageMechanic(){
-        super("storagemechanic");
+    public StorageMechanic() {
+        super(23027);
         instance = this;
     }
 
     @Override
     public void onEnable() {
-        AdventureUtils.sendMessagePluginConsole(this,"<gray>-----------------------------------------------------------");
-        AdventureUtils.sendMessagePluginConsole(this,"<gray>-----------------------------------------------------------");
-        AdventureUtils.sendMessagePluginConsole(this,"<gold>                            StorageMechanic");
+        AdventureUtils.sendMessagePluginConsole(this, "<gray>-----------------------------------------------------------");
+        AdventureUtils.sendMessagePluginConsole(this, "<gray>-----------------------------------------------------------");
+        AdventureUtils.sendMessagePluginConsole(this, "<gold>                            StorageMechanic");
         AdventureUtils.sendMessagePluginConsole(this, "<gold>Version: <aqua>" + getDescription().getVersion());
         AdventureUtils.sendMessagePluginConsole(this, "<gold>Author: <aqua>" + getDescription().getAuthors());
         AdventureUtils.sendMessagePluginConsole(this, "<gold>Buyer id: <aqua>" + Buyer.BUYER);
@@ -30,14 +30,15 @@ public final class StorageMechanic extends MechanicAddon {
         loadManager();
         AdventureUtils.sendMessagePluginConsole(this, "<green>StorageMechanic is loaded!");
         AdventureUtils.sendMessagePluginConsole(this, "<gray>-----------------------------------------------------------");
-        AdventureUtils.sendMessagePluginConsole(this,"<gray>-----------------------------------------------------------");
+        AdventureUtils.sendMessagePluginConsole(this, "<gray>-----------------------------------------------------------");
     }
 
-    public void loadDebug(){
+    public void loadDebug() {
         debug = new Debug();
-        Bukkit.getPluginManager().registerEvents(debug,this);
+        Bukkit.getPluginManager().registerEvents(debug, this);
     }
-    public void loadManager(){
+
+    public void loadManager() {
         managers = new Managers(this);
         managers.loadManagers();
     }
@@ -45,7 +46,7 @@ public final class StorageMechanic extends MechanicAddon {
     @Override
     public void onDisable() {
         managers.stop();
-        AdventureUtils.sendMessagePluginConsole(this,"<red> StorageMechanic Stopped!");
+        AdventureUtils.sendMessagePluginConsole(this, "<red> StorageMechanic Stopped!");
     }
 
     public static StorageMechanic getInstance() {
