@@ -44,7 +44,7 @@ public class Compatibilities {
         return Bukkit.getPluginManager().getPlugin("MythicMobs");
     }
 
-    public static boolean isOraxenNew(){
+    public static boolean isOraxenNew() {
         return getOraxen().getDescription().getVersion().startsWith("2");
     }
 }

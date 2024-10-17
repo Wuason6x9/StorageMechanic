@@ -60,7 +60,7 @@ public class FurnitureStorageManager {
         if (Compatibilities.isOraxenLoaded()) {
             if (Compatibilities.isOraxenNew()) {
                 try {
-                    Class<?> oraxenEventsClass = Class.forName("dev.wuason.storagemechanic.storages.types.block.compatibilities.OraxenFurnitureEvents");
+                    Class<?> oraxenEventsClass = Class.forName("dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.OraxenFurnitureEvents");
                     Object oraxenEvents = oraxenEventsClass.getDeclaredConstructor(FurnitureStorageManager.class).newInstance(this);
                     Bukkit.getPluginManager().registerEvents((Listener) oraxenEvents, core);
                 } catch (ClassNotFoundException | InstantiationException | InvocationTargetException |
