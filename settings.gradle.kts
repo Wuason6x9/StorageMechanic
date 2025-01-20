@@ -1,4 +1,7 @@
 rootProject.name = "StorageMechanic"
 
-include(":oraxen-j21")
-include(":plugin")
+include(
+    ":plugin",
+    ":oraxen-j21",
+    ":nexo-j21",
+)

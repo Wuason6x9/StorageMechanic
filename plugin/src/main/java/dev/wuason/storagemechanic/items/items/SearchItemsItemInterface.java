@@ -1,5 +1,6 @@
 package dev.wuason.storagemechanic.items.items;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.libs.invmechaniclib.events.CloseEvent;
 import dev.wuason.libs.invmechaniclib.types.InvCustom;
 import dev.wuason.libs.invmechaniclib.types.pages.content.anvil.InvCustomPagesAnvil;
@@ -9,7 +10,6 @@ import dev.wuason.libs.invmechaniclib.types.pages.content.normal.InvCustomPagesC
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.events.ContentClickEvent;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.NextPageItem;
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.PreviousPageItem;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.configuration.inventories.InventoryConfig;
 import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.mechanics.utils.*;

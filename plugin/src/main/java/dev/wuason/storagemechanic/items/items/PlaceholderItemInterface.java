@@ -1,6 +1,6 @@
 package dev.wuason.storagemechanic.items.items;
 
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.ItemInterface;

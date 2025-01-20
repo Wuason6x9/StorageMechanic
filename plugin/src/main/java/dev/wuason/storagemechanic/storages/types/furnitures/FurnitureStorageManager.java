@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.furnitures;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.libs.protectionlib.ProtectionLib;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.compatibilities.Compatibilities;
@@ -10,9 +10,12 @@ import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.types.block.BlockStorageManager;
+import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfig;
+import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageType;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.ItemsAdderFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.OraxenFurnitureEventsOld;
 import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfig;
+import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageType;
 import dev.wuason.storagemechanic.utils.StorageUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
@@ -56,6 +59,16 @@ public class FurnitureStorageManager {
         PluginManager pm = Bukkit.getPluginManager();
         if (Compatibilities.isItemsAdderLoaded()) {
             pm.registerEvents(new ItemsAdderFurnitureEvents(this), core);
+        }
+        if (Compatibilities.isNexoLoaded()) {
+            try {
+                Class<?> nexoEventsClass = Class.forName("dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.NexoFurnitureEvents");
+                Listener nexoEvents = (Listener) nexoEventsClass.getDeclaredConstructor(FurnitureStorageManager.class).newInstance(this);
+                pm.registerEvents(nexoEvents, core);
+            } catch (ClassNotFoundException | InvocationTargetException | InstantiationException |
+                     IllegalAccessException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
         }
         if (Compatibilities.isOraxenLoaded()) {
             if (Compatibilities.isOraxenNew()) {
@@ -348,10 +361,9 @@ public class FurnitureStorageManager {
 
             switch (furnitureStorageConfig.getFurnitureStorageType()) {
                 case ENDER_CHEST -> {
-                    //ELIMINAR DE MEMORIA Y DE PERSISTENCIA
                     removeFurnitureStoragePersistence(entity.getLocation());
                 }
-                case SHULKER -> { //GUARDAR EN DATA ✅
+                case SHULKER -> {
                     removeFurnitureStoragePersistence(entity.getLocation());
                     ItemStack item = Adapter.getItemStack(furnitureStorageConfig.getFurniture());
                     ItemMeta itemMeta = item.getItemMeta();
@@ -387,6 +399,11 @@ public class FurnitureStorageManager {
                     removeFurnitureStorage(furnitureStorage.getId());
                     furnitureStorage.delete();
                 }
+            }
+        } else {
+            FurnitureStorageConfig furnitureStorageConfig = core.getManagers().getFurnitureStorageConfigManager().findFurnitureStorageConfigByItemID(adapterId);
+            if (furnitureStorageConfig != null && furnitureStorageConfig.getFurnitureStorageType() == FurnitureStorageType.SHULKER) {
+                entity.getWorld().dropItem(entity.getLocation(), Adapter.getItemStack(adapterId));
             }
         }
 

@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.block;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.libs.protectionlib.ProtectionLib;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.compatibilities.Compatibilities;
@@ -13,6 +13,7 @@ import dev.wuason.storagemechanic.storages.types.block.compatibilities.ItemsAdde
 import dev.wuason.storagemechanic.storages.types.block.compatibilities.OraxenEventsOld;
 import dev.wuason.storagemechanic.storages.types.block.compatibilities.mythic.MythicCrucibleBlockEvents;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfig;
+import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageType;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.integrated.hopper.HopperBlockMechanic;
 import dev.wuason.storagemechanic.utils.StorageUtils;
@@ -62,15 +63,26 @@ public class BlockStorageManager implements Listener {
     public void loadEvents() {
 
         if (Bukkit.getPluginManager().getPlugin("ItemsAdder") != null) {
-            ItemsAdderEvents itemsAdderEvents = new ItemsAdderEvents(this);
+            ItemsAdderEvents itemsAdderEvents = new ItemsAdderEvents(this, core);
             Bukkit.getPluginManager().registerEvents(itemsAdderEvents, core);
         }
+
+        if (Compatibilities.isNexoLoaded()) {
+            try {
+                Class<?> nexoEventsClass = Class.forName("dev.wuason.storagemechanic.storages.types.block.compatibilities.NexoEvents");
+                Listener nexoEvents = (Listener) nexoEventsClass.getDeclaredConstructor(BlockStorageManager.class).newInstance(this);
+                Bukkit.getPluginManager().registerEvents(nexoEvents, core);
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                     InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (Bukkit.getPluginManager().getPlugin("MythicCrucible") != null) {
             MythicCrucibleBlockEvents mythicCrucibleBlockEvents = new MythicCrucibleBlockEvents(this);
             Bukkit.getPluginManager().registerEvents(mythicCrucibleBlockEvents, core);
         }
         if (Compatibilities.isOraxenLoaded()) {
-            Plugin oraxen = Compatibilities.getOraxen();
             if (Compatibilities.isOraxenNew()) {
                 try {
                     Class<?> oraxenEventsClass = Class.forName("dev.wuason.storagemechanic.storages.types.block.compatibilities.OraxenEvents");
@@ -221,7 +233,6 @@ public class BlockStorageManager implements Listener {
         }
     }
 
-    //ONPLACE
     @EventHandler(priority = EventPriority.NORMAL)
     public void BlockStoragePlaceEvent(BlockPlaceEvent event) {
         if (event.getHand() == EquipmentSlot.HAND && event.getPlayer() != null && event.canBuild()) {
@@ -258,7 +269,7 @@ public class BlockStorageManager implements Listener {
             String blockStorageID = data[0];
             String blockStorageConfigID = data[1];
             String ownerUUID = data[2];
-            //NameSpace
+
             PersistentDataContainer persistentDataContainerBlock = block.getChunk().getPersistentDataContainer();
             int x = block.getX();
             int y = block.getY();
@@ -266,11 +277,9 @@ public class BlockStorageManager implements Listener {
             NamespacedKey namespacedKey = new NamespacedKey(core, "BlockStorageShulker_" + x + "_" + y + "_" + z);
 
             persistentDataContainerBlock.set(namespacedKey, PersistentDataType.STRING, blockStorageID + ":" + blockStorageConfigID + ":" + ownerUUID);
-            //set the new location
             BlockStorage blockStorage = getBlockStorage(blockStorageID);
             blockStorage.addLocation(block.getLocation());
 
-            //others
             BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).get();
             HopperBlockMechanic hopperBlockMechanic = (HopperBlockMechanic) core.getManagers().getBlockMechanicManager().getMechanic(HopperBlockMechanic.HOPPER_MECHANIC_KEY);
             hopperBlockMechanic.onBlockStoragePlace(block, player, blockStorage, blockStorageConfig);
@@ -278,11 +287,8 @@ public class BlockStorageManager implements Listener {
 
     }
 
-
-    //ONBREAK
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void BlockBreakEvent(BlockBreakEvent event) { //AHORA
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void BlockBreakEvent(BlockBreakEvent event) {
 
         if (event.getBlock() != null) {
             if (isBlockStorageByBlock(event.getBlock())) {
@@ -292,13 +298,11 @@ public class BlockStorageManager implements Listener {
 
                 switch (blockStorageConfig.getBlockStorageType()) {
                     case ENDER_CHEST -> {
-                        //Eliminar localizacion
                         blockStorage.removeLocation(block.getLocation());
-                        //ELIMINAR DE MEMORIA Y DE PERSISTENCIA
                         removeBlockStoragePersistence(block);
 
                     }
-                    case SHULKER -> { //GUARDAR EN DATA ✅
+                    case SHULKER -> {
                         removeBlockStoragePersistence(block);
                         blockStorage.removeLocation(block.getLocation());
                         ItemStack item = Adapter.getItemStack(blockStorageConfig.getBlock());
@@ -330,10 +334,17 @@ public class BlockStorageManager implements Listener {
                             core.getManagers().getStorageManager().removeStorage(storage.getId());
                         }
                         blockStorage.getStorages().clear();
-                        //ELIMINAR DE MEMORIA Y DE PERSISTENCIA
                         removeBlockStoragePersistence(block);
                         removeBlockStorage(blockStorage.getId());
                         blockStorage.delete();
+                    }
+                }
+            } else {
+                String adapterID = Adapter.getAdapterId(event.getBlock());
+                BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigByItemID(adapterID);
+                if (blockStorageConfig != null && blockStorageConfig.getBlockStorageType() == BlockStorageType.SHULKER) {
+                    if (adapterID.startsWith("sm:")) {
+                        event.getBlock().getWorld().dropItem(event.getBlock().getLocation(), Adapter.getItemStack(adapterID));
                     }
                 }
             }
@@ -349,7 +360,7 @@ public class BlockStorageManager implements Listener {
         if (event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND)) return;
         if (event.getAction().toString().contains("AIR") || event.getAction().equals(Action.PHYSICAL)) return;
         String adapterID = Adapter.getAdapterId(event.getClickedBlock());
-        if (adapterID.contains("or:") && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+        if ((adapterID.contains("or:") || adapterID.contains("nx:")) && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         onBlockInteract(event.getClickedBlock(), event.getItem(), event.getPlayer(), event, event.getAction(), adapterID);
     }
 

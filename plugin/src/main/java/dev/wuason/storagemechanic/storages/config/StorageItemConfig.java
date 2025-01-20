@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.config;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
