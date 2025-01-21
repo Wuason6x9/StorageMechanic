@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.item.config;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageClickType;
@@ -70,7 +70,7 @@ public class ItemStorageConfigManager {
 
                     //ITEM ID
                     String itemId = sectionItemStorage.getString("item",".");
-                    if(itemId.equals(".") || !Adapter.isValidAdapterId(itemId)){
+                    if(itemId.equals(".") || !Adapter.isValid(itemId)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item storage Config! itemstorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Item is null or invalid");
                         continue;

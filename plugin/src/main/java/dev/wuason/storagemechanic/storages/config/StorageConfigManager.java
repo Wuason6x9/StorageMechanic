@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.config;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
@@ -260,7 +260,7 @@ public class StorageConfigManager {
                     }
                 }
 
-                if (!Adapter.isValidAdapterIds(items)) {
+                if (!Adapter.isValidAdapterIds(items).isEmpty()) {
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Storage " + itemType + " item Config! storage_id: " + key + " " + itemType + "Item_id: " + itemsKey + " in file: " + file.getName());
                     AdventureUtils.sendMessagePluginConsole(core, "<red>Error: " + itemType + "Item is null or invalid");
                     continue;

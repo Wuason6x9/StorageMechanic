@@ -40,7 +40,7 @@ public class BlockStorage {
                 if(playerDataManager.existPlayerData(uuid)){
                     PlayerData playerData = playerDataManager.getPlayerData(uuid);
                     if(playerData != null){
-                        playerData.getStorages().put(storage.getId(),STORAGE_CONTEXT + "_" + blockStorageConfigID + "_" + id);
+                        playerData.getStorages().put(storage.getId(), STORAGE_CONTEXT + "_" + blockStorageConfigID + "_" + id);
                         if(!offlinePlayer.isOnline()){
                             playerDataManager.savePlayerData(uuid);
                         }

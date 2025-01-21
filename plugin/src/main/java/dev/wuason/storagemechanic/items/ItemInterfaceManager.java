@@ -1,5 +1,5 @@
 package dev.wuason.storagemechanic.items;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.items.*;
@@ -80,7 +80,7 @@ public class ItemInterfaceManager {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
                     }
-                    if(!Adapter.isValidAdapterId(item)){
+                    if(Adapter.getAdapterData(item).isEmpty()){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;

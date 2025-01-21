@@ -1,8 +1,8 @@
 package dev.wuason.storagemechanic.items.items;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.libs.apache.commons.lang3.function.TriConsumer;
 import dev.wuason.libs.invmechaniclib.types.InvCustom;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.configuration.inventories.InventoryConfig;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.nms.wrappers.NMSManager;

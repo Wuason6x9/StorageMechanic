@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.furnitures.config;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.utils.StorageUtils;
@@ -73,7 +73,7 @@ public class FurnitureStorageConfigManager {
 
                     String furniture = sectionFurnitureStorage.getString("furniture",".");
 
-                    if(furniture.equals(".") || !Adapter.isValidAdapterId(furniture)){
+                    if(furniture.equals(".") || !Adapter.isValid(furniture)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Furniture storage Config! FurnitureStorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Furniture is null or invalid");
                         continue;

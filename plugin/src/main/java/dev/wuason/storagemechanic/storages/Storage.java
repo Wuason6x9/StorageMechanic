@@ -1,6 +1,6 @@
 package dev.wuason.storagemechanic.storages;
 
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.MathUtils;
@@ -811,7 +811,6 @@ public class Storage {
     }
 
     public List<StorageItemDataInfo> searchItemsByAdapterId(String s, boolean exact) {
-        if (exact) s = Adapter.getAdapterIdBasic(s);
         s = s.toUpperCase(Locale.ENGLISH).trim();
         List<StorageItemDataInfo> list = new ArrayList<>();
         if (s.isEmpty()) return list;
@@ -819,7 +818,7 @@ public class Storage {
             HashMap<Integer, ItemStack> pageItemsMap = getMapItemsFromPage(i);
             for (Map.Entry<Integer, ItemStack> entry : pageItemsMap.entrySet()) {
                 if (entry.getValue().getType().equals(Material.AIR)) continue;
-                String adapterId = Adapter.getAdapterIdBasic(entry.getValue()).toUpperCase(Locale.ENGLISH);
+                String adapterId = Adapter.getAdvancedAdapterId(entry.getValue()).toUpperCase(Locale.ENGLISH);
                 if (adapterId.contains(s)) {
                     list.add(new StorageItemDataInfo(entry.getValue(), i, entry.getKey(), this));
                 }

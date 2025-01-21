@@ -1,7 +1,7 @@
 package dev.wuason.storagemechanic.storages.types.block.config;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.Mechanics;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanic;
@@ -82,7 +82,7 @@ public class BlockStorageConfigManager {
 
                     String block = sectionBlockStorage.getString("block",".");
 
-                    if(block.equals(".") || !Adapter.isValidAdapterId(block)){
+                    if(block.equals(".") || !Adapter.isValid(block)){
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Block storage Config! blockstorage_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Block is null or invalid");
                         continue;

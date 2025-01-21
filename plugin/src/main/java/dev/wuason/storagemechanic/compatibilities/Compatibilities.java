@@ -8,6 +8,7 @@ public class Compatibilities {
     private static boolean oraxenLoaded = false;
     private static boolean mythicCrucibleLoaded = false;
     private static boolean mythicMobsLoaded = false;
+    private static boolean nexoLoaded = false;
 
 
     public static boolean isMythicMobsLoaded(){
@@ -28,6 +29,11 @@ public class Compatibilities {
         return mythicCrucibleLoaded;
     }
 
+    public static boolean isNexoLoaded() {
+        if(!nexoLoaded) nexoLoaded = Bukkit.getPluginManager().getPlugin("Nexo") != null;
+        return nexoLoaded;
+    }
+
     public static Plugin getItemsAdder(){
         return Bukkit.getPluginManager().getPlugin("ItemsAdder");
     }
@@ -44,7 +50,11 @@ public class Compatibilities {
         return Bukkit.getPluginManager().getPlugin("MythicMobs");
     }
 
-    public static boolean isOraxenNew(){
+    public static boolean isOraxenNew() {
         return getOraxen().getDescription().getVersion().startsWith("2");
+    }
+
+    public static Plugin getNexo() {
+        return Bukkit.getPluginManager().getPlugin("Nexo");
     }
 }

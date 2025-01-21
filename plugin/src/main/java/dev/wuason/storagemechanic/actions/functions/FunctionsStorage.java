@@ -1,8 +1,8 @@
 package dev.wuason.storagemechanic.actions.functions;
 
+import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.actions.functions.Functions;
-import dev.wuason.mechanics.compatibilities.adapter.Adapter;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.PlayerUtils;
 import dev.wuason.nms.wrappers.NMSManager;
