@@ -443,7 +443,7 @@ public class BlockStorageManager implements Listener {
                                     persistentDataContainer.set(namespacedKey, PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorage.getBlockStorageConfigID() + ":" + blockStorage.getOwnerUUID());
                                 }
                             }
-                            if (adapterID.contains("or:") || adapterID.contains("mc:") || adapterID.contains("sm:") || adapterID.contains("mmoitems:") || adapterID.contains("eb:") || adapterID.contains("mythiccrucible:")) {
+                            if (adapterID.contains("or:") || adapterID.contains("mc:") || adapterID.contains("sm:") || adapterID.contains("mmoitems:") || adapterID.contains("eb:") || adapterID.contains("mythiccrucible:") || adapterID.contains("nx:")) {
                                 openBlockStorage(blockStorage.getId(), player);
                             }
                         }

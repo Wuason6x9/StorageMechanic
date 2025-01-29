@@ -20,7 +20,7 @@ public class NexoEvents implements Listener {
     public void onInteractNexoBlock(NexoNoteBlockInteractEvent event) {
         if (event.getPlayer().isSneaking()) return;
         if (event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND)) return;
-        String adapterId = "nexo:" + event.getMechanic().getItemID();
+        String adapterId = "nx:" + event.getMechanic().getItemID();
         blockStorageManager.onBlockInteract(event.getBlock(), event.getItemInHand(), event.getPlayer(), event, Action.RIGHT_CLICK_BLOCK, adapterId);
     }
 
@@ -28,7 +28,7 @@ public class NexoEvents implements Listener {
     public void onInteractNexoBlockString(NexoStringBlockInteractEvent event) {
         if (event.getPlayer().isSneaking()) return;
         if (event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND)) return;
-        String adapterId = "nexo:" + event.getMechanic().getItemID();
+        String adapterId = "nx:" + event.getMechanic().getItemID();
         blockStorageManager.onBlockInteract(event.getBlock(), event.getItemInHand(), event.getPlayer(), event, Action.RIGHT_CLICK_BLOCK, adapterId);
     }
 }

@@ -112,6 +112,7 @@ project(":plugin") {
 
 dependencies {
     implementation(project(":oraxen-j21"))
+    implementation(project(":nexo-j21"))
     implementation(project(":plugin"))
 }
 
