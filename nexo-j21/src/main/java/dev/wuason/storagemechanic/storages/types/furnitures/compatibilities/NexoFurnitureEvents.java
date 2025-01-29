@@ -11,7 +11,7 @@ import org.bukkit.event.Listener;
 
 public class NexoFurnitureEvents implements Listener {
 
-    private final String ADAPTER_TYPE = "nexo:";
+    private final String ADAPTER_TYPE = "nx:";
     private FurnitureStorageManager furnitureStorageManager;
 
     public NexoFurnitureEvents(FurnitureStorageManager furnitureStorageManager) {
