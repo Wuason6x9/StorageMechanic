@@ -1156,7 +1156,7 @@ public class Storage {
             }
         }
 
-        if (items.containsKey(page)) {
+        else if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
             for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null) {
@@ -1169,6 +1169,14 @@ public class Storage {
             }
         }
 
+        return itemsList;
+    }
+
+    public HashMap<Integer, ItemStack> getMapItemsFromAllPages() {
+        HashMap<Integer, ItemStack> itemsList = new HashMap<>();
+        for (int i = 0; i < getTotalPages(); i++) {
+            itemsList.putAll(getMapItemsFromPage(i));
+        }
         return itemsList;
     }
 
@@ -1196,7 +1204,7 @@ public class Storage {
             }
         }
 
-        if (items.containsKey(page)) {
+        else if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
             for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null) {
