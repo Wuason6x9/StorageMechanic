@@ -30,6 +30,7 @@ public class ItemInterfaceManager {
         add("DROP_ITEMS");
         add("PLACEHOLDER");
         add("ACTION");
+        add("COMMAND_ITEM");
     }};
 
     public ItemInterfaceManager(StorageMechanic core) {
@@ -113,6 +114,32 @@ public class ItemInterfaceManager {
                             itemInterfaceHashMap.put(key, new ActionItemInterface(item, displayName, lore, actionId, key));
                             continue;
                         }
+                        case "COMMAND_ITEM" -> {
+                            String command = sectionItemInterface.getString("properties.command", null);
+
+                            if(command == null){
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Command is null!");
+                                continue;
+                            }
+
+                            boolean asConsole = sectionItemInterface.getBoolean("properties.asConsole", false);
+                            boolean asOp = sectionItemInterface.getBoolean("properties.asOp", false);
+                            long delay = sectionItemInterface.getLong("properties.delay", 0);
+
+                            itemInterfaceHashMap.put(key, new CommandItemInterface(
+                                    item,
+                                    displayName,
+                                    lore,
+                                    key,
+                                    command,
+                                    asConsole,
+                                    asOp,
+                                    delay
+                            ));
+                            continue;
+                        }
+
                         case "BLOCKED_ITEM" -> {
                             itemInterfaceHashMap.put(key, new BlockedItemInterface(item, displayName, lore, key));
                             continue;
