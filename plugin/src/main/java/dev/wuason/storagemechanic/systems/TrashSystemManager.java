@@ -35,26 +35,28 @@ public class TrashSystemManager implements Listener {
     private BlockStorageConfigManager blockStorageConfigManager;
     FurnitureStorageConfigManager furnitureStorageConfigManager;
 
-    public TrashSystemManager(StorageMechanic core, DataManager dataManager, BlockStorageConfigManager blockStorageConfigManager, FurnitureStorageConfigManager furnitureStorageConfigManager){
+    public TrashSystemManager(StorageMechanic core, DataManager dataManager, BlockStorageConfigManager blockStorageConfigManager, FurnitureStorageConfigManager furnitureStorageConfigManager) {
         this.core = core;
         this.dataManager = dataManager;
         this.blockStorageConfigManager = blockStorageConfigManager;
         this.furnitureStorageConfigManager = furnitureStorageConfigManager;
     }
-    public void checkTrashOnChunk(PersistentDataContainer persistentDataContainer){
+
+    public void checkTrashOnChunk(PersistentDataContainer persistentDataContainer) {
         checkTrashOnChunkBlockStorage(persistentDataContainer); //BLOCKSTORAGE
         checkTrashOnChunkCustomBlock(persistentDataContainer); //CUSTOM BLOCKS
         checkTrashOnChunkFurnitureStorage(persistentDataContainer); //FURNITURE
     }
-    public void checkTrashOnChunkCustomBlock(PersistentDataContainer persistentDataContainer){
 
-        for(NamespacedKey namespacedKey : persistentDataContainer.getKeys()){
+    public void checkTrashOnChunkCustomBlock(PersistentDataContainer persistentDataContainer) {
 
-            if(namespacedKey.getKey().contains("storagemechanicb")){
+        for (NamespacedKey namespacedKey : persistentDataContainer.getKeys()) {
 
-                String customBlockId = persistentDataContainer.get(namespacedKey,PersistentDataType.STRING);
+            if (namespacedKey.getKey().contains("storagemechanicb")) {
 
-                if(!core.getManagers().getCustomItemsManager().customItemExists(customBlockId)){
+                String customBlockId = persistentDataContainer.get(namespacedKey, PersistentDataType.STRING);
+
+                if (!core.getManagers().getCustomItemsManager().customItemExists(customBlockId)) {
                     persistentDataContainer.remove(namespacedKey);
                 }
 
@@ -63,17 +65,18 @@ public class TrashSystemManager implements Listener {
         }
 
     }
-    public void checkTrashOnChunkBlockStorage(PersistentDataContainer persistentDataContainer){
 
-        for(NamespacedKey namespacedKey : persistentDataContainer.getKeys()){
+    public void checkTrashOnChunkBlockStorage(PersistentDataContainer persistentDataContainer) {
 
-            if(namespacedKey.getKey().contains("blockstorage")){
+        for (NamespacedKey namespacedKey : persistentDataContainer.getKeys()) {
+
+            if (namespacedKey.getKey().contains("blockstorage")) {
 
                 String[] blockStorageSrc = persistentDataContainer.get(namespacedKey, PersistentDataType.STRING).split(":");
 
-                if(!blockStorageConfigManager.blockStorageConfigExists(blockStorageSrc[1])){
+                if (!blockStorageConfigManager.blockStorageConfigExists(blockStorageSrc[1])) {
                     BlockStorage blockStorage = dataManager.getStorageManagerData().getBlockStorageManagerData().loadBlockStorageData(blockStorageSrc[0]);
-                    if(blockStorage != null){
+                    if (blockStorage != null) {
                         blockStorage.delete();
                         BlockStorageManager blockStorageManager = core.getManagers().getBlockStorageManager();
                         blockStorageManager.removeBlockStorage(blockStorage.getId());
@@ -86,17 +89,18 @@ public class TrashSystemManager implements Listener {
         }
 
     }
-    public void checkTrashOnChunkFurnitureStorage(PersistentDataContainer persistentDataContainer){
 
-        for(NamespacedKey namespacedKey : persistentDataContainer.getKeys()){
+    public void checkTrashOnChunkFurnitureStorage(PersistentDataContainer persistentDataContainer) {
 
-            if(namespacedKey.getKey().contains("furniturestorage")){
+        for (NamespacedKey namespacedKey : persistentDataContainer.getKeys()) {
+
+            if (namespacedKey.getKey().contains("furniturestorage")) {
 
                 String[] furnitureStorageSrc = persistentDataContainer.get(namespacedKey, PersistentDataType.STRING).split(":");
 
-                if(!furnitureStorageConfigManager.furnitureStorageConfigExists(furnitureStorageSrc[1])){
+                if (!furnitureStorageConfigManager.furnitureStorageConfigExists(furnitureStorageSrc[1])) {
                     FurnitureStorage furnitureStorage = dataManager.getStorageManagerData().getFurnitureStorageManagerData().loadFurnitureStorageData(furnitureStorageSrc[0]);
-                    if(furnitureStorage != null){
+                    if (furnitureStorage != null) {
                         furnitureStorage.delete();
                         FurnitureStorageManager furnitureStorageManager = core.getManagers().getFurnitureStorageManager();
                         furnitureStorageManager.removeFurnitureStorage(furnitureStorage.getId());
@@ -110,135 +114,133 @@ public class TrashSystemManager implements Listener {
 
     }
 
-    public void cleanTrash(){
-        AdventureUtils.sendMessagePluginConsole(core,"<red> Starting Anti-Trash System.");
+    public void cleanTrash() {
+        AdventureUtils.sendMessagePluginConsole(core, "<red> Starting Anti-Trash System.");
         cleanTrashBlockStorages();
         cleanTrashFurnitureStorages();
         cleanTrashItemsStorages();
     }
-    public void cleanTrashBlockStorages(){
-        Bukkit.getScheduler().runTaskAsynchronously(core,() ->{
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Waiting BlockStorage Config...");
-            core.getManagers().getConfigManager().isConfigLoaded();
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Checking BlockStorages...");
+
+    public void cleanTrashBlockStorages() {
+        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Waiting BlockStorage Config...");
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Checking BlockStorages...");
             ArrayList<BlockStorageData> trashData = new ArrayList<>();
 
             Data[] datas = dataManager.getAllData(BlockStorageData.class.getSimpleName());
 
-            if(datas == null) return;
+            if (datas == null) return;
 
-            if(datas.length == 0) return;
+            if (datas.length == 0) return;
 
             BlockStorageData[] blockStoragesData = Arrays.stream(datas).map(data -> (BlockStorageData) data.getDataObject()).toArray(BlockStorageData[]::new);
 
-            if(blockStoragesData.length == 0) return;
+            if (blockStoragesData.length == 0) return;
 
-            for(BlockStorageData blockData : blockStoragesData){
+            for (BlockStorageData blockData : blockStoragesData) {
 
                 String configId = blockData.getBlockStorageConfigID();
-                if(!blockStorageConfigManager.blockStorageConfigExists(configId)){
+                if (!blockStorageConfigManager.blockStorageConfigExists(configId)) {
                     trashData.add(blockData);
                 }
             }
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Cleaning <aqua>" + datas.length + " <red> BlockStorages.");
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Cleaning <aqua>" + datas.length + " <red> BlockStorages.");
 
-            for(BlockStorageData blockStorageDataTrash : trashData){
+            for (BlockStorageData blockStorageDataTrash : trashData) {
                 BlockStorage blockStorage = dataManager.getStorageManagerData().getBlockStorageManagerData().loadBlockStorageData(blockStorageDataTrash.getBlockStorageID());
 
                 blockStorage.delete();
                 core.getManagers().getBlockStorageManager().removeBlockStorage(blockStorage.getId());
 
             }
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Cleaned <aqua>" + trashData.size() + " <red> BlockStorages.");
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Cleaned <aqua>" + trashData.size() + " <red> BlockStorages.");
 
         });
     }
 
-    public void cleanTrashFurnitureStorages(){
-        Bukkit.getScheduler().runTaskAsynchronously(core,() ->{
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Waiting FurnitureStorage Config...");
-            core.getManagers().getConfigManager().isConfigLoaded();
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Checking FurnitureStorages...");
+    public void cleanTrashFurnitureStorages() {
+        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Waiting FurnitureStorage Config...");
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Checking FurnitureStorages...");
             ArrayList<FurnitureStorageData> trashData = new ArrayList<>();
 
             Data[] datas = dataManager.getAllData(FurnitureStorageData.class.getSimpleName());
 
-            if(datas == null) return;
+            if (datas == null) return;
 
-            if(datas.length == 0) return;
+            if (datas.length == 0) return;
 
             FurnitureStorageData[] furnitureStoragesData = Arrays.stream(datas).map(data -> (FurnitureStorageData) data.getDataObject()).toArray(FurnitureStorageData[]::new);
 
-            if(furnitureStoragesData.length == 0) return;
+            if (furnitureStoragesData.length == 0) return;
 
-            for(FurnitureStorageData furnitureData : furnitureStoragesData){
+            for (FurnitureStorageData furnitureData : furnitureStoragesData) {
 
                 String configId = furnitureData.getFurnitureStorageConfigID();
-                if(!furnitureStorageConfigManager.furnitureStorageConfigExists(configId)){
+                if (!furnitureStorageConfigManager.furnitureStorageConfigExists(configId)) {
                     trashData.add(furnitureData);
                 }
             }
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Cleaning <aqua>" + datas.length + " <red> FurnitureStorages.");
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Cleaning <aqua>" + datas.length + " <red> FurnitureStorages.");
 
-            for(FurnitureStorageData furnitureStorageDataTrash : trashData){
+            for (FurnitureStorageData furnitureStorageDataTrash : trashData) {
                 FurnitureStorage furnitureStorage = dataManager.getStorageManagerData().getFurnitureStorageManagerData().loadFurnitureStorageData(furnitureStorageDataTrash.getFurnitureStorageID());
 
                 furnitureStorage.delete();
                 core.getManagers().getFurnitureStorageManager().removeFurnitureStorage(furnitureStorage.getId());
 
             }
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Cleaned <aqua>" + trashData.size() + " <red> FurnitureStorages.");
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Cleaned <aqua>" + trashData.size() + " <red> FurnitureStorages.");
 
         });
     }
 
-    public void cleanTrashItemsStorages(){
-        Bukkit.getScheduler().runTaskAsynchronously(core,() ->{
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Waiting ItemsStorage Config...");
-            core.getManagers().getConfigManager().isConfigLoaded();
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Checking ItemsStorages...");
+    public void cleanTrashItemsStorages() {
+        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Waiting ItemsStorage Config...");
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Checking ItemsStorages...");
             Map<PlayerData, String> trashData = new HashMap<>();
             Data[] datas = dataManager.getAllData(PlayerData.class.getSimpleName());
-            if(datas == null) return;
-            if(datas.length == 0) return;
+            if (datas == null) return;
+            if (datas.length == 0) return;
             PlayerData[] playersData = Arrays.stream(datas).map(data -> (PlayerData) data.getDataObject()).toArray(PlayerData[]::new);
-            if(playersData.length == 0) return;
-            Map<PlayerData, Map.Entry<String,String>> toCheck = new HashMap<>();
-            for(PlayerData playerData : playersData){
-                for(Map.Entry<String,String> entry : playerData.getStorages().entrySet()){
+            if (playersData.length == 0) return;
+            Map<PlayerData, Map.Entry<String, String>> toCheck = new HashMap<>();
+            for (PlayerData playerData : playersData) {
+                for (Map.Entry<String, String> entry : playerData.getStorages().entrySet()) {
                     PlayerData pd = dataManager.getPlayerDataManager().getPlayerData(playerData.getUuid());
-                    if(entry.getValue().contains(ItemStorageManager.STORAGE_CONTEXT)) toCheck.put(pd, entry);
+                    if (entry.getValue().contains(ItemStorageManager.STORAGE_CONTEXT)) toCheck.put(pd, entry);
                 }
             }
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Cleaning <aqua>" + toCheck.size() + " <red> ItemsStorages.");
-            for(Map.Entry<PlayerData,Map.Entry<String,String>> entry : toCheck.entrySet()){
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Cleaning <aqua>" + toCheck.size() + " <red> ItemsStorages.");
+            for (Map.Entry<PlayerData, Map.Entry<String, String>> entry : toCheck.entrySet()) {
                 String itemConfigId = (entry.getValue().getValue().split("_"))[2];
-                if(!core.getManagers().getItemStorageConfigManager().existItemStorageConfig(itemConfigId)){
-                    trashData.put(entry.getKey(),entry.getValue().getKey());
+                if (!core.getManagers().getItemStorageConfigManager().existItemStorageConfig(itemConfigId)) {
+                    trashData.put(entry.getKey(), entry.getValue().getKey());
                 }
             }
-            for(Map.Entry<PlayerData, String> entry : trashData.entrySet()){
+            for (Map.Entry<PlayerData, String> entry : trashData.entrySet()) {
                 StorageManager storageManager = core.getManagers().getStorageManager();
                 entry.getKey().getStorages().remove(entry.getValue());
                 storageManager.removeStorage(entry.getValue());
-                if(!Bukkit.getOfflinePlayer(entry.getKey().getUuid()).isOnline()){
+                if (!Bukkit.getOfflinePlayer(entry.getKey().getUuid()).isOnline()) {
                     dataManager.getPlayerDataManager().savePlayerData(entry.getKey().getUuid());
                 }
             }
-            AdventureUtils.sendMessagePluginConsole(core,"<red> Anti-Trash -> Cleaned <aqua>" + trashData.size() + " <red> ItemsStorages.");
+            AdventureUtils.sendMessagePluginConsole(core, "<red> Anti-Trash -> Cleaned <aqua>" + trashData.size() + " <red> ItemsStorages.");
         });
     }
 
 
     @EventHandler
-    public void BlockStorageLoadChunk(ChunkLoadEvent event){
+    public void BlockStorageLoadChunk(ChunkLoadEvent event) {
         PersistentDataContainer persistentDataContainer = event.getChunk().getPersistentDataContainer();
 
-        Bukkit.getScheduler().runTaskAsynchronously(core,() ->{
+        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
 
-            try{
+            try {
                 core.getManagers().getTrashSystemManager().checkTrashOnChunk(persistentDataContainer);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -246,11 +248,11 @@ public class TrashSystemManager implements Listener {
     }
 
     @EventHandler
-    public void BlockStorageUnLoadChunk(ChunkUnloadEvent event){
+    public void BlockStorageUnLoadChunk(ChunkUnloadEvent event) {
 
         PersistentDataContainer persistentDataContainer = event.getChunk().getPersistentDataContainer();
 
-        Bukkit.getScheduler().runTaskAsynchronously(core,() ->{
+        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
 
             core.getManagers().getTrashSystemManager().checkTrashOnChunk(persistentDataContainer);
 

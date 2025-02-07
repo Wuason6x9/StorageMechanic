@@ -349,9 +349,8 @@ public class StorageInventory implements InventoryHolder {
         if (slotFree == -1) return;
         Player player = (Player) event.getWhoClicked();
         ItemStack clickedItem = event.getCurrentItem();
-        ;
         StorageConfig storageConfig = this.storage.getStorageConfig();
-        if (!clickedItem.getType().isAir()) {
+        if (clickedItem != null && !clickedItem.getType().isAir()) {
             if (storageConfig.isStorageItemsWhiteListEnabled()) {
                 if (!storage.isItemInList(clickedItem, slotFree, this.page, Storage.ListType.WHITELIST, storageConfig)) {
                     AdventureUtils.playerMessage(storageConfig.getWhiteListMessage(), player);
@@ -381,6 +380,12 @@ public class StorageInventory implements InventoryHolder {
                         AdventureUtils.playerMessage(storageBlockItemConfig.getMessage(), player);
                     }
                     event.setCancelled(true);
+                    List<ItemStack> items = storage.addItemStackWithRestrictions(page, clickedItem);
+                    if (items.isEmpty()) {
+                        event.setCurrentItem(null);
+                    } else {
+                        event.setCurrentItem(items.get(0));
+                    }
                 }
             }
         }
