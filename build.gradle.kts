@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = "dev.wuason"
-    version = "1.0.4"
+    version = "1.0.4.1"
 }
 
 subprojects {

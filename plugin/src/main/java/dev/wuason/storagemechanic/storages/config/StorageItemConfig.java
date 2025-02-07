@@ -12,7 +12,6 @@ public class StorageItemConfig {
     private Map<Integer, Set<Integer>> pagesToSlots;
     private Set<String> itemsList;
     private float chance;
-    private ItemStack[] items;
 
     public StorageItemConfig(String id, String amount, List<Integer> slots, List<Integer> pages, List<String> itemsList, float chance) {
         this.id = id;
@@ -21,11 +20,6 @@ public class StorageItemConfig {
         this.chance = chance;
         this.pagesToSlots = new HashMap<>();
         HashSet<Integer> hashSet = new HashSet<>(slots);
-        //BUILD ITEMS
-        items = new ItemStack[itemsList.size()];
-        for(int i=0;i<itemsList.size();i++){
-            items[i] = Adapter.getItemStack(itemsList.get(i));
-        }
         for(Integer i : pages){
             pagesToSlots.put(i,hashSet);
         }
@@ -48,7 +42,7 @@ public class StorageItemConfig {
     }
 
     public ItemStack[] getItems() {
-        return items;
+        return itemsList.stream().map(Adapter::getItemStack).toArray(ItemStack[]::new);
     }
 
     public float getChance() {

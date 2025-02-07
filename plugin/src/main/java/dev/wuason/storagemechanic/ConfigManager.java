@@ -28,30 +28,12 @@ public class ConfigManager {
     public ConfigManager(StorageMechanic core) {
         this.core = core;
     }
-    public void loadAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(core, () -> {
-            isConfigLoaded = false;
-            while (!waitDependencies()){
-            }
-            Plugin plugin = Bukkit.getPluginManager().getPlugin("ItemsAdder");
-            if(plugin != null && plugin.isEnabled()){
-                ItemsAdderEvent itemsAdderEvent = new ItemsAdderEvent();
-                Bukkit.getPluginManager().registerEvents(itemsAdderEvent,core);
-                return;
-            }
 
-            try {
-                loadConfig();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
     public void load() {
         try {
             loadMainConfig();
             loadLang();
-            loadAsync();
+            loadConfig();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -73,27 +55,6 @@ public class ConfigManager {
         langDocumentYaml = config;
     }
 
-    public boolean waitDependencies(){
-        boolean a = true;
-        ArrayList<Plugin> plugins = new ArrayList<>();
-        PluginManager pluginManager = Bukkit.getPluginManager();
-
-        for(String p : core.getDescription().getSoftDepend()){
-            Plugin pl = pluginManager.getPlugin(p);
-            if(pl != null){
-                plugins.add(pl);
-            }
-        }
-
-        for(Plugin plugin : plugins){
-            if(!plugin.isEnabled()){
-                a = false;
-            }
-        }
-
-        return a;
-    }
-
     public void loadConfig() throws IOException {
         AdventureUtils.sendMessagePluginConsole(core, "<green>Loading Config...");
         mainConfig.reload();
@@ -111,28 +72,6 @@ public class ConfigManager {
         core.getManagers().getInventoryConfigManager().load();
         AdventureUtils.sendMessagePluginConsole(core, "<aqua> Inventories loaded: <yellow>" + core.getManagers().getInventoryConfigManager().getInventories().size());
         Bukkit.getScheduler().runTask(core, () -> core.getManagers().getRecipesManager().loadRecipes());
-        setConfigLoaded(true);
-    }
-
-    public boolean isConfigLoaded() {
-        synchronized (lock) {
-            while (!isConfigLoaded) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    // manejar la excepción
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
-        return isConfigLoaded;
-    }
-
-    public void setConfigLoaded(boolean isConfigLoaded) {
-        synchronized (lock) {
-            this.isConfigLoaded = isConfigLoaded;
-            lock.notifyAll();
-        }
     }
 
     public YamlDocument getLangDocumentYaml() {
