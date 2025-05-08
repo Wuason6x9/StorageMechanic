@@ -19,7 +19,6 @@ import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageItemDataInfo;
-import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.Bukkit;
@@ -33,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 public class SearchItemsItemInterface extends ItemInterface {
@@ -177,7 +175,7 @@ public class SearchItemsItemInterface extends ItemInterface {
             @Override
             public void onContentClick(ContentClickAnvilEvent<StorageItemDataInfo> event) {
 
-                if(toAddInventory.contains(event.getContent())) {
+                if (toAddInventory.contains(event.getContent())) {
                     toAddInventory.remove(event.getContent());
                     new ItemBuilder(event.getEvent().getCurrentItem()).removeLastLoreLine().build();
                     return;
@@ -199,7 +197,7 @@ public class SearchItemsItemInterface extends ItemInterface {
         invManagerAnvil.setPickupCancel(true);
         invManagerAnvil.savePlayerInventory();
         long refreshTicks = invConfig.getSection().getLong("refresh_ticks", 0L);
-        if(refreshTicks>0){
+        if (refreshTicks > 0) {
             invManagerAnvil.setRenameTextListener(refreshTicks);
         }
 
@@ -427,9 +425,7 @@ public class SearchItemsItemInterface extends ItemInterface {
     }
 
     public enum SearchType {
-        BY_MATERIAL((storage, s) -> List.copyOf(storage.searchItemsByMaterial(s, false))),
-        BY_ITEM_ADAPTER((storage, s) -> List.copyOf(storage.searchItemsByAdapterId(s, false))),
-        BY_DISPLAY_NAME((storage, s) -> List.copyOf(storage.searchItemsByName(s, false)));
+        BY_MATERIAL((storage, s) -> List.copyOf(storage.searchItemsByMaterial(s, false))), BY_ITEM_ADAPTER((storage, s) -> List.copyOf(storage.searchItemsByAdapterId(s, false))), BY_DISPLAY_NAME((storage, s) -> List.copyOf(storage.searchItemsByName(s, false)));
 
         public final BiFunction<Storage, String, List<StorageItemDataInfo>> function;
 
@@ -444,8 +440,7 @@ public class SearchItemsItemInterface extends ItemInterface {
 
     public enum SearchInput {
 
-        ANVIL(SearchItemsItemInterface::openAnvil),
-        SIGN(SearchItemsItemInterface::signOpen);
+        ANVIL(SearchItemsItemInterface::openAnvil), SIGN(SearchItemsItemInterface::signOpen);
 
         private final QuadConsumer<SearchItemsItemInterface, Player, StorageInventory, SearchType> consumer;
 

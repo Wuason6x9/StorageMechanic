@@ -1,5 +1,7 @@
 package dev.wuason.storagemechanic.items;
+
 import dev.wuason.libs.adapter.Adapter;
+import dev.wuason.libs.adapter.AdapterData;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.items.*;
@@ -18,8 +20,8 @@ import java.util.*;
 public class ItemInterfaceManager {
     private StorageMechanic core;
     private HashMap<String, ItemInterface> itemInterfaceHashMap = new HashMap<>();
-    public final static NamespacedKey NAMESPACED_KEY = new NamespacedKey(StorageMechanic.getInstance(),"storagemechanicitem");
-    public static final List<String> ITEMS_REGISTERED_LIST = new ArrayList<>(){{
+    public final static NamespacedKey NAMESPACED_KEY = new NamespacedKey(StorageMechanic.getInstance(), "storagemechanicitem");
+    public static final List<String> ITEMS_REGISTERED_LIST = new ArrayList<>() {{
         add("NEXT_PAGE");
         add("BACK_PAGE");
         add("SEARCH_PAGE");
@@ -38,8 +40,7 @@ public class ItemInterfaceManager {
     }
 
 
-
-    public void loadItemsInterface(){
+    public void loadItemsInterface() {
 
         itemInterfaceHashMap = new HashMap<>();
 
@@ -48,27 +49,27 @@ public class ItemInterfaceManager {
 
         File[] files = Arrays.stream(base.listFiles()).filter(f -> {
 
-            if(f.getName().contains(".yml")) return true;
+            if (f.getName().contains(".yml")) return true;
 
             return false;
 
         }).toArray(File[]::new);
 
-        for(File file : files){
+        for (File file : files) {
 
             YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
             ConfigurationSection sectionItemsInterfaces = config.getConfigurationSection("items");
-            if(sectionItemsInterfaces == null) sectionItemsInterfaces = config.getConfigurationSection("Items");
+            if (sectionItemsInterfaces == null) sectionItemsInterfaces = config.getConfigurationSection("Items");
 
-            if(sectionItemsInterfaces != null){
-                for(String key : sectionItemsInterfaces.getKeys(false)){
+            if (sectionItemsInterfaces != null) {
+                for (String key : sectionItemsInterfaces.getKeys(false)) {
 
-                    ConfigurationSection sectionItemInterface = sectionItemsInterfaces.getConfigurationSection((String)key);
+                    ConfigurationSection sectionItemInterface = sectionItemsInterfaces.getConfigurationSection((String) key);
 
                     String itemType = sectionItemInterface.getString("itemType", ".").toUpperCase(Locale.ENGLISH);
 
-                    if(!ITEMS_REGISTERED_LIST.contains(itemType)){
+                    if (!ITEMS_REGISTERED_LIST.contains(itemType)) {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: ItemType is invalid or null");
                         continue;
@@ -76,12 +77,12 @@ public class ItemInterfaceManager {
 
                     String item = sectionItemInterface.getString("item");
 
-                    if(item == null){
+                    if (item == null) {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
                     }
-                    if(Adapter.getAdapterData(item).isEmpty()){
+                    if (Adapter.getAdapterData(item).isEmpty()) {
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                         AdventureUtils.sendMessagePluginConsole(core, "<red>Error: item is null");
                         continue;
@@ -90,7 +91,7 @@ public class ItemInterfaceManager {
                     String displayName = sectionItemInterface.getString("displayName");
                     List<String> lore = sectionItemInterface.getStringList("lore");
 
-                    switch (itemType){
+                    switch (itemType) {
                         case "NEXT_PAGE" -> {
                             itemInterfaceHashMap.put(key, new NextPageItemInterface(item, displayName, lore, key));
                             continue;
@@ -106,7 +107,7 @@ public class ItemInterfaceManager {
                         }
                         case "ACTION" -> {
                             String actionId = sectionItemInterface.getString("properties.action_id");
-                            if(actionId == null || !core.getManagers().getActionManager().isActionConfigRegistered(actionId)){
+                            if (actionId == null || !core.getManagers().getActionManager().isActionConfigRegistered(actionId)) {
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Action id is null or invalid!");
                                 continue;
@@ -117,7 +118,7 @@ public class ItemInterfaceManager {
                         case "COMMAND_ITEM" -> {
                             String command = sectionItemInterface.getString("properties.command", null);
 
-                            if(command == null){
+                            if (command == null) {
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: Command is null!");
                                 continue;
@@ -149,19 +150,31 @@ public class ItemInterfaceManager {
                             List<String> blacklistItems = sectionItemInterface.getStringList("properties.blacklist.list");
                             boolean whitelistEnabled = sectionItemInterface.getBoolean("properties.whitelist.enabled", false);
                             boolean blacklistEnabled = sectionItemInterface.getBoolean("properties.blacklist.enabled", false);
-                            if(whitelistItems == null) whitelistEnabled = false;
-                            if(blacklistItems == null) blacklistEnabled = false;
+                            if (whitelistItems == null) whitelistEnabled = false;
+                            if (blacklistItems == null) blacklistEnabled = false;
                             //COMPUTE ITEMS
                             List<String> itemsBlackListComputed = new ArrayList<>();
-                            if(blacklistEnabled){
-                                for(String i : blacklistItems){
-                                    itemsBlackListComputed.add(Adapter.getAdapterId(Adapter.getItemStack(i)));
+                            if (blacklistEnabled) {
+                                for (String i : blacklistItems) {
+                                    Optional<AdapterData> adapterData = Adapter.getAdapterData(i);
+                                    if (adapterData.isEmpty()) {
+                                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: BLACKLIST_ITEM item is invalid! item: " + i);
+                                        continue;
+                                    }
+                                    itemsBlackListComputed.add(adapterData.toString());
                                 }
                             }
                             List<String> itemsWhiteListComputed = new ArrayList<>();
-                            if(whitelistEnabled){
-                                for(String i : whitelistItems){
-                                    itemsWhiteListComputed.add(Adapter.getAdapterId(Adapter.getItemStack(i)));
+                            if (whitelistEnabled) {
+                                for (String i : whitelistItems) {
+                                    Optional<AdapterData> adapterData = Adapter.getAdapterData(i);
+                                    if (adapterData.isEmpty()) {
+                                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
+                                        AdventureUtils.sendMessagePluginConsole(core, "<red>Error: WHITELIST_ITEM item is invalid! item: " + i);
+                                        continue;
+                                    }
+                                    itemsWhiteListComputed.add(adapterData.toString());
                                 }
                             }
                             itemInterfaceHashMap.put(key, new PlaceholderItemInterface(item, displayName, lore, whitelistEnabled, blacklistEnabled, itemsWhiteListComputed, itemsBlackListComputed, key));
@@ -171,7 +184,7 @@ public class ItemInterfaceManager {
                         case "CLEAN_ITEM" -> {
                             List<String> pagesString = sectionItemInterface.getStringList("properties.pages");
                             List<String> slotsString = sectionItemInterface.getStringList("properties.slots");
-                            if(slotsString == null || pagesString == null){
+                            if (slotsString == null || pagesString == null) {
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: CLEAN_ITEM slots or pages is invalid!");
                                 continue;
@@ -192,7 +205,7 @@ public class ItemInterfaceManager {
                             String invId = sectionItemInterface.getString("properties.inv-id", "search-item");
                             String invResultId = sectionItemInterface.getString("properties.inv-result-id");
                             String searchTypeString = sectionItemInterface.getString("properties.def-action");
-                            if(invId == null || invResultId == null){
+                            if (invId == null || invResultId == null) {
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error loading Item interface! itemInterface_id: " + key + " in file: " + file.getName());
                                 AdventureUtils.sendMessagePluginConsole(core, "<red>Error: SEARCH_ITEM invId, invResultId or searchType is invalid!");
                                 continue;
@@ -201,7 +214,8 @@ public class ItemInterfaceManager {
 
                             SearchItemsItemInterface.SearchType searchType = null;
                             try {
-                                if(searchTypeString != null) searchType = SearchItemsItemInterface.SearchType.valueOf(searchTypeString.toUpperCase(Locale.ENGLISH));
+                                if (searchTypeString != null)
+                                    searchType = SearchItemsItemInterface.SearchType.valueOf(searchTypeString.toUpperCase(Locale.ENGLISH));
                             } catch (IllegalArgumentException e) {
                             }
 

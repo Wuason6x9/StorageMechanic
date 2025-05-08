@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.kotlin.dsl.support.zipTo
 
 plugins {
     id("java")
@@ -7,7 +8,7 @@ plugins {
 
 allprojects {
     group = "dev.wuason"
-    version = "1.0.4.1"
+    version = "1.0.4.2"
 }
 
 subprojects {
@@ -91,7 +92,7 @@ project(":plugin") {
         compileOnly("io.lumine:MythicCrucible-Dist:2.0.0-20240122.174338-17")
         compileOnly("io.th0rgal:oraxen:1.172.0")
         compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-        compileOnly("com.github.Wuason6x9:mechanics:1.0.2")
+        compileOnly("com.github.Wuason6x9:mechanics:1.0.3.1")
         //compileOnly(fileTree("libs").include("*.jar"))
     }
 
@@ -125,4 +126,24 @@ tasks {
     build {
         dependsOn(":shadowJar")
     }
+}
+
+tasks.register<Zip>("zipPlugin") {
+    group = "build"
+    dependsOn("build")
+
+    archiveFileName.set("${rootProject.name}-${rootProject.version}.zip")
+    destinationDirectory.set(file("$rootDir/target"))
+
+    from("$rootDir/target/") {
+        include("${rootProject.name}-${rootProject.version}.jar")
+    }
+    from("$rootDir/pack/") {
+        include("StorageMechanic\\**")
+    }
+
+    doLast {
+        println("Zip created at: ${archiveFile.get().asFile.absolutePath}")
+    }
+
 }
