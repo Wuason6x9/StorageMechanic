@@ -12,19 +12,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ItemInterface {
-    private final ItemStack itemStack;
-    private List<Object> data = new ArrayList<>();
+    private final List<Object> data = new ArrayList<>();
     private final String id;
     private final String name;
+    private final String displayName;
+    private final List<String> lore;
+    private final String item;
 
     public ItemInterface(String item, String displayName, List<String> lore, String id, String name) {
-        itemStack = new ItemBuilder(item,1).setNameWithMiniMessage(displayName).setLore(lore).addPersistentData(ItemInterfaceManager.NAMESPACED_KEY,id).build();
         this.id = id;
         this.name = name;
+        this.displayName = displayName;
+        this.lore = lore;
+        this.item = item;
     }
 
     public ItemStack getItemStack() {
-        return ItemBuilder.copyOf(itemStack).addPersistentData(ItemInterfaceManager.NAMESPACED_KEY, id).build();
+        return new ItemBuilder(item, 1).setNameWithMiniMessage(displayName).setLore(lore).addPersistentData(ItemInterfaceManager.NAMESPACED_KEY, id).build();
     }
 
     public String getId() {
@@ -32,7 +36,8 @@ public abstract class ItemInterface {
     }
 
     public void setData(List<Object> data) {
-        this.data = data;
+        this.data.clear();
+        this.data.addAll(data);
     }
 
     public List<Object> getData() {
@@ -50,5 +55,6 @@ public abstract class ItemInterface {
     public void removeData(Object data) {
         this.data.remove(data);
     }
+
     public abstract void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig);
 }

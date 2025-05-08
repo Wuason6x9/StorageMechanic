@@ -85,8 +85,6 @@ public class Managers {
         }
         furnitureStorageManager = new FurnitureStorageManager(core, dataManager);
         storageApiManager = new StorageApiManager(core);
-        //********* INVENTORIES *********
-        inventoryConfigManager = new InventoryConfigManager(core); //change this line
 
         //********* ANTI TRASH *********
 
