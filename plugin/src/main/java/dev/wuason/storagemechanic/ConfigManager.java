@@ -76,7 +76,6 @@ public class ConfigManager {
 
     public YamlDocument getLangDocumentYaml() {
         return langDocumentYaml;
-
     }
 
     public YamlDocument getMainConfig() {

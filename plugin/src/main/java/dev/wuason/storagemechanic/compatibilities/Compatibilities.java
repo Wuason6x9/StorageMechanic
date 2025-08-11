@@ -9,6 +9,7 @@ public class Compatibilities {
     private static boolean mythicCrucibleLoaded = false;
     private static boolean mythicMobsLoaded = false;
     private static boolean nexoLoaded = false;
+    private static boolean craftEngineLoaded = false;
 
 
     public static boolean isMythicMobsLoaded(){
@@ -34,6 +35,13 @@ public class Compatibilities {
         return nexoLoaded;
     }
 
+    public static boolean isCraftEngineLoaded() {
+        if(!craftEngineLoaded) craftEngineLoaded = Bukkit.getPluginManager().getPlugin("CraftEngine") != null;
+        return craftEngineLoaded;
+    }
+
+
+
     public static Plugin getItemsAdder(){
         return Bukkit.getPluginManager().getPlugin("ItemsAdder");
     }
@@ -56,5 +64,9 @@ public class Compatibilities {
 
     public static Plugin getNexo() {
         return Bukkit.getPluginManager().getPlugin("Nexo");
+    }
+
+    public static Plugin getCraftEngine() {
+        return Bukkit.getPluginManager().getPlugin("CraftEngine");
     }
 }

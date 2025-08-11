@@ -78,6 +78,17 @@ public class BlockStorageManager implements Listener {
             }
         }
 
+        if (Compatibilities.isCraftEngineLoaded()) {
+            try {
+                Class<?> nexoEventsClass = Class.forName("dev.wuason.storagemechanic.storages.types.block.compatibilities.CraftEngineEvents");
+                Listener nexoEvents = (Listener) nexoEventsClass.getDeclaredConstructor(BlockStorageManager.class).newInstance(this);
+                Bukkit.getPluginManager().registerEvents(nexoEvents, core);
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                     InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (Bukkit.getPluginManager().getPlugin("MythicCrucible") != null) {
             MythicCrucibleBlockEvents mythicCrucibleBlockEvents = new MythicCrucibleBlockEvents(this);
             Bukkit.getPluginManager().registerEvents(mythicCrucibleBlockEvents, core);
@@ -360,7 +371,7 @@ public class BlockStorageManager implements Listener {
         if (event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND)) return;
         if (event.getAction().toString().contains("AIR") || event.getAction().equals(Action.PHYSICAL)) return;
         String adapterID = Adapter.getAdapterId(event.getClickedBlock());
-        if ((adapterID.contains("or:") || adapterID.contains("nx:")) && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+        if ((adapterID.contains("or:") || adapterID.contains("nx:") || adapterID.contains("ce:")) && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         onBlockInteract(event.getClickedBlock(), event.getItem(), event.getPlayer(), event, event.getAction(), adapterID);
     }
 
@@ -443,7 +454,7 @@ public class BlockStorageManager implements Listener {
                                     persistentDataContainer.set(namespacedKey, PersistentDataType.STRING, blockStorage.getId() + ":" + blockStorage.getBlockStorageConfigID() + ":" + blockStorage.getOwnerUUID());
                                 }
                             }
-                            if (adapterID.contains("or:") || adapterID.contains("mc:") || adapterID.contains("sm:") || adapterID.contains("mmoitems:") || adapterID.contains("eb:") || adapterID.contains("mythiccrucible:") || adapterID.contains("nx:")) {
+                            if (adapterID.contains("or:") || adapterID.contains("mc:") || adapterID.contains("sm:") || adapterID.contains("mmoitems:") || adapterID.contains("eb:") || adapterID.contains("mythiccrucible:") || adapterID.contains("nx:") || adapterID.contains("ce:")) {
                                 openBlockStorage(blockStorage.getId(), player);
                             }
                         }

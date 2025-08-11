@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "dev.wuason"
-    version = "1.0.4.2"
+    version = "1.0.5"
 }
 
 subprojects {
@@ -28,6 +28,7 @@ subprojects {
         maven("https://repo.oraxen.com/snapshots")
         maven("https://repo.nexomc.com/snapshots/")
         maven("https://repo.nexomc.com/releases/")
+        maven("https://repo.momirealms.net/releases/")
     }
 
     tasks.withType<JavaCompile> {
@@ -83,6 +84,23 @@ project(":nexo-j21") {
     }
 }
 
+project(":ce-j21") {
+    dependencies {
+        compileOnly("io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT") //Vanilla
+        compileOnly("net.momirealms:craft-engine-core:0.0.60")
+        compileOnly("net.momirealms:craft-engine-bukkit:0.0.60")
+        compileOnly(project(":plugin"))
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
+    }
+}
+
 project(":plugin") {
 
     dependencies {
@@ -114,6 +132,7 @@ project(":plugin") {
 dependencies {
     implementation(project(":oraxen-j21"))
     implementation(project(":nexo-j21"))
+    implementation(project(":ce-j21"))
     implementation(project(":plugin"))
 }
 
