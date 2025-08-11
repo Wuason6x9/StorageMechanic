@@ -60,6 +60,16 @@ public class FurnitureStorageManager {
         if (Compatibilities.isItemsAdderLoaded()) {
             pm.registerEvents(new ItemsAdderFurnitureEvents(this), core);
         }
+        if (Compatibilities.isCraftEngineLoaded()) {
+            try {
+                Class<?> nexoEventsClass = Class.forName("dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.CraftEngineFurnitureEvents");
+                Listener nexoEvents = (Listener) nexoEventsClass.getDeclaredConstructor(FurnitureStorageManager.class).newInstance(this);
+                pm.registerEvents(nexoEvents, core);
+            } catch (ClassNotFoundException | InvocationTargetException | InstantiationException |
+                     IllegalAccessException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
         if (Compatibilities.isNexoLoaded()) {
             try {
                 Class<?> nexoEventsClass = Class.forName("dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.NexoFurnitureEvents");
