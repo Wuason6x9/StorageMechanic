@@ -371,7 +371,8 @@ public class BlockStorageManager implements Listener {
         if (event.getHand() == null || !event.getHand().equals(EquipmentSlot.HAND)) return;
         if (event.getAction().toString().contains("AIR") || event.getAction().equals(Action.PHYSICAL)) return;
         String adapterID = Adapter.getAdapterId(event.getClickedBlock());
-        if ((adapterID.contains("or:") || adapterID.contains("nx:") || adapterID.contains("ce:")) && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+        if (adapterID.startsWith("ce:")) return;
+        if ((adapterID.contains("or:") || adapterID.contains("nx:")) && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         onBlockInteract(event.getClickedBlock(), event.getItem(), event.getPlayer(), event, event.getAction(), adapterID);
     }
 
@@ -399,7 +400,7 @@ public class BlockStorageManager implements Listener {
                             cancellable.setCancelled(true);
                             switch (blockStorageConfig.getBlockStorageType()) {
                                 case PERSONAL -> {
-                                    if (!blockStorage.existStoragePlayer(player)) {
+                                     if (!blockStorage.existStoragePlayer(player)) {
                                         blockStorage.createStoragePlayer(player.getUniqueId().toString());
                                     }
                                     openBlockStorage(blockStorageData[0], player);
