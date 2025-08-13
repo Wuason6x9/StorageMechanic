@@ -1,7 +1,6 @@
 package dev.wuason.storagemechanic.storages.types.block;
 
 import dev.wuason.libs.adapter.Adapter;
-import dev.wuason.libs.protectionlib.ProtectionLib;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.compatibilities.Compatibilities;
@@ -378,7 +377,8 @@ public class BlockStorageManager implements Listener {
 
     public void onBlockInteract(Block block, ItemStack itemHand, Player player, Cancellable cancellable, Action action, String adapterID) {
         if (!player.isSneaking()) {
-            if (!ProtectionLib.canInteract(player, block.getLocation())) return;
+            if (!core.getMechanics().getAntiGriefLib().canInteract(player, block.getLocation())) return;
+            //if (!ProtectionLib.canInteract(player, block.getLocation())) return;
             if (block != null && player != null) {
 
                 PersistentDataContainer persistentDataContainer = block.getChunk().getPersistentDataContainer();

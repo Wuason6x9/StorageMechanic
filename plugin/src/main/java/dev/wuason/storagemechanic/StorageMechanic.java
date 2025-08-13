@@ -10,7 +10,6 @@ public final class StorageMechanic extends MechanicAddon {
     private Managers managers;
     private Debug debug;
 
-
     public StorageMechanic() {
         super(23027);
         instance = this;
