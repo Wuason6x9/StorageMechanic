@@ -1,6 +1,5 @@
 package dev.wuason.storagemechanic.storages.types.entity.skills;
 
-import dev.wuason.libs.protectionlib.ProtectionLib;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.compatibilities.Compatibilities;
 import dev.wuason.storagemechanic.storages.Storage;
@@ -45,7 +44,8 @@ public class SmOpenMythicMechanic implements ITargetedEntitySkill {
             id = ((ActiveMob) caster).getEntity().getUniqueId().toString();
             idTriggerSkill = ((ActiveMob) caster).getType().getInternalName();
         }
-        if(!ProtectionLib.canInteract((Player)skillMetadata.getTrigger().asPlayer().getBukkitEntity(),location)) return SkillResult.ERROR;
+        if (!core.getMechanics().getAntiGriefLib().canInteract((Player)skillMetadata.getTrigger().asPlayer().getBukkitEntity(),location)) return SkillResult.ERROR;
+        //if(!ProtectionLib.canInteract((Player)skillMetadata.getTrigger().asPlayer().getBukkitEntity(),location)) return SkillResult.ERROR;
         if(!(skillMetadata.getTrigger().getBukkitEntity() instanceof Player)) return SkillResult.ERROR;
         if(!storageManager.storageExists(id)) return SkillResult.ERROR;
         Storage storage = storageManager.getStorage(id);

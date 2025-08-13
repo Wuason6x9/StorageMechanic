@@ -21,6 +21,7 @@ public class CraftEngineEvents implements Listener {
 
         if (event.hand() != InteractionHand.MAIN_HAND) return;
         String adapterId = "ce:" + event.customBlock().id().toString();
-        blockStorageManager.onBlockInteract(event.bukkitBlock(), event.player().getInventory().getItemInMainHand(), event.getPlayer(), event, Action.RIGHT_CLICK_BLOCK, adapterId);
+        Action action = event.action() == CustomBlockInteractEvent.Action.LEFT_CLICK ? Action.LEFT_CLICK_BLOCK : Action.RIGHT_CLICK_BLOCK;
+        blockStorageManager.onBlockInteract(event.bukkitBlock(), event.player().getInventory().getItemInMainHand(), event.getPlayer(), event, action, adapterId);
     }
 }

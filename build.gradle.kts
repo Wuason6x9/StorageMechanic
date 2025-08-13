@@ -8,11 +8,7 @@ plugins {
 
 allprojects {
     group = "dev.wuason"
-    version = "1.0.5"
-}
-
-subprojects {
-    apply(plugin = "java")
+    version = "1.0.5.1"
 
     repositories {
         mavenCentral()
@@ -30,6 +26,10 @@ subprojects {
         maven("https://repo.nexomc.com/releases/")
         maven("https://repo.momirealms.net/releases/")
     }
+}
+
+subprojects {
+    apply(plugin = "java")
 
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
@@ -110,7 +110,7 @@ project(":plugin") {
         compileOnly("io.lumine:MythicCrucible-Dist:2.0.0-20240122.174338-17")
         compileOnly("io.th0rgal:oraxen:1.172.0")
         compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-        compileOnly("com.github.Wuason6x9:mechanics:1.0.3.1")
+        compileOnly("com.github.Wuason6x9:mechanics:1.0.3.8")
         //compileOnly(fileTree("libs").include("*.jar"))
     }
 

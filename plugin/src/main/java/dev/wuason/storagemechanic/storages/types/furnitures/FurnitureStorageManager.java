@@ -1,7 +1,6 @@
 package dev.wuason.storagemechanic.storages.types.furnitures;
 
 import dev.wuason.libs.adapter.Adapter;
-import dev.wuason.libs.protectionlib.ProtectionLib;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.compatibilities.Compatibilities;
@@ -9,9 +8,6 @@ import dev.wuason.storagemechanic.data.DataManager;
 import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
-import dev.wuason.storagemechanic.storages.types.block.BlockStorageManager;
-import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageConfig;
-import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageType;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.ItemsAdderFurnitureEvents;
 import dev.wuason.storagemechanic.storages.types.furnitures.compatibilities.OraxenFurnitureEventsOld;
 import dev.wuason.storagemechanic.storages.types.furnitures.config.FurnitureStorageConfig;
@@ -238,7 +234,8 @@ public class FurnitureStorageManager {
     public void onFurnitureInteract(String adapterId, Player player, Entity entity, ItemStack itemHand, EventCancel cancellable) {
 
         if (player.isSneaking() || entity == null || player == null) return;
-        if (!ProtectionLib.canInteract(player, entity.getLocation())) return;
+        if (!core.getMechanics().getAntiGriefLib().canInteract(player, entity.getLocation())) return;
+        //if (!ProtectionLib.canInteract(player, entity.getLocation())) return;
         Location location = entity.getLocation();
         PersistentDataContainer persistentDataContainer = location.getChunk().getPersistentDataContainer();
         int x = location.getBlockX();
