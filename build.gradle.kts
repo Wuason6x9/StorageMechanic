@@ -25,6 +25,7 @@ allprojects {
         maven("https://repo.nexomc.com/snapshots/")
         maven("https://repo.nexomc.com/releases/")
         maven("https://repo.momirealms.net/releases/")
+        maven("https://maven.devs.beer/")
     }
 }
 
@@ -104,7 +105,7 @@ project(":ce-j21") {
 project(":plugin") {
 
     dependencies {
-        compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
+        compileOnly("dev.lone:api-itemsadder:4.0.10")
         compileOnly("me.clip:placeholderapi:2.11.6")
         compileOnly("io.lumine:Mythic-Dist:5.6.0-20240124.234541-47")
         compileOnly("io.lumine:MythicCrucible-Dist:2.0.0-20240122.174338-17")

@@ -5,6 +5,7 @@ import dev.lone.itemsadder.api.CustomFurniture;
 import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
 import dev.lone.itemsadder.api.Events.FurnitureInteractEvent;
 import dev.lone.itemsadder.api.Events.FurniturePlaceSuccessEvent;
+import dev.lone.itemsadder.api.Events.FurniturePlacedEvent;
 import dev.wuason.storagemechanic.storages.types.furnitures.EventCancel;
 import dev.wuason.storagemechanic.storages.types.furnitures.FurnitureStorageManager;
 import org.bukkit.event.EventHandler;
@@ -31,7 +32,7 @@ public class ItemsAdderFurnitureEvents implements Listener {
 
     }
     @EventHandler
-    public void onFurniturePlace(FurniturePlaceSuccessEvent event){
+    public void onFurniturePlace(FurniturePlacedEvent event){
         if(event.getPlayer()==null) return;
         String adapterId = ADAPTER_TYPE + event.getNamespacedID();
         EventCancel eventCancel = new EventCancel();
