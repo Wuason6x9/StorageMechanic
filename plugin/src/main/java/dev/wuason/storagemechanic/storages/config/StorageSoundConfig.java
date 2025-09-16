@@ -20,8 +20,8 @@ public class StorageSoundConfig {
         this.pagesToSlots = new HashMap<>();
         HashSet<Integer> hashSet = new HashSet<>(slots);
 
-        for(Integer i : pages){
-            pagesToSlots.put(i,hashSet);
+        for (Integer i : pages) {
+            pagesToSlots.put(i, hashSet);
         }
     }
 

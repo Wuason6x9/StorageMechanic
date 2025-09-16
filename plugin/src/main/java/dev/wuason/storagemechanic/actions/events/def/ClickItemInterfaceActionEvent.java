@@ -7,7 +7,6 @@ import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.HashMap;
 import java.util.Locale;
 
 public class ClickItemInterfaceActionEvent implements EventAction {
@@ -35,8 +34,8 @@ public class ClickItemInterfaceActionEvent implements EventAction {
         action.registerPlaceholder("$itemInterface_itemStack$", itemInterface.getItemStack());
         action.registerPlaceholder("$itemInterface_name$", itemInterface.getName());
 
-        for(Object object : itemInterface.getData()){
-            if(object instanceof ItemInterfaceData data){
+        for (Object object : itemInterface.getData()) {
+            if (object instanceof ItemInterfaceData data) {
                 action.registerPlaceholder(data.getId(), data.getObject());
             }
         }

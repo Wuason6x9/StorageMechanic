@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public class ItemsAdderEvent implements Listener {
     @EventHandler
-    public void loadEvent(ItemsAdderLoadDataEvent itemsAdderLoadDataEvent){
-        if(itemsAdderLoadDataEvent.getCause().equals(ItemsAdderLoadDataEvent.Cause.FIRST_LOAD)){
+    public void loadEvent(ItemsAdderLoadDataEvent itemsAdderLoadDataEvent) {
+        if (itemsAdderLoadDataEvent.getCause().equals(ItemsAdderLoadDataEvent.Cause.FIRST_LOAD)) {
             try {
                 StorageMechanic.getInstance().getManagers().getConfigManager().loadConfig();
             } catch (IOException e) {

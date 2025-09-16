@@ -18,71 +18,79 @@ public class StorageManagerData {
     private FurnitureStorageManagerData furnitureStorageManagerData;
     private StorageApiManagerData storageApiManager;
 
-    public StorageManagerData(DataManager dataManager, StorageMechanic core){
+    public StorageManagerData(DataManager dataManager, StorageMechanic core) {
         this.dataManager = dataManager;
-        blockStorageManagerData = new BlockStorageManagerData(dataManager,core);
-        furnitureStorageManagerData = new FurnitureStorageManagerData(dataManager,core);
-        storageApiManager = new StorageApiManagerData(dataManager,core);
+        blockStorageManagerData = new BlockStorageManagerData(dataManager, core);
+        furnitureStorageManagerData = new FurnitureStorageManagerData(dataManager, core);
+        storageApiManager = new StorageApiManagerData(dataManager, core);
     }
 
 
     //basics load,remove,exist,save
-    public Storage loadStorageData(String id){
-        if(dataManager.existData(DATA_TYPE,id)){
-            StorageData storageData = (StorageData) dataManager.getData(DATA_TYPE,id).getDataObject();
+    public Storage loadStorageData(String id) {
+        if (dataManager.existData(DATA_TYPE, id)) {
+            StorageData storageData = (StorageData) dataManager.getData(DATA_TYPE, id).getDataObject();
             return storageDataToStorage(storageData);
         }
         return null;
     }
-    public boolean existStorageData(String id){
-        return dataManager.existData(DATA_TYPE,id);
+
+    public boolean existStorageData(String id) {
+        return dataManager.existData(DATA_TYPE, id);
     }
-    public void removeStorageData(String id){
-        if(existStorageData(id)){
-            dataManager.removeData(DATA_TYPE,id);
+
+    public void removeStorageData(String id) {
+        if (existStorageData(id)) {
+            dataManager.removeData(DATA_TYPE, id);
         }
     }
-    public void removeStorageData(Storage storage){
+
+    public void removeStorageData(Storage storage) {
         removeStorageData(storage.getId());
     }
-    public void removeStorageData(StorageData storageData){
+
+    public void removeStorageData(StorageData storageData) {
         removeStorageData(storageData.getId());
     }
-    public void saveStorageData(StorageData storageData){
-        if(storageData == null) return;
+
+    public void saveStorageData(StorageData storageData) {
+        if (storageData == null) return;
         Data data = null;
         String id = storageData.getId();
-        if(existStorageData(id)){
-            data = dataManager.getData(DATA_TYPE,id);
+        if (existStorageData(id)) {
+            data = dataManager.getData(DATA_TYPE, id);
         }
-        if(data == null){
+        if (data == null) {
             data = new Data(id);
         }
         data.setDataObject(storageData);
         dataManager.saveData(data);
     }
-    public void saveStorageData(Storage storage){
+
+    public void saveStorageData(Storage storage) {
         StorageData storageData = storageToStorageData(storage);
         saveStorageData(storageData);
     }
-    public StorageData getStorageData(String id){
-        if(existStorageData(id)){
-            return (StorageData) dataManager.getData(DATA_TYPE,id).getDataObject();
+
+    public StorageData getStorageData(String id) {
+        if (existStorageData(id)) {
+            return (StorageData) dataManager.getData(DATA_TYPE, id).getDataObject();
         }
         return null;
     }
 
     //Serialize
     public Storage storageDataToStorage(StorageData storageData) {
-        if(storageData != null){
-            Storage storage = new Storage(storageData.getId(), storageData.getItems(), storageData.getStorageIdConfig(), storageData.getDate(), new StorageOriginContext(StorageOriginContext.Context.valueOf(storageData.getStorageOriginContext()),storageData.getStorageOriginContextData()), storageData.getLastOpenDate());return storage;
+        if (storageData != null) {
+            Storage storage = new Storage(storageData.getId(), storageData.getItems(), storageData.getStorageIdConfig(), storageData.getDate(), new StorageOriginContext(StorageOriginContext.Context.valueOf(storageData.getStorageOriginContext()), storageData.getStorageOriginContextData()), storageData.getLastOpenDate());
+            return storage;
         }
         return null;
     }
 
     public StorageData storageToStorageData(Storage storage) {
-        if(storage != null){
-            return new StorageData(storage.getItems(), storage.getId(), storage.getStorageIdConfig(), storage.getCreationDate(),storage.getStorageOriginContext().getContext().toString(),storage.getStorageOriginContext().getData(),storage.getLastOpen());
+        if (storage != null) {
+            return new StorageData(storage.getItems(), storage.getId(), storage.getStorageIdConfig(), storage.getCreationDate(), storage.getStorageOriginContext().getContext().toString(), storage.getStorageOriginContext().getData(), storage.getLastOpen());
         }
         return null;
     }

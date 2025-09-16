@@ -30,15 +30,15 @@ public class StorageExecutor extends Executor {
 
         StorageOriginContext storageOriginContext = storage.getStorageOriginContext();
 
-        switch (storageOriginContext.getContext()){
+        switch (storageOriginContext.getContext()) {
             case BLOCK_STORAGE -> {
-                BlockStorage blockStorage = ((StorageMechanic)action.getCore()).getManagers().getBlockStorageManager().getBlockStorage(storageOriginContext.getData().get(1));
+                BlockStorage blockStorage = ((StorageMechanic) action.getCore()).getManagers().getBlockStorageManager().getBlockStorage(storageOriginContext.getData().get(1));
                 action.registerPlaceholder("$blockStorage$", blockStorage);
                 action.registerPlaceholder("$blockStorageId$", blockStorage.getId());
                 action.registerPlaceholder("$blockStorageConfigId$", storageOriginContext.getData().get(0));
             }
             case FURNITURE_STORAGE -> {
-                FurnitureStorage furnitureStorage = ((StorageMechanic)action.getCore()).getManagers().getFurnitureStorageManager().getFurnitureStorage(storageOriginContext.getData().get(1));
+                FurnitureStorage furnitureStorage = ((StorageMechanic) action.getCore()).getManagers().getFurnitureStorageManager().getFurnitureStorage(storageOriginContext.getData().get(1));
                 action.registerPlaceholder("$furnitureStorage$", furnitureStorage);
                 action.registerPlaceholder("$furnitureStorageId$", furnitureStorage.getId());
                 action.registerPlaceholder("$furnitureStorageConfigId$", storageOriginContext.getData().get(0));

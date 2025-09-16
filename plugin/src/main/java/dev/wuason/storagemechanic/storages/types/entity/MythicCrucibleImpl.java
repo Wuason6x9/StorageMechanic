@@ -15,16 +15,16 @@ import java.util.UUID;
 
 public class MythicCrucibleImpl {
 
-    public void a(HashMap<String, HashMap<SkillTrigger, Queue<SkillMechanic>>> triggerSkills){
+    public void a(HashMap<String, HashMap<SkillTrigger, Queue<SkillMechanic>>> triggerSkills) {
         Collection<CrucibleItem> items = MythicCrucible.inst().getItemManager().getItems();
-        for(CrucibleItem crucibleItem : items){
-            if(crucibleItem.getType().equals(CrucibleItemType.FURNITURE)){
+        for (CrucibleItem crucibleItem : items) {
+            if (crucibleItem.getType().equals(CrucibleItemType.FURNITURE)) {
                 FurnitureItemContext furnitureItemContext = crucibleItem.getFurnitureData();
                 HashMap<SkillTrigger, Queue<SkillMechanic>> map = new HashMap<>();
-                for(SkillTrigger trigger : StorageTriggers.getTriggers()){
+                for (SkillTrigger trigger : StorageTriggers.getTriggers()) {
                     Queue<SkillMechanic> skillMechanics = furnitureItemContext.getSkills(trigger);
-                    if(skillMechanics != null && !skillMechanics.isEmpty()){
-                        map.put(trigger,skillMechanics);
+                    if (skillMechanics != null && !skillMechanics.isEmpty()) {
+                        map.put(trigger, skillMechanics);
                     }
                 }
                 triggerSkills.put(crucibleItem.getInternalName(), map);
@@ -32,7 +32,7 @@ public class MythicCrucibleImpl {
         }
     }
 
-    public Object[] b(UUID uuid){
+    public Object[] b(UUID uuid) {
         Object[] objects = new Object[2];
         Furniture furniture = MythicCrucible.inst().getItemManager().getFurnitureManager().getFurniture(uuid).get();
         objects[0] = furniture;

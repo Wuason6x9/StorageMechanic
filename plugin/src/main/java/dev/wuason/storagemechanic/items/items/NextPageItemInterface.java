@@ -2,7 +2,6 @@ package dev.wuason.storagemechanic.items.items;
 
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.storages.Storage;
-import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.entity.Player;
@@ -18,8 +17,8 @@ public class NextPageItemInterface extends ItemInterface {
 
     @Override
     public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
-        if(storageInventory.getPage()<(storageConfig.getPages() - 1)){
-            storage.openStorageR((Player) event.getWhoClicked(),storageInventory.getPage() + 1);
+        if (storageInventory.getPage() < (storageConfig.getPages() - 1)) {
+            storage.openStorageR((Player) event.getWhoClicked(), storageInventory.getPage() + 1);
         }
     }
 }

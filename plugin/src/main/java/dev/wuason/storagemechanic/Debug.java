@@ -13,35 +13,39 @@ public class Debug implements Listener {
     private static Set<Player> players = new HashSet<>();
 
 
-    public void enableDebugMode(Player player){
-        if(players.contains(player)) return;
+    public void enableDebugMode(Player player) {
+        if (players.contains(player)) return;
         players.add(player);
     }
-    public void disableDebugMode(Player player){
-        if(!players.contains(player)) return;
+
+    public void disableDebugMode(Player player) {
+        if (!players.contains(player)) return;
         players.remove(player);
     }
-    public static void debug(String string){
-        if(players.size()>0){
+
+    public static void debug(String string) {
+        if (players.size() > 0) {
             System.out.println("[SM][DEBUG] ->" + string);
         }
     }
-    public static void debugToPlayers(String s){
+
+    public static void debugToPlayers(String s) {
         players.forEach(player -> {
-            AdventureUtils.playerMessage(s,player);
+            AdventureUtils.playerMessage(s, player);
         });
     }
-    public static void debugToPlayer(String s, Player player){
-        if(players.contains(player)){
-            AdventureUtils.playerMessage(s,player);
+
+    public static void debugToPlayer(String s, Player player) {
+        if (players.contains(player)) {
+            AdventureUtils.playerMessage(s, player);
         }
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        if(e.getClickedInventory() == null) return;
+        if (e.getClickedInventory() == null) return;
         Player player = (Player) e.getWhoClicked();
-        if(!players.contains(player)) return;
+        if (!players.contains(player)) return;
         debugToPlayer("InventoryType: " + e.getClickedInventory().getType(), player);
         debugToPlayer("Slot: " + e.getSlot(), player);
         debugToPlayer("SlotType: " + e.getSlotType(), player);

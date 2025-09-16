@@ -3,7 +3,6 @@ package dev.wuason.storagemechanic.actions.events.def;
 import dev.wuason.mechanics.actions.Action;
 import dev.wuason.mechanics.actions.events.EventAction;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 
 import java.util.Locale;

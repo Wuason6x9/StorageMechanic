@@ -6,13 +6,13 @@ import java.util.UUID;
 
 public class FurnitureStorageData implements Serializable {
     private UUID ownerUUID;
-    private HashMap<String,String> storagesID;
+    private HashMap<String, String> storagesID;
     private String furnitureStorageID;
     private String furnitureStorageConfigID;
 
     private String[] locs;
 
-    public FurnitureStorageData(UUID ownerUUID, HashMap<String,String> storagesID, String furnitureStorageID, String furnitureStorageConfigID, String[] locs) {
+    public FurnitureStorageData(UUID ownerUUID, HashMap<String, String> storagesID, String furnitureStorageID, String furnitureStorageConfigID, String[] locs) {
         this.ownerUUID = ownerUUID;
         this.storagesID = storagesID;
         this.furnitureStorageID = furnitureStorageID;
@@ -24,7 +24,7 @@ public class FurnitureStorageData implements Serializable {
         return ownerUUID;
     }
 
-    public HashMap<String,String> getStoragesID() {
+    public HashMap<String, String> getStoragesID() {
         return storagesID;
     }
 

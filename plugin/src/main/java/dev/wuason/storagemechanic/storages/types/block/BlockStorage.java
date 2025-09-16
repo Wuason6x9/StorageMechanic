@@ -19,29 +19,29 @@ public class BlockStorage {
     private String id;
     private String blockStorageConfigID;
 
-    private HashMap<String,Storage> storages = new HashMap<>();
+    private HashMap<String, Storage> storages = new HashMap<>();
     private UUID owner;
     private ArrayList<Location> locs = new ArrayList<>();
     public final static String STORAGE_CONTEXT = "BLOCK_STORAGE";
 
-    public BlockStorage(String id, String blockStorageConfigID, HashMap<String,Storage> storages,UUID owner,ArrayList<Location> locs) {
+    public BlockStorage(String id, String blockStorageConfigID, HashMap<String, Storage> storages, UUID owner, ArrayList<Location> locs) {
         this.id = id;
         this.blockStorageConfigID = blockStorageConfigID;
         this.storages = storages;
-        if(owner != null) this.owner = owner;
+        if (owner != null) this.owner = owner;
         this.locs = locs;
         PlayerDataManager playerDataManager = StorageMechanic.getInstance().getManagers().getDataManager().getPlayerDataManager();
         //Storage player data
-        if(!storages.isEmpty()){
-            for(String playerUUID : storages.keySet()){
+        if (!storages.isEmpty()) {
+            for (String playerUUID : storages.keySet()) {
                 UUID uuid = UUID.fromString(playerUUID);
                 Storage storage = storages.get(playerUUID);
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                if(playerDataManager.existPlayerData(uuid)){
+                if (playerDataManager.existPlayerData(uuid)) {
                     PlayerData playerData = playerDataManager.getPlayerData(uuid);
-                    if(playerData != null){
+                    if (playerData != null) {
                         playerData.getStorages().put(storage.getId(), STORAGE_CONTEXT + "_" + blockStorageConfigID + "_" + id);
-                        if(!offlinePlayer.isOnline()){
+                        if (!offlinePlayer.isOnline()) {
                             playerDataManager.savePlayerData(uuid);
                         }
                     }
@@ -49,13 +49,13 @@ public class BlockStorage {
             }
         }
         //BlockStorage player data
-        if(owner != null){
-            if(playerDataManager.existPlayerData(owner)){
+        if (owner != null) {
+            if (playerDataManager.existPlayerData(owner)) {
                 PlayerData playerData = playerDataManager.getPlayerData(owner);
-                if(playerData != null){
+                if (playerData != null) {
                     playerData.getBlockStorages().add(id);
                     OfflinePlayer player = Bukkit.getOfflinePlayer(owner);
-                    if(!player.isOnline()){
+                    if (!player.isOnline()) {
                         playerDataManager.savePlayerData(owner);
                     }
                 }
@@ -70,16 +70,19 @@ public class BlockStorage {
     public Player getOwnerPlayer() {
         return Bukkit.getPlayer(owner);
     }
+
     public OfflinePlayer getOwnerOfflinePlayer() {
         return Bukkit.getOfflinePlayer(owner);
     }
-    public UUID getOwnerUUID(){
+
+    public UUID getOwnerUUID() {
         return owner;
     }
 
     public String getBlockStorageConfigID() {
         return blockStorageConfigID;
     }
+
     public BlockStorageConfig getBlockStorageConfig() {
         return StorageMechanic.getInstance().getManagers().getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
     }
@@ -92,33 +95,36 @@ public class BlockStorage {
         return locs.get(0);
     }
 
-    public boolean existStoragePlayer(Player player){
+    public boolean existStoragePlayer(Player player) {
         return storages.containsKey(player.getUniqueId().toString());
     }
-    public Storage getStoragePlayer(Player player){
+
+    public Storage getStoragePlayer(Player player) {
         return existStoragePlayer(player) ? storages.get(player.getUniqueId().toString()) : null;
     }
-    public Storage removeStoragePlayer(Player player){
+
+    public Storage removeStoragePlayer(Player player) {
         return existStoragePlayer(player) ? storages.remove(player.getUniqueId().toString()) : null;
     }
-    public Storage createStoragePlayer(Player player){
+
+    public Storage createStoragePlayer(Player player) {
         Storage storage = null;
-        if(!existStoragePlayer(player)){
+        if (!existStoragePlayer(player)) {
             Managers managers = StorageMechanic.getInstance().getManagers();
-            storage = managers.getStorageManager().createStorage(managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.BLOCK_STORAGE, new ArrayList<>(){{
+            storage = managers.getStorageManager().createStorage(managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.BLOCK_STORAGE, new ArrayList<>() {{
                 add(blockStorageConfigID);
                 add(id);
                 add(player.getUniqueId().toString());
             }}));
-            storages.put(player.getUniqueId().toString(),storage);
+            storages.put(player.getUniqueId().toString(), storage);
             //Storage Player Data
             PlayerDataManager playerDataManager = managers.getDataManager().getPlayerDataManager();
             UUID uuid = player.getUniqueId();
-            if(playerDataManager.existPlayerData(uuid)){
+            if (playerDataManager.existPlayerData(uuid)) {
                 PlayerData playerData = playerDataManager.getPlayerData(uuid);
-                if(playerData != null){
-                    playerData.getStorages().put(storage.getId(),STORAGE_CONTEXT + "_" + blockStorageConfigID + "_" + id);
-                    if(!player.isOnline()){
+                if (playerData != null) {
+                    playerData.getStorages().put(storage.getId(), STORAGE_CONTEXT + "_" + blockStorageConfigID + "_" + id);
+                    if (!player.isOnline()) {
                         playerDataManager.savePlayerData(uuid);
                     }
                 }
@@ -127,29 +133,29 @@ public class BlockStorage {
         return storage;
     }
 
-    public boolean existStoragePlayer(String id){
+    public boolean existStoragePlayer(String id) {
         if (id == null) return false;
         return storages.containsKey(id);
     }
 
-    public Storage getStoragePlayer(String id){
+    public Storage getStoragePlayer(String id) {
         if (id == null) return null;
-        return storages.getOrDefault(id,createStoragePlayer(id));
+        return storages.getOrDefault(id, createStoragePlayer(id));
     }
 
-    public Storage removeStoragePlayer(String id){
+    public Storage removeStoragePlayer(String id) {
         if (id == null) return null;
         return storages.remove(id);
     }
 
-    public Storage createStoragePlayer(String id){
+    public Storage createStoragePlayer(String id) {
         if (id == null || existStoragePlayer(id)) return null;
 
         Managers managers = StorageMechanic.getInstance().getManagers();
         StorageManager storageManager = managers.getStorageManager();
         BlockStorageConfig blockStorageConfig = managers.getBlockStorageConfigManager().findBlockStorageConfigById(blockStorageConfigID).orElse(null);
 
-        Storage storage = storageManager.createStorage(blockStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.Context.BLOCK_STORAGE, new ArrayList<>(){{
+        Storage storage = storageManager.createStorage(blockStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.BLOCK_STORAGE, new ArrayList<>() {{
             add(blockStorageConfigID);
             add(getId());
             add(id);
@@ -158,7 +164,6 @@ public class BlockStorage {
 
         return storage;
     }
-
 
 
     public Location removeLocationAt(int index) {
@@ -241,41 +246,41 @@ public class BlockStorage {
         return locs.contains(loc);
     }
 
-    public void delete(){ //DELETE ALL FROM PLAYER DATA
+    public void delete() { //DELETE ALL FROM PLAYER DATA
 
         PlayerDataManager playerDataManager = StorageMechanic.getInstance().getManagers().getDataManager().getPlayerDataManager();
 
         //BLOCK STORAGE
-        if(playerDataManager.existPlayerData(owner)){
+        if (playerDataManager.existPlayerData(owner)) {
             OfflinePlayer OwnerOfflinePlayer = getOwnerOfflinePlayer();
             PlayerData playerData = playerDataManager.getPlayerData(owner);
-            if(playerData != null){
+            if (playerData != null) {
 
                 playerData.getBlockStorages().remove(id);
 
-                if(!OwnerOfflinePlayer.isOnline()){
+                if (!OwnerOfflinePlayer.isOnline()) {
                     playerDataManager.savePlayerData(owner);
                 }
             }
         }
 
         //STORAGES
-        if(!storages.isEmpty()){
-            for(String playerUUID : storages.keySet()){
+        if (!storages.isEmpty()) {
+            for (String playerUUID : storages.keySet()) {
 
                 UUID uuid = UUID.fromString(playerUUID);
                 Storage storage = storages.get(playerUUID);
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 
-                if(playerDataManager.existPlayerData(uuid)){
+                if (playerDataManager.existPlayerData(uuid)) {
 
                     PlayerData playerData = playerDataManager.getPlayerData(uuid);
 
-                    if(playerData != null){
+                    if (playerData != null) {
 
                         playerData.getStorages().remove(storage.getId());
 
-                        if(!offlinePlayer.isOnline()){
+                        if (!offlinePlayer.isOnline()) {
                             playerDataManager.savePlayerData(uuid);
                         }
 

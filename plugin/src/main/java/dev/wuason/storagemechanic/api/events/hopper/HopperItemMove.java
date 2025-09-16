@@ -6,7 +6,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class HopperItemMove extends Event {

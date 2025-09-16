@@ -21,7 +21,7 @@ public class StorageConfig {
     private final boolean storageItemsWhiteListEnabled;
     private final ArrayList<StorageItemConfig> storageItemsBlackListConfig;
     private final boolean storageItemsBlackListEnabled;
-    private final HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig;
+    private final HashMap<Integer, HashMap<Integer, StorageItemInterfaceConfig>> storageItemsInterfaceConfig;
     private final boolean storageItemsInterfaceEnabled;
 
     private final ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig;
@@ -31,7 +31,7 @@ public class StorageConfig {
     private final int maxViewers;
 
 
-    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, HashMap<Integer, HashMap<Integer,StorageItemInterfaceConfig>> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled, StorageProperties storageProperties, ArrayList<StageStorage> stagesOrder, long refreshTimeStages, HashMap<String, StageStorage> stagesHashMap, int maxViewers) {
+    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, HashMap<Integer, HashMap<Integer, StorageItemInterfaceConfig>> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled, StorageProperties storageProperties, ArrayList<StageStorage> stagesOrder, long refreshTimeStages, HashMap<String, StageStorage> stagesHashMap, int maxViewers) {
         this.id = id;
         this.rows = rows;
         this.pages = pages;

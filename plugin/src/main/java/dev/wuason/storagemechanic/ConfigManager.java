@@ -7,14 +7,10 @@ import dev.wuason.libs.boostedyaml.settings.general.GeneralSettings;
 import dev.wuason.libs.boostedyaml.settings.loader.LoaderSettings;
 import dev.wuason.libs.boostedyaml.settings.updater.UpdaterSettings;
 import dev.wuason.mechanics.utils.AdventureUtils;
-import dev.wuason.storagemechanic.compatibilities.ItemsAdderEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Locale;
 
 public class ConfigManager {
@@ -50,8 +46,8 @@ public class ConfigManager {
         base.mkdirs();
         String selectedLang = mainConfig.getString("config.lang", "en").toLowerCase(Locale.ENGLISH);
         File file = new File(base.getPath() + "/" + selectedLang + ".yml");
-        if(core.getResource("lang/"+ selectedLang +".yml") == null && !file.exists()) selectedLang = "en";
-        YamlDocument config = YamlDocument.create(file, core.getResource("lang/"+ selectedLang +".yml"), GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("config-version")).build());
+        if (core.getResource("lang/" + selectedLang + ".yml") == null && !file.exists()) selectedLang = "en";
+        YamlDocument config = YamlDocument.create(file, core.getResource("lang/" + selectedLang + ".yml"), GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("config-version")).build());
         langDocumentYaml = config;
     }
 

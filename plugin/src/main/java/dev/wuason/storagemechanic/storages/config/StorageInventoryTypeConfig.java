@@ -4,16 +4,16 @@ public enum StorageInventoryTypeConfig {
     CHEST(54),
     DROPPER(9),
     HOPPER(5),
-    DISPENSER(9)
-    ;
+    DISPENSER(9);
 
     private int size;
+
     private StorageInventoryTypeConfig(int size) {
         this.size = size;
     }
 
 
-    public int getSize(){
+    public int getSize() {
         return size;
     }
 }

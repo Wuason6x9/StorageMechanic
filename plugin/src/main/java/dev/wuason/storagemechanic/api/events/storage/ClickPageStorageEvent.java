@@ -19,6 +19,7 @@ public class ClickPageStorageEvent extends Event {
     public HandlerList getHandlers() {
         return getHandlerList();
     }
+
     public static HandlerList getHandlerList() {
         return HANDLERS;
     }

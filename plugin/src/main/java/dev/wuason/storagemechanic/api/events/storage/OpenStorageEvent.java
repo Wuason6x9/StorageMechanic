@@ -1,6 +1,5 @@
 package dev.wuason.storagemechanic.api.events.storage;
 
-import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

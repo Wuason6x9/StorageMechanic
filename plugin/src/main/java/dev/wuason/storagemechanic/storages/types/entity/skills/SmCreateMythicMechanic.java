@@ -21,8 +21,9 @@ import java.util.UUID;
 public class SmCreateMythicMechanic implements ITargetedEntitySkill {
     private StorageMechanic core;
     private String storageConfigId;
+
     public SmCreateMythicMechanic(MythicLineConfig config, StorageMechanic core) {
-        storageConfigId = config.getString("id","a");
+        storageConfigId = config.getString("id", "a");
         this.core = core;
     }
 
@@ -35,27 +36,27 @@ public class SmCreateMythicMechanic implements ITargetedEntitySkill {
         String idTriggerSkill = null;
         String type = null;
 
-        if(Compatibilities.isMythicCrucibleLoaded()){
-            if(skillMetadata.getCaster() instanceof Furniture) {
+        if (Compatibilities.isMythicCrucibleLoaded()) {
+            if (skillMetadata.getCaster() instanceof Furniture) {
                 location = BukkitAdapter.adapt(((Furniture) caster).getLocation());
                 id = ((Furniture) caster).getEntity().getUniqueId().toString();
                 idTriggerSkill = ((Furniture) caster).getFurnitureData().getItem().getInternalName();
                 type = "FURNITURE";
             }
         }
-        if(skillMetadata.getCaster() instanceof ActiveMob) {
+        if (skillMetadata.getCaster() instanceof ActiveMob) {
             location = BukkitAdapter.adapt(((ActiveMob) caster).getLocation());
             id = ((ActiveMob) caster).getEntity().getUniqueId().toString();
             idTriggerSkill = ((ActiveMob) caster).getType().getInternalName();
             type = "MOB";
         }
 
-        if(core.getManagers().getStorageManager().storageExists(id)) return SkillResult.SUCCESS;
-        if(!core.getManagers().getStorageConfigManager().existsStorageConfig(storageConfigId)){
+        if (core.getManagers().getStorageManager().storageExists(id)) return SkillResult.SUCCESS;
+        if (!core.getManagers().getStorageConfigManager().existsStorageConfig(storageConfigId)) {
             return SkillResult.INVALID_CONFIG;
         }
         String finalType = type;
-        Storage storage = core.getManagers().getStorageManager().createStorage(storageConfigId, UUID.fromString(id),new StorageOriginContext(StorageOriginContext.Context.ENTITY_STORAGE, new ArrayList<>(){{
+        Storage storage = core.getManagers().getStorageManager().createStorage(storageConfigId, UUID.fromString(id), new StorageOriginContext(StorageOriginContext.Context.ENTITY_STORAGE, new ArrayList<>() {{
             add(finalType);
         }}));
         return SkillResult.SUCCESS;

@@ -21,12 +21,13 @@ public class BlockMechanicManager {
     }
 
     public void registerMechanic(BlockMechanic mechanic) {
-        if(mechanic instanceof Listener) {
+        if (mechanic instanceof Listener) {
             Bukkit.getPluginManager().registerEvents((Listener) mechanic, core);
         }
         this.mechanics.put(mechanic.getId(), mechanic);
     }
-    public void regDef(){
+
+    public void regDef() {
         HOPPER_BLOCK_MECHANIC = new HopperBlockMechanic(core);
 
         registerMechanic(HOPPER_BLOCK_MECHANIC);

@@ -33,7 +33,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.InvocationTargetException;
@@ -102,8 +101,7 @@ public class BlockStorageManager implements Listener {
                          IllegalAccessException | NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 }
-            }
-            else {
+            } else {
                 Bukkit.getPluginManager().registerEvents(new OraxenEventsOld(this), core);
             }
         }
@@ -371,7 +369,8 @@ public class BlockStorageManager implements Listener {
         if (event.getAction().toString().contains("AIR") || event.getAction().equals(Action.PHYSICAL)) return;
         String adapterID = Adapter.getAdapterId(event.getClickedBlock());
         if (adapterID.startsWith("ce:")) return;
-        if ((adapterID.contains("or:") || adapterID.contains("nx:")) && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+        if ((adapterID.contains("or:") || adapterID.contains("nx:")) && event.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+            return;
         onBlockInteract(event.getClickedBlock(), event.getItem(), event.getPlayer(), event, event.getAction(), adapterID);
     }
 
@@ -400,7 +399,7 @@ public class BlockStorageManager implements Listener {
                             cancellable.setCancelled(true);
                             switch (blockStorageConfig.getBlockStorageType()) {
                                 case PERSONAL -> {
-                                     if (!blockStorage.existStoragePlayer(player)) {
+                                    if (!blockStorage.existStoragePlayer(player)) {
                                         blockStorage.createStoragePlayer(player.getUniqueId().toString());
                                     }
                                     openBlockStorage(blockStorageData[0], player);

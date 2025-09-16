@@ -4,7 +4,6 @@ import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.storages.Storage;
-import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.WaitingInputData;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
@@ -15,7 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SearchPageItemInterface extends ItemInterface {
@@ -31,7 +29,7 @@ public class SearchPageItemInterface extends ItemInterface {
     public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
         Player player = (Player) event.getWhoClicked();
         player.closeInventory();
-        player.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.storage.search_page_enter"),null));
+        player.sendMessage(AdventureUtils.deserializeLegacy(core.getManagers().getConfigManager().getLangDocumentYaml().getString("messages.storage.search_page_enter"), null));
         UUID playerId = player.getUniqueId();
         getWaitingInput().put(playerId, new WaitingInputData(storage, storageInventory.getPage(), player.getLocation(), this));
         AtomicLong timer = new AtomicLong(0);

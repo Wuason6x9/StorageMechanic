@@ -4,7 +4,6 @@ import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.actions.events.def.ClickItemInterfaceTypeActionEvent;
 import dev.wuason.storagemechanic.items.ItemInterface;
 import dev.wuason.storagemechanic.storages.Storage;
-import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.entity.Player;
@@ -26,7 +25,7 @@ public class ActionItemInterface extends ItemInterface {
     @Override
     public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
         Player player = (Player) event.getWhoClicked();
-        if(!core.getManagers().getActionManager().isActionConfigRegistered(actionId)) {
+        if (!core.getManagers().getActionManager().isActionConfigRegistered(actionId)) {
             player.sendMessage("§cAction with id " + actionId + " not found");
             return;
         }

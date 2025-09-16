@@ -6,13 +6,13 @@ import java.util.UUID;
 
 public class BlockStorageData implements Serializable {
     private UUID ownerUUID;
-    private HashMap<String,String> storagesID;
+    private HashMap<String, String> storagesID;
     private String blockStorageID;
     private String blockStorageConfigID;
 
     private String[] locs;
 
-    public BlockStorageData(UUID ownerUUID, HashMap<String,String> storagesID, String blockStorageID, String blockStorageConfigID, String[] locs) {
+    public BlockStorageData(UUID ownerUUID, HashMap<String, String> storagesID, String blockStorageID, String blockStorageConfigID, String[] locs) {
         this.ownerUUID = ownerUUID;
         this.storagesID = storagesID;
         this.blockStorageID = blockStorageID;
@@ -24,7 +24,7 @@ public class BlockStorageData implements Serializable {
         return ownerUUID;
     }
 
-    public HashMap<String,String> getStoragesID() {
+    public HashMap<String, String> getStoragesID() {
         return storagesID;
     }
 

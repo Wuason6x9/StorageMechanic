@@ -9,61 +9,61 @@ import org.bukkit.event.Listener;
 import java.util.*;
 
 public class StorageApiManager implements Listener {
-   private StorageMechanic core;
+    private StorageMechanic core;
 
-   private HashMap<String,StorageApi> storageApis = new HashMap<>();
+    private HashMap<String, StorageApi> storageApis = new HashMap<>();
 
     public StorageApiManager(StorageMechanic core) {
         this.core = core;
     }
 
-    public StorageApi getStorageApi(String id){
-        if(storageApis.containsKey(id)){
+    public StorageApi getStorageApi(String id) {
+        if (storageApis.containsKey(id)) {
             return storageApis.get(id);
         }
         StorageApi storageApi = core.getManagers().getDataManager().getStorageManagerData().getStorageApiManager().loadStorageApi(id);
-        if(storageApi == null) return null;
-        storageApis.put(id,storageApi);
+        if (storageApi == null) return null;
+        storageApis.put(id, storageApi);
         return storageApi;
     }
 
-    public boolean existStorageApi(String id){
-        if(storageApis.containsKey(id)){
+    public boolean existStorageApi(String id) {
+        if (storageApis.containsKey(id)) {
             return true;
         }
         return core.getManagers().getDataManager().getStorageManagerData().getStorageApiManager().existStorageApiData(id);
     }
 
-    public StorageApi createStorageApi(String id, StorageApiType type, String storageConfigId){
-        StorageOriginContext storageOriginContext = new StorageOriginContext(StorageOriginContext.Context.API, new ArrayList<>(){{
+    public StorageApi createStorageApi(String id, StorageApiType type, String storageConfigId) {
+        StorageOriginContext storageOriginContext = new StorageOriginContext(StorageOriginContext.Context.API, new ArrayList<>() {{
             add(id);
             add(storageConfigId);
             add(type.toString());
         }});
 
-        Storage storage = core.getManagers().getStorageManager().createStorage(storageConfigId,storageOriginContext);
-        if(storage == null) return null;
-        StorageApi storageApi = new StorageApi(type,storage,id);
-        storageApis.put(id,storageApi);
+        Storage storage = core.getManagers().getStorageManager().createStorage(storageConfigId, storageOriginContext);
+        if (storage == null) return null;
+        StorageApi storageApi = new StorageApi(type, storage, id);
+        storageApis.put(id, storageApi);
         return storageApi;
     }
 
-    public void removeStorageApi(String id){
+    public void removeStorageApi(String id) {
         core.getManagers().getStorageManager().removeStorage(getStorageApi(id).getStorage().getId());
-        if(storageApis.containsKey(id)){
+        if (storageApis.containsKey(id)) {
             StorageApi storageApi = storageApis.get(id);
             storageApi.getStorage().closeAllInventory();
             core.getManagers().getStorageManager().removeStorage(storageApi.getStorage().getId());
-        }
-        else {
+        } else {
             StorageApi storageApi = core.getManagers().getDataManager().getStorageManagerData().getStorageApiManager().loadStorageApi(id);
             core.getManagers().getStorageManager().removeStorage(storageApi.getStorage().getId());
         }
         storageApis.remove(id);
         core.getManagers().getDataManager().getStorageManagerData().getStorageApiManager().removeStorageApiData(id);
     }
-    public void saveStorageApi(String id, SaveCause saveCause){
-        if(!storageApis.containsKey(id)) return;
+
+    public void saveStorageApi(String id, SaveCause saveCause) {
+        if (!storageApis.containsKey(id)) return;
         StorageApi storageApi = storageApis.get(id);
         core.getManagers().getStorageManager().saveStorage(storageApi.getStorage(), saveCause);
         storageApis.remove(id);
@@ -74,15 +74,15 @@ public class StorageApiManager implements Listener {
         return storageApis;
     }
 
-    public void stop(){
-        while (!storageApis.isEmpty()){
+    public void stop() {
+        while (!storageApis.isEmpty()) {
             String id = (String) storageApis.keySet().toArray()[0];
-            if(id == null) continue;
+            if (id == null) continue;
             saveStorageApi(id, SaveCause.STOPPING_SAVE);
         }
     }
 
-    public Set<String> getAllStoragesId(){
+    public Set<String> getAllStoragesId() {
         Set<String> storagesId = new HashSet<>();
         storagesId.addAll(storageApis.keySet());
         storagesId.addAll(Arrays.stream(core.getManagers().getDataManager().getStorageManagerData().getStorageApiManager().getAllStoragesApiDataIds()).toList());

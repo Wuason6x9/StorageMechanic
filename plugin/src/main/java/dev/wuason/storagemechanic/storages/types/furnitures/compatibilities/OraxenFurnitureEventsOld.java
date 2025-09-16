@@ -18,31 +18,33 @@ public class OraxenFurnitureEventsOld implements Listener {
     }
 
     @EventHandler
-    public void onFurnitureInteract(OraxenFurnitureInteractEvent event){
+    public void onFurnitureInteract(OraxenFurnitureInteractEvent event) {
         String adapterId = ADAPTER_TYPE + event.getMechanic().getItemID();
         EventCancel eventCancel = new EventCancel();
-        furnitureStorageManager.onFurnitureInteract(adapterId, event.getPlayer(),event.getBaseEntity(),event.getItemInHand(),eventCancel);
-        if(eventCancel.isCancelled()){
+        furnitureStorageManager.onFurnitureInteract(adapterId, event.getPlayer(), event.getBaseEntity(), event.getItemInHand(), eventCancel);
+        if (eventCancel.isCancelled()) {
             event.setCancelled(true);
         }
 
     }
+
     @EventHandler
-    public void onFurniturePlace(OraxenFurniturePlaceEvent event){
+    public void onFurniturePlace(OraxenFurniturePlaceEvent event) {
         String adapterId = ADAPTER_TYPE + event.getMechanic().getItemID();
         EventCancel eventCancel = new EventCancel();
-        furnitureStorageManager.onFurniturePlace(adapterId, event.getPlayer(),event.getBaseEntity(),event.getItemInHand(),eventCancel);
-        if(eventCancel.isCancelled()){
+        furnitureStorageManager.onFurniturePlace(adapterId, event.getPlayer(), event.getBaseEntity(), event.getItemInHand(), eventCancel);
+        if (eventCancel.isCancelled()) {
             event.setCancelled(true);
         }
 
     }
+
     @EventHandler
-    public void onFurnitureBreak(OraxenFurnitureBreakEvent event){
+    public void onFurnitureBreak(OraxenFurnitureBreakEvent event) {
         String adapterId = ADAPTER_TYPE + event.getMechanic().getItemID();
         EventCancel eventCancel = new EventCancel();
-        furnitureStorageManager.onFurnitureBreak(adapterId, event.getPlayer(),event.getBaseEntity(),event.getPlayer().getInventory().getItemInMainHand(),eventCancel);
-        if(eventCancel.isCancelled()){
+        furnitureStorageManager.onFurnitureBreak(adapterId, event.getPlayer(), event.getBaseEntity(), event.getPlayer().getInventory().getItemInMainHand(), eventCancel);
+        if (eventCancel.isCancelled()) {
             event.setCancelled(true);
         }
 

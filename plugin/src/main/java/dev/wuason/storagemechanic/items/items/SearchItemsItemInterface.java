@@ -12,7 +12,10 @@ import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.NextPageI
 import dev.wuason.libs.invmechaniclib.types.pages.content.normal.items.PreviousPageItem;
 import dev.wuason.mechanics.configuration.inventories.InventoryConfig;
 import dev.wuason.mechanics.items.ItemBuilder;
-import dev.wuason.mechanics.utils.*;
+import dev.wuason.mechanics.utils.AdventureUtils;
+import dev.wuason.mechanics.utils.InventoryUtils;
+import dev.wuason.mechanics.utils.StorageUtils;
+import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.mechanics.utils.functions.QuadConsumer;
 import dev.wuason.nms.wrappers.NMSManager;
 import dev.wuason.storagemechanic.StorageMechanic;

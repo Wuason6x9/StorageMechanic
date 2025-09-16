@@ -1,7 +1,6 @@
 package dev.wuason.storagemechanic.storages.inventory;
 
 import dev.wuason.libs.invmechaniclib.events.CloseEvent;
-import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.nms.wrappers.NMSManager;
@@ -19,12 +18,14 @@ import dev.wuason.storagemechanic.storages.Storage;
 import dev.wuason.storagemechanic.storages.StorageOriginContext;
 import dev.wuason.storagemechanic.storages.config.*;
 import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanicManager;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -32,8 +33,10 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class StorageInventory implements InventoryHolder {
 
@@ -95,7 +98,7 @@ public class StorageInventory implements InventoryHolder {
         this.storage.closeStorage(this.page, player); //TODO: Modify this method
 
         //call method to close the storage bug
-        if(storageConfig.getRefreshTimeStages() > 0){
+        if (storageConfig.getRefreshTimeStages() > 0) {
             NMSManager.getVersionWrapper().sendCloseInventoryPacket(player);
         }
 
@@ -219,7 +222,7 @@ public class StorageInventory implements InventoryHolder {
     public void clickItemBlocked(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         ItemStack cursor = event.getCursor();
-        if(event.getHotbarButton() != -1) {
+        if (event.getHotbarButton() != -1) {
             cursor = player.getInventory().getItem(event.getHotbarButton());
         }
         StorageConfig storageConfig = this.storage.getStorageConfig();
@@ -238,7 +241,7 @@ public class StorageInventory implements InventoryHolder {
 
     public void clickItemCheck(InventoryClickEvent event) {
         ItemStack cursor = event.getCursor();
-        if(event.getHotbarButton() != -1) {
+        if (event.getHotbarButton() != -1) {
             cursor = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
         }
         Managers managers = StorageMechanic.getInstance().getManagers();
@@ -281,7 +284,7 @@ public class StorageInventory implements InventoryHolder {
     public void clickItemCheckList(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         ItemStack cursor = event.getCursor();
-        if(event.getHotbarButton() != -1) {
+        if (event.getHotbarButton() != -1) {
             cursor = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
         }
         StorageConfig storageConfig = this.storage.getStorageConfig();

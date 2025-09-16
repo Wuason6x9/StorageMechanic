@@ -9,15 +9,18 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class StorageUtils {
 
-    public static boolean isValidConfigId(String id){
-        if(!id.contains("_")) return true;
+    public static boolean isValidConfigId(String id) {
+        if (!id.contains("_")) return true;
         return false;
     }
+
     public static boolean canNotBuild(Player player, Block block) {
         if (player == null) return false;
         final Location bLoc = (new Location(block.getLocation().getWorld(), block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).clone().add(0.5, 0.5, 0.5);
@@ -26,13 +29,13 @@ public class StorageUtils {
     }
 
     @Deprecated
-    public static ArrayList<Integer> configFill(List<String> arrayList){
+    public static ArrayList<Integer> configFill(List<String> arrayList) {
 
         ArrayList<Integer> arrayListNumbers = new ArrayList<>();
 
-        for(String number : arrayList){
+        for (String number : arrayList) {
 
-            if(!number.contains("-")) {
+            if (!number.contains("-")) {
                 if (Utils.isNumber(number)) {
                     arrayListNumbers.add(Integer.parseInt(number));
                 }
@@ -41,11 +44,11 @@ public class StorageUtils {
 
             String numbers[] = number.split("-");
 
-            if(numbers.length>0){
-                for(String n : numbers){
-                    if(!Utils.isNumber(n)) continue;
+            if (numbers.length > 0) {
+                for (String n : numbers) {
+                    if (!Utils.isNumber(n)) continue;
                 }
-                for(int i=Integer.parseInt(numbers[0]);i<Integer.parseInt(numbers[1])+1;i++){
+                for (int i = Integer.parseInt(numbers[0]); i < Integer.parseInt(numbers[1]) + 1; i++) {
                     arrayListNumbers.add(i);
                 }
             }
@@ -60,9 +63,8 @@ public class StorageUtils {
      * Adds an item to the player's inventory. If the inventory is full, the item will be dropped
      * at the player's location.
      *
-     * @param player     The player whose inventory the item will be added to.
-     * @param itemStack  The item to be added to the inventory.
-     *
+     * @param player    The player whose inventory the item will be added to.
+     * @param itemStack The item to be added to the inventory.
      * @deprecated This method is deprecated and will be removed in a future release. Use {@link dev.wuason.mechanics.utils.StorageUtils#addItemToInventoryOrDrop(Player, ItemStack)}
      * methods directly instead.
      */
@@ -78,18 +80,19 @@ public class StorageUtils {
         }
     }
 
-    public static String getStoragePhysicalId(Location loc){
+    public static String getStoragePhysicalId(Location loc) {
         return loc.getWorld().getUID() + "_" + loc.getBlockX() + "_" + loc.getY() + "_" + loc.getBlockZ();
     }
-    public static Location getStoragePhysicalLocation(String id){
+
+    public static Location getStoragePhysicalLocation(String id) {
         String[] loc = id.split("_");
-        return new Location(Bukkit.getWorld(UUID.fromString(loc[0])),Double.parseDouble(loc[1]),Double.parseDouble(loc[2]),Double.parseDouble(loc[3]));
+        return new Location(Bukkit.getWorld(UUID.fromString(loc[0])), Double.parseDouble(loc[1]), Double.parseDouble(loc[2]), Double.parseDouble(loc[3]));
     }
 
 
-    public static boolean numbersCheck(List<Integer> numbers, int maxNumber, int minNumber){
-        for(int number : numbers){
-            if(number>maxNumber || number<minNumber) return false;
+    public static boolean numbersCheck(List<Integer> numbers, int maxNumber, int minNumber) {
+        for (int number : numbers) {
+            if (number > maxNumber || number < minNumber) return false;
         }
         return true;
     }

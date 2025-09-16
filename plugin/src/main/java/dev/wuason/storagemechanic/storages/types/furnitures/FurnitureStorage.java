@@ -26,25 +26,24 @@ public class FurnitureStorage {
     public final static String STORAGE_CONTEXT = "FURNITURE_STORAGE";
 
 
-
-    public FurnitureStorage(String id, String furnitureStorageConfigID, HashMap<String,Storage> storages,UUID owner,ArrayList<Location> locs) {
+    public FurnitureStorage(String id, String furnitureStorageConfigID, HashMap<String, Storage> storages, UUID owner, ArrayList<Location> locs) {
         this.id = id;
         this.furnitureStorageConfigID = furnitureStorageConfigID;
         this.storages = storages;
-        if(owner != null) this.owner = owner;
+        if (owner != null) this.owner = owner;
         this.locs = locs;
         PlayerDataManager playerDataManager = StorageMechanic.getInstance().getManagers().getDataManager().getPlayerDataManager();
         //Storage player data
-        if(!storages.isEmpty()){
-            for(String playerUUID : storages.keySet()){
+        if (!storages.isEmpty()) {
+            for (String playerUUID : storages.keySet()) {
                 UUID uuid = UUID.fromString(playerUUID);
                 Storage storage = storages.get(playerUUID);
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                if(playerDataManager.existPlayerData(uuid)){
+                if (playerDataManager.existPlayerData(uuid)) {
                     PlayerData playerData = playerDataManager.getPlayerData(uuid);
-                    if(playerData != null){
-                        playerData.getStorages().put(storage.getId(),STORAGE_CONTEXT + "_" + furnitureStorageConfigID + "_" + id);
-                        if(!offlinePlayer.isOnline()){
+                    if (playerData != null) {
+                        playerData.getStorages().put(storage.getId(), STORAGE_CONTEXT + "_" + furnitureStorageConfigID + "_" + id);
+                        if (!offlinePlayer.isOnline()) {
                             playerDataManager.savePlayerData(uuid);
                         }
                     }
@@ -52,13 +51,13 @@ public class FurnitureStorage {
             }
         }
         //FurnitureStorage player data
-        if(owner != null){
-            if(playerDataManager.existPlayerData(owner)){
+        if (owner != null) {
+            if (playerDataManager.existPlayerData(owner)) {
                 PlayerData playerData = playerDataManager.getPlayerData(owner);
-                if(playerData != null){
+                if (playerData != null) {
                     playerData.getFurnitureStorages().add(id);
                     OfflinePlayer player = Bukkit.getOfflinePlayer(owner);
-                    if(!player.isOnline()){
+                    if (!player.isOnline()) {
                         playerDataManager.savePlayerData(owner);
                     }
                 }
@@ -73,14 +72,16 @@ public class FurnitureStorage {
     public Player getOwnerPlayer() {
         return Bukkit.getPlayer(owner);
     }
+
     public OfflinePlayer getOwnerOfflinePlayer() {
         return Bukkit.getOfflinePlayer(owner);
     }
-    public UUID getOwnerUUID(){
+
+    public UUID getOwnerUUID() {
         return owner;
     }
 
-    
+
     public FurnitureStorageConfig getFurnitureStorageConfig() {
         return StorageMechanic.getInstance().getManagers().getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).orElse(null);
     }
@@ -93,33 +94,36 @@ public class FurnitureStorage {
         return locs.get(0);
     }
 
-    public boolean existStoragePlayer(Player player){
+    public boolean existStoragePlayer(Player player) {
         return storages.containsKey(player.getUniqueId().toString());
     }
-    public Storage getStoragePlayer(Player player){
+
+    public Storage getStoragePlayer(Player player) {
         return existStoragePlayer(player) ? storages.get(player.getUniqueId().toString()) : null;
     }
-    public Storage removeStoragePlayer(Player player){
+
+    public Storage removeStoragePlayer(Player player) {
         return existStoragePlayer(player) ? storages.remove(player.getUniqueId().toString()) : null;
     }
-    public Storage createStoragePlayer(Player player){
+
+    public Storage createStoragePlayer(Player player) {
         Storage storage = null;
-        if(!existStoragePlayer(player)){
+        if (!existStoragePlayer(player)) {
             Managers managers = StorageMechanic.getInstance().getManagers();
-            storage = managers.getStorageManager().createStorage(managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.FURNITURE_STORAGE, new ArrayList<>(){{
+            storage = managers.getStorageManager().createStorage(managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).get().getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.FURNITURE_STORAGE, new ArrayList<>() {{
                 add(furnitureStorageConfigID);
                 add(getId());
                 add(player.getUniqueId().toString());
             }}));
-            storages.put(player.getUniqueId().toString(),storage);
+            storages.put(player.getUniqueId().toString(), storage);
             //Storage Player Data
             PlayerDataManager playerDataManager = managers.getDataManager().getPlayerDataManager();
             UUID uuid = player.getUniqueId();
-            if(playerDataManager.existPlayerData(uuid)){
+            if (playerDataManager.existPlayerData(uuid)) {
                 PlayerData playerData = playerDataManager.getPlayerData(uuid);
-                if(playerData != null){
-                    playerData.getStorages().put(storage.getId(),STORAGE_CONTEXT + "_" + furnitureStorageConfigID + "_" + id);
-                    if(!player.isOnline()){
+                if (playerData != null) {
+                    playerData.getStorages().put(storage.getId(), STORAGE_CONTEXT + "_" + furnitureStorageConfigID + "_" + id);
+                    if (!player.isOnline()) {
                         playerDataManager.savePlayerData(uuid);
                     }
                 }
@@ -128,29 +132,29 @@ public class FurnitureStorage {
         return storage;
     }
 
-    public boolean existStoragePlayer(String id){
+    public boolean existStoragePlayer(String id) {
         if (id == null) return false;
         return storages.containsKey(id);
     }
 
-    public Storage getStoragePlayer(String id){
+    public Storage getStoragePlayer(String id) {
         if (id == null) return null;
         return storages.get(id);
     }
 
-    public Storage removeStoragePlayer(String id){
+    public Storage removeStoragePlayer(String id) {
         if (id == null) return null;
         return storages.remove(id);
     }
 
-    public Storage createStoragePlayer(String id){
+    public Storage createStoragePlayer(String id) {
         if (id == null || existStoragePlayer(id)) return null;
 
         Managers managers = StorageMechanic.getInstance().getManagers();
         StorageManager storageManager = managers.getStorageManager();
         FurnitureStorageConfig furnitureStorageConfig = managers.getFurnitureStorageConfigManager().findFurnitureStorageConfigById(furnitureStorageConfigID).orElse(null);
 
-        Storage storage = storageManager.createStorage(furnitureStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.FURNITURE_STORAGE, new ArrayList<>(){{
+        Storage storage = storageManager.createStorage(furnitureStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.FURNITURE_STORAGE, new ArrayList<>() {{
             add(furnitureStorageConfigID);
             add(getId());
             add(id);
@@ -159,7 +163,6 @@ public class FurnitureStorage {
 
         return storage;
     }
-
 
 
     public Location removeLocationAt(int index) {
@@ -242,41 +245,41 @@ public class FurnitureStorage {
         return locs.contains(loc);
     }
 
-    public void delete(){ //DELETE ALL FROM PLAYER DATA
+    public void delete() { //DELETE ALL FROM PLAYER DATA
 
         PlayerDataManager playerDataManager = StorageMechanic.getInstance().getManagers().getDataManager().getPlayerDataManager();
 
         //Furniture STORAGE
-        if(playerDataManager.existPlayerData(owner)){
+        if (playerDataManager.existPlayerData(owner)) {
             OfflinePlayer OwnerOfflinePlayer = getOwnerOfflinePlayer();
             PlayerData playerData = playerDataManager.getPlayerData(owner);
-            if(playerData != null){
+            if (playerData != null) {
 
                 playerData.getFurnitureStorages().remove(id);
 
-                if(!OwnerOfflinePlayer.isOnline()){
+                if (!OwnerOfflinePlayer.isOnline()) {
                     playerDataManager.savePlayerData(owner);
                 }
             }
         }
 
         //STORAGES
-        if(!storages.isEmpty()){
-            for(String playerUUID : storages.keySet()){
+        if (!storages.isEmpty()) {
+            for (String playerUUID : storages.keySet()) {
 
                 UUID uuid = UUID.fromString(playerUUID);
                 Storage storage = storages.get(playerUUID);
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 
-                if(playerDataManager.existPlayerData(uuid)){
+                if (playerDataManager.existPlayerData(uuid)) {
 
                     PlayerData playerData = playerDataManager.getPlayerData(uuid);
 
-                    if(playerData != null){
+                    if (playerData != null) {
 
                         playerData.getStorages().remove(storage.getId());
 
-                        if(!offlinePlayer.isOnline()){
+                        if (!offlinePlayer.isOnline()) {
                             playerDataManager.savePlayerData(uuid);
                         }
 

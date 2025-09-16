@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class  StorageData implements Serializable {
+public class StorageData implements Serializable {
     private static final long serialVersionUID = 1101L;
     private final Map<Integer, ItemStack[]> items;
     private final String id;
@@ -46,9 +46,11 @@ public class  StorageData implements Serializable {
     public String getStorageOriginContext() {
         return storageOriginContext;
     }
+
     public List<String> getStorageOriginContextData() {
         return List.of(storageOriginContextData);
     }
+
     public Date getLastOpenDate() {
         return lastOpenDate;
     }

@@ -34,15 +34,16 @@ public class PlaceHolderApiStorageApi extends PlaceholderExpansion {
     public boolean persist() {
         return true;
     }
+
     @Override
     public String onRequest(OfflinePlayer player, String params) {
-        if(params == null || params.isEmpty() || params.indexOf("_") == -1) return null;
+        if (params == null || params.isEmpty() || params.indexOf("_") == -1) return null;
 
         String param = params.substring(0, params.indexOf("_"));
 
-        switch (param.toLowerCase(Locale.ENGLISH)){
+        switch (param.toLowerCase(Locale.ENGLISH)) {
             case "exist" -> {
-                String id = params.substring(params.indexOf("_")+1);
+                String id = params.substring(params.indexOf("_") + 1);
                 return plugin.getManagers().getStorageApiManager().existStorageApi(id) + "";
             }
         }

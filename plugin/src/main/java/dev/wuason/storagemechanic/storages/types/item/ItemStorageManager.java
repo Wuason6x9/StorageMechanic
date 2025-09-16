@@ -32,7 +32,7 @@ import java.util.UUID;
 
 public class ItemStorageManager implements Listener {
 
-    private final static NamespacedKey NAMESPACED_KEY = new NamespacedKey(StorageMechanic.getInstance(),"sm_item_storage");
+    private final static NamespacedKey NAMESPACED_KEY = new NamespacedKey(StorageMechanic.getInstance(), "sm_item_storage");
     public final static String STORAGE_CONTEXT = "ITEM_STORAGE";
 
     private StorageMechanic core;
@@ -42,107 +42,113 @@ public class ItemStorageManager implements Listener {
     }
 
     @EventHandler
-    public void OnInteract(PlayerInteractEvent e){
+    public void OnInteract(PlayerInteractEvent e) {
 
-        if(e.getHand() != null && e.getHand().equals(EquipmentSlot.HAND) && e.hasItem() && !e.getItem().getType().equals(Material.AIR)){
-            Debug.debugToPlayer("ItemStorageManager:OnInteract:1",e.getPlayer());
-            if(isItemStorage(e.getItem())){
+        if (e.getHand() != null && e.getHand().equals(EquipmentSlot.HAND) && e.hasItem() && !e.getItem().getType().equals(Material.AIR)) {
+            Debug.debugToPlayer("ItemStorageManager:OnInteract:1", e.getPlayer());
+            if (isItemStorage(e.getItem())) {
                 String[] src = getDataFromItemStack(e.getItem()).split(":");
                 StorageManager storageManager = core.getManagers().getStorageManager();
-                if(!storageManager.storageExists(src[1])){
+                if (!storageManager.storageExists(src[1])) {
                     removeStorageFromItemStack(e.getItem());
                     removeStoragePlayerData(UUID.fromString(src[2]), src[1]);
-                    Bukkit.getScheduler().runTask(core,() -> e.getPlayer().getInventory().remove(e.getItem()));
+                    Bukkit.getScheduler().runTask(core, () -> e.getPlayer().getInventory().remove(e.getItem()));
                     return;
                 }
                 Storage storage = storageManager.getStorage(src[1]);
-                if(!core.getManagers().getItemStorageConfigManager().getItemStorageConfigs().containsKey(src[0])){
+                if (!core.getManagers().getItemStorageConfigManager().getItemStorageConfigs().containsKey(src[0])) {
                     core.getManagers().getStorageManager().removeStorage(src[1]);
                     removeStorageFromItemStack(e.getItem());
                     removeStoragePlayerData(UUID.fromString(src[2]), src[1]);
-                    Bukkit.getScheduler().runTask(core,() -> e.getPlayer().getInventory().remove(e.getItem()));
+                    Bukkit.getScheduler().runTask(core, () -> e.getPlayer().getInventory().remove(e.getItem()));
                     return;
                 }
                 ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().getItemStorageConfigs().get(src[0]);
-                if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
-                if(e.getPlayer().isSneaking()) return;
+                if (!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
+                if (e.getPlayer().isSneaking()) return;
                 e.setCancelled(true);
-                Bukkit.getScheduler().runTask(core,() -> storage.openStorageR(e.getPlayer(),0));
+                Bukkit.getScheduler().runTask(core, () -> storage.openStorageR(e.getPlayer(), 0));
                 return;
             }
             ItemStorageConfig itemStorageConfig = core.getManagers().getItemStorageConfigManager().findItemStorageConfigByItemID(Adapter.getAdapterId(e.getItem()));
-            if(itemStorageConfig == null) return;
-            if(!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
-            if(e.getPlayer().isSneaking()) return;
-            Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID(),new StorageOriginContext(StorageOriginContext.Context.ITEM_STORAGE,new ArrayList<>(){{
+            if (itemStorageConfig == null) return;
+            if (!e.getAction().toString().contains(itemStorageConfig.getItemStorageClickType().toString())) return;
+            if (e.getPlayer().isSneaking()) return;
+            Storage storage = core.getManagers().getStorageManager().createStorage(itemStorageConfig.getStorageConfigID(), new StorageOriginContext(StorageOriginContext.Context.ITEM_STORAGE, new ArrayList<>() {{
                 add(itemStorageConfig.getId());
                 add(e.getPlayer().getUniqueId().toString());
             }}));
-            addStoragePlayerData(e.getPlayer().getUniqueId(),storage.getId(),itemStorageConfig.getId());
+            addStoragePlayerData(e.getPlayer().getUniqueId(), storage.getId(), itemStorageConfig.getId());
             ItemStack itemStack = e.getItem().clone();
             e.getItem().setAmount(e.getItem().getAmount() - 1);
             itemStack.setAmount(1);
-            setStorageFromItemStack(itemStack,storage.getId(),itemStorageConfig.getId(),e.getPlayer().getUniqueId());
+            setStorageFromItemStack(itemStack, storage.getId(), itemStorageConfig.getId(), e.getPlayer().getUniqueId());
             e.setCancelled(true);
-            Bukkit.getScheduler().runTask(core,() -> {
+            Bukkit.getScheduler().runTask(core, () -> {
                 StorageUtils.addItemToInventoryOrDrop(e.getPlayer(), itemStack);
                 storage.openStorageR(e.getPlayer(), 0);
             });
         }
 
     }
-    public void setStorageFromItemStack(ItemStack itemStack, String storageID, String itemStorageConfigID, UUID owner){
-        if(itemStack == null) return;
+
+    public void setStorageFromItemStack(ItemStack itemStack, String storageID, String itemStorageConfigID, UUID owner) {
+        if (itemStack == null) return;
         String src = itemStorageConfigID + ":" + storageID + ":" + owner;
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY,PersistentDataType.STRING,src);
+        itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, src);
         itemStack.setItemMeta(itemMeta);
     }
-    public void removeStorageFromItemStack(ItemStack itemStack){
-        if(itemStack == null) return;
+
+    public void removeStorageFromItemStack(ItemStack itemStack) {
+        if (itemStack == null) return;
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.getPersistentDataContainer().remove(NAMESPACED_KEY);
         itemStack.setItemMeta(itemMeta);
     }
-    public String getDataFromItemStack(ItemStack itemStack){
-        if(itemStack == null) return null;
+
+    public String getDataFromItemStack(ItemStack itemStack) {
+        if (itemStack == null) return null;
         return itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING) ? itemStack.getItemMeta().getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING) : null;
     }
-    public boolean isItemStorage(ItemStack itemStack){
-        if(itemStack == null) return false;
+
+    public boolean isItemStorage(ItemStack itemStack) {
+        if (itemStack == null) return false;
         return itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING);
     }
-    public void addStoragePlayerData(UUID uuid, String storageId, String itemConfigId){
+
+    public void addStoragePlayerData(UUID uuid, String storageId, String itemConfigId) {
         PlayerDataManager playerDataManager = core.getManagers().getDataManager().getPlayerDataManager();
-        if(playerDataManager.existPlayerData(uuid)){
+        if (playerDataManager.existPlayerData(uuid)) {
             PlayerData playerData = playerDataManager.getPlayerData(uuid);
-            playerData.getStorages().put(storageId,STORAGE_CONTEXT + "_" + itemConfigId + "_" + storageId);
+            playerData.getStorages().put(storageId, STORAGE_CONTEXT + "_" + itemConfigId + "_" + storageId);
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            if(offlinePlayer != null && !offlinePlayer.isOnline()){
+            if (offlinePlayer != null && !offlinePlayer.isOnline()) {
                 playerDataManager.savePlayerData(uuid);
             }
         }
     }
-    public void removeStoragePlayerData(UUID uuid, String storageID){
+
+    public void removeStoragePlayerData(UUID uuid, String storageID) {
         PlayerDataManager playerDataManager = core.getManagers().getDataManager().getPlayerDataManager();
-        if(playerDataManager.existPlayerData(uuid)){
+        if (playerDataManager.existPlayerData(uuid)) {
             PlayerData playerData = playerDataManager.getPlayerData(uuid);
             playerData.getStorages().remove(storageID);
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            if(offlinePlayer != null && !offlinePlayer.isOnline()){
+            if (offlinePlayer != null && !offlinePlayer.isOnline()) {
                 playerDataManager.savePlayerData(uuid);
             }
         }
     }
 
     @EventHandler
-    public void onItemRemove(ItemDespawnEvent event){
-        if(isItemStorage(event.getEntity().getItemStack())){
+    public void onItemRemove(ItemDespawnEvent event) {
+        if (isItemStorage(event.getEntity().getItemStack())) {
             String[] src = getDataFromItemStack(event.getEntity().getItemStack()).split(":");
             event.setCancelled(false);
             StorageManager storageManager = core.getManagers().getStorageManager();
 
-            if(storageManager.storageExists(src[1])){
+            if (storageManager.storageExists(src[1])) {
                 removeStoragePlayerData(UUID.fromString(src[2]), src[1]);
                 storageManager.removeStorage(src[1]);
             }
@@ -150,19 +156,20 @@ public class ItemStorageManager implements Listener {
     }
 
     @EventHandler
-    public void onItemRemove(EntityDamageEvent event){
-        if(event.getEntity() instanceof Item && isItemStorage(((Item) event.getEntity()).getItemStack())){
+    public void onItemRemove(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Item && isItemStorage(((Item) event.getEntity()).getItemStack())) {
             Item item = (Item) event.getEntity();
-            if(item.getItemStack() == null) return;
+            if (item.getItemStack() == null) return;
             String[] src = getDataFromItemStack(item.getItemStack()).split(":");
             String itemStorageConfigID = src[0];
             String storageId = src[1];
             ItemStorageConfigManager itemStorageConfigManager = core.getManagers().getItemStorageConfigManager();
             StorageManager storageManager = core.getManagers().getStorageManager();
-            if(!itemStorageConfigManager.existItemStorageConfig(itemStorageConfigID) || !storageManager.storageExists(storageId)) return;
+            if (!itemStorageConfigManager.existItemStorageConfig(itemStorageConfigID) || !storageManager.storageExists(storageId))
+                return;
             UUID owner = UUID.fromString(src[2]);
             removeStoragePlayerData(owner, storageId);
-            if(itemStorageConfigManager.getItemStorageConfig(itemStorageConfigID).getItemStoragePropertiesConfig().isDropAllItemsOnDeath()){
+            if (itemStorageConfigManager.getItemStorageConfig(itemStorageConfigID).getItemStoragePropertiesConfig().isDropAllItemsOnDeath()) {
                 Storage storage = storageManager.getStorage(storageId);
                 storage.dropAllItems(item.getLocation());
             }
@@ -172,12 +179,12 @@ public class ItemStorageManager implements Listener {
     }
 
     @EventHandler
-    public void onItemDrop(PlayerDropItemEvent event){
-        if(isItemStorage(event.getItemDrop().getItemStack())){
+    public void onItemDrop(PlayerDropItemEvent event) {
+        if (isItemStorage(event.getItemDrop().getItemStack())) {
             ItemStorageConfigManager itemStorageConfigManager = core.getManagers().getItemStorageConfigManager();
             ItemStorageConfig itemStorageConfig = itemStorageConfigManager.getItemStorageConfig(getDataFromItemStack(event.getItemDrop().getItemStack()).split(":")[0]);
-            if(itemStorageConfig == null) return;
-            if(!itemStorageConfig.getItemStoragePropertiesConfig().isDamageable()){
+            if (itemStorageConfig == null) return;
+            if (!itemStorageConfig.getItemStoragePropertiesConfig().isDamageable()) {
                 event.getItemDrop().setInvulnerable(true);
             }
         }

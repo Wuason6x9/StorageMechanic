@@ -1,12 +1,10 @@
 package dev.wuason.storagemechanic.storages.config;
 
 import dev.wuason.libs.adapter.Adapter;
-import dev.wuason.mechanics.Mechanics;
 import dev.wuason.mechanics.utils.AdventureUtils;
 import dev.wuason.mechanics.utils.Utils;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.utils.StorageUtils;
-import io.lumine.mythic.bukkit.utils.numbers.Numbers;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 

@@ -1,6 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.kotlin.dsl.support.zipTo
-
 plugins {
     id("java")
     id("io.github.goooler.shadow") version "8.1.7"

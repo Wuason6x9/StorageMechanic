@@ -2,7 +2,6 @@ package dev.wuason.storagemechanic.items;
 
 import dev.wuason.mechanics.items.ItemBuilder;
 import dev.wuason.storagemechanic.storages.Storage;
-import dev.wuason.storagemechanic.storages.StorageManager;
 import dev.wuason.storagemechanic.storages.config.StorageConfig;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.event.inventory.InventoryClickEvent;

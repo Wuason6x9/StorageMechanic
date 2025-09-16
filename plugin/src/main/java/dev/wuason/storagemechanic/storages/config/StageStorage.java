@@ -1,7 +1,5 @@
 package dev.wuason.storagemechanic.storages.config;
 
-import dev.wuason.storagemechanic.storages.config.StorageItemInterfaceConfig;
-
 import java.util.HashMap;
 
 public class StageStorage {

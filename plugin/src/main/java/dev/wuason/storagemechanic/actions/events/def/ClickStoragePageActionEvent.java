@@ -4,7 +4,6 @@ import dev.wuason.mechanics.actions.Action;
 import dev.wuason.mechanics.actions.events.EventAction;
 import dev.wuason.storagemechanic.storages.inventory.StorageInventory;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import java.util.Locale;
 

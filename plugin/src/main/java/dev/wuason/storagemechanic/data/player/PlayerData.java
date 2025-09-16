@@ -1,7 +1,10 @@
 package dev.wuason.storagemechanic.data.player;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 
 public class PlayerData implements Serializable {
@@ -12,11 +15,11 @@ public class PlayerData implements Serializable {
     }
 
     private UUID uuid;
-    private HashMap<String,String> storages = new HashMap<>(); //STORAGE ID & CONTEXT
+    private HashMap<String, String> storages = new HashMap<>(); //STORAGE ID & CONTEXT
     private Set<String> blockStorages = new HashSet<>();
     private Set<String> furnitureStorages = new HashSet<>();
 
-    public HashMap<String,String> getStorages() {
+    public HashMap<String, String> getStorages() {
         return storages;
     }
 

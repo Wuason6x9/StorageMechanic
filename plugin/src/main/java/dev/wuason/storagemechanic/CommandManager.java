@@ -103,7 +103,8 @@ public class CommandManager {
                                 .withArguments(new IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.strings(si -> {
 
                                     String storageApiId = (String) si.previousArgs().get(0);
-                                    if (!core.getManagers().getStorageApiManager().existStorageApi(storageApiId)) return new String[]{"0"};
+                                    if (!core.getManagers().getStorageApiManager().existStorageApi(storageApiId))
+                                        return new String[]{"0"};
 
                                     StorageApi storageApi = core.getManagers().getStorageApiManager().getStorageApi(storageApiId);
 
@@ -160,11 +161,12 @@ public class CommandManager {
                                         , new StringArgument("storageConfigId").replaceSuggestions(ArgumentSuggestions.strings(suggestionInfo -> {
                                             return core.getManagers().getStorageConfigManager().getStoragesConfigMap().keySet().toArray(new String[0]);
                                         })))
-                                .withArguments(new IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.strings( si -> {
+                                .withArguments(new IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.strings(si -> {
 
                                     String storageConfigId = (String) si.previousArgs().get(1);
 
-                                    if (!core.getManagers().getStorageConfigManager().existsStorageConfig(storageConfigId)) return new String[]{"0"};
+                                    if (!core.getManagers().getStorageConfigManager().existsStorageConfig(storageConfigId))
+                                        return new String[]{"0"};
 
                                     StorageConfig storageConfig = core.getManagers().getStorageConfigManager().getStorageConfigById(storageConfigId);
 

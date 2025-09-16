@@ -14,12 +14,12 @@ public class StorageTriggers {
         load();
     }
 
-    public void load(){
+    public void load() {
 
-        OPEN_STORAGE = SkillTrigger.create("OPENSTORAGE", new String[]{"OPENS", "OPEN_STORAGE","STORAGEOPEN", "STORAGE_OPEN"});
+        OPEN_STORAGE = SkillTrigger.create("OPENSTORAGE", new String[]{"OPENS", "OPEN_STORAGE", "STORAGEOPEN", "STORAGE_OPEN"});
         OPEN_STORAGE.register();
 
-        CLOSE_STORAGE = SkillTrigger.create("CLOSESTORAGE", new String[]{"CLOSES", "CLOSE_STORAGE","STORAGECLOSE", "STORAGE_CLOSE"});
+        CLOSE_STORAGE = SkillTrigger.create("CLOSESTORAGE", new String[]{"CLOSES", "CLOSE_STORAGE", "STORAGECLOSE", "STORAGE_CLOSE"});
         CLOSE_STORAGE.register();
 
         triggers.add(OPEN_STORAGE);

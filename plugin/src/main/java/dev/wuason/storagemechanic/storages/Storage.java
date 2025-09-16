@@ -19,7 +19,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -626,7 +625,7 @@ public class Storage {
         List<StorageItemDataInfo> itemsList = getItemsFromPage(page);
         World world = dropLocation.getWorld();
         for (StorageItemDataInfo item : itemsList) {
-            if(!item.exists()) continue;
+            if (!item.exists()) continue;
             item.removeWithRestrictions();
             if (PlaceholderItemInterface.isPlaceholderItem(item.getItemStack())) {
                 new ItemBuilder(item.getItemStack()).meta(meta -> {
@@ -639,7 +638,7 @@ public class Storage {
         }
     }
 
-    public StorageBlockItemConfig getStorageBlockItemConfig(int slot, int page){
+    public StorageBlockItemConfig getStorageBlockItemConfig(int slot, int page) {
         StorageConfig storageConfig = getStorageConfig();
         for (StorageBlockItemConfig storageBlockItemConfig : storageConfig.getStorageBlockedItemsConfig()) {
             if (!storageBlockItemConfig.getPagesToSlots().containsKey(page)) {
@@ -1145,22 +1144,19 @@ public class Storage {
             ItemStack[] contents = storageInventory.getInventory().getContents();
             for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null && !contents[i].getType().isAir()) {
-                    if(core.getManagers().getItemInterfaceManager().isItemInterface(contents[i]) && PlaceholderItemInterface.isPlaceholderItem(contents[i])){
+                    if (core.getManagers().getItemInterfaceManager().isItemInterface(contents[i]) && PlaceholderItemInterface.isPlaceholderItem(contents[i])) {
                         itemsList.add(new StorageItemDataInfo(PlaceholderItemInterface.getOriginalItemStack(contents[i]), page, i, this));
                         continue;
-                    }
-                    else if (!core.getManagers().getItemInterfaceManager().isItemInterface(contents[i])) {
+                    } else if (!core.getManagers().getItemInterfaceManager().isItemInterface(contents[i])) {
                         itemsList.add(new StorageItemDataInfo(contents[i], page, i, this));
                     }
                 }
             }
-        }
-
-        else if (items.containsKey(page)) {
+        } else if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
             for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null) {
-                    if(PlaceholderItemInterface.isPlaceholderItem(contents[i])){
+                    if (PlaceholderItemInterface.isPlaceholderItem(contents[i])) {
                         itemsList.add(new StorageItemDataInfo(PlaceholderItemInterface.getOriginalItemStack(contents[i]), page, i, this));
                         continue;
                     }
@@ -1202,9 +1198,7 @@ public class Storage {
                     }
                 }
             }
-        }
-
-        else if (items.containsKey(page)) {
+        } else if (items.containsKey(page)) {
             ItemStack[] contents = items.get(page);
             for (int i = 0; i < contents.length; i++) {
                 if (contents[i] != null) {

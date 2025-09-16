@@ -1,10 +1,5 @@
 package dev.wuason.storagemechanic.storages.types.furnitures.config;
 
-import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageClickType;
-import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageProperties;
-import dev.wuason.storagemechanic.storages.types.block.config.BlockStorageType;
-import dev.wuason.storagemechanic.storages.types.block.mechanics.BlockMechanic;
-
 public class FurnitureStorageConfig {
     private FurnitureStorageType furnitureStorageType;
     private String id;

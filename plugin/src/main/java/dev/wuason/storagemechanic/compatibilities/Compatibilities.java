@@ -12,49 +12,50 @@ public class Compatibilities {
     private static boolean craftEngineLoaded = false;
 
 
-    public static boolean isMythicMobsLoaded(){
-        if(!mythicMobsLoaded) mythicMobsLoaded = Bukkit.getPluginManager().getPlugin("MythicMobs") != null;
+    public static boolean isMythicMobsLoaded() {
+        if (!mythicMobsLoaded) mythicMobsLoaded = Bukkit.getPluginManager().getPlugin("MythicMobs") != null;
         return mythicMobsLoaded;
     }
 
-    public static boolean isItemsAdderLoaded(){
-        if(!itemsAdderLoaded) itemsAdderLoaded = Bukkit.getPluginManager().getPlugin("ItemsAdder") != null;
+    public static boolean isItemsAdderLoaded() {
+        if (!itemsAdderLoaded) itemsAdderLoaded = Bukkit.getPluginManager().getPlugin("ItemsAdder") != null;
         return itemsAdderLoaded;
     }
-    public static boolean isOraxenLoaded(){
-        if(!oraxenLoaded) oraxenLoaded = Bukkit.getPluginManager().getPlugin("Oraxen") != null;
+
+    public static boolean isOraxenLoaded() {
+        if (!oraxenLoaded) oraxenLoaded = Bukkit.getPluginManager().getPlugin("Oraxen") != null;
         return oraxenLoaded;
     }
-    public static boolean isMythicCrucibleLoaded(){
-        if(!mythicCrucibleLoaded) mythicCrucibleLoaded = Bukkit.getPluginManager().getPlugin("MythicCrucible") != null;
+
+    public static boolean isMythicCrucibleLoaded() {
+        if (!mythicCrucibleLoaded) mythicCrucibleLoaded = Bukkit.getPluginManager().getPlugin("MythicCrucible") != null;
         return mythicCrucibleLoaded;
     }
 
     public static boolean isNexoLoaded() {
-        if(!nexoLoaded) nexoLoaded = Bukkit.getPluginManager().getPlugin("Nexo") != null;
+        if (!nexoLoaded) nexoLoaded = Bukkit.getPluginManager().getPlugin("Nexo") != null;
         return nexoLoaded;
     }
 
     public static boolean isCraftEngineLoaded() {
-        if(!craftEngineLoaded) craftEngineLoaded = Bukkit.getPluginManager().getPlugin("CraftEngine") != null;
+        if (!craftEngineLoaded) craftEngineLoaded = Bukkit.getPluginManager().getPlugin("CraftEngine") != null;
         return craftEngineLoaded;
     }
 
 
-
-    public static Plugin getItemsAdder(){
+    public static Plugin getItemsAdder() {
         return Bukkit.getPluginManager().getPlugin("ItemsAdder");
     }
 
-    public static Plugin getOraxen(){
+    public static Plugin getOraxen() {
         return Bukkit.getPluginManager().getPlugin("Oraxen");
     }
 
-    public static Plugin getMythicCrucible(){
+    public static Plugin getMythicCrucible() {
         return Bukkit.getPluginManager().getPlugin("MythicCrucible");
     }
 
-    public static Plugin getMythicMobs(){
+    public static Plugin getMythicMobs() {
         return Bukkit.getPluginManager().getPlugin("MythicMobs");
     }
 

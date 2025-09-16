@@ -3,8 +3,6 @@ package dev.wuason.storagemechanic.storages.config;
 import dev.wuason.storagemechanic.StorageMechanic;
 import dev.wuason.storagemechanic.items.ItemInterface;
 
-import java.util.*;
-
 public class StorageItemInterfaceConfig {
     private String id;
     private String item;
@@ -19,9 +17,11 @@ public class StorageItemInterfaceConfig {
     public String getId() {
         return id;
     }
+
     public String getItem() {
         return item;
     }
+
     public ItemInterface getItemInterface() {
         return itemInterface;
     }

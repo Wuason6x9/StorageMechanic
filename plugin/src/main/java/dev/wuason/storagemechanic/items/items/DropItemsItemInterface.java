@@ -27,16 +27,16 @@ public class DropItemsItemInterface extends ItemInterface {
 
     public DropItemsItemInterface(String item, String displayName, List<String> lore, String id, @Nullable DropItemsType dropItemsType, @Nullable String inventoryConfigId) {
         super(item, displayName, lore, id, "DROP_ITEMS");
-        if(dropItemsType != null) this.dropItemsType = dropItemsType;
+        if (dropItemsType != null) this.dropItemsType = dropItemsType;
         else this.dropItemsType = null;
-        if(inventoryConfigId != null) this.inventoryConfigId = inventoryConfigId;
+        if (inventoryConfigId != null) this.inventoryConfigId = inventoryConfigId;
         else this.inventoryConfigId = "drop-items";
     }
 
     @Override
     public void onClick(Storage storage, StorageInventory storageInventory, InventoryClickEvent event, StorageConfig storageConfig) {
 
-        if(!core.getManagers().getInventoryConfigManager().existInventoryConfig(inventoryConfigId)){
+        if (!core.getManagers().getInventoryConfigManager().existInventoryConfig(inventoryConfigId)) {
 
             AdventureUtils.sendMessagePluginConsole(core, String.format("<red>InventoryConfig %s not found", inventoryConfigId));
 
@@ -45,8 +45,8 @@ public class DropItemsItemInterface extends ItemInterface {
 
         Player player = (Player) event.getWhoClicked();
 
-        if(dropItemsType != null){
-            if(dropItemsType.isPlayerCloseInventory()) player.closeInventory();
+        if (dropItemsType != null) {
+            if (dropItemsType.isPlayerCloseInventory()) player.closeInventory();
             dropItemsType.run(this, player, storageInventory);
             return;
         }
@@ -68,7 +68,7 @@ public class DropItemsItemInterface extends ItemInterface {
 
                 DropItemsType dropItemsType = DropItemsType.valueOf(itemConfig.getActionId());
 
-                inv.setItemInterfaceInv( inv.registerItemInterface(builder -> {
+                inv.setItemInterfaceInv(inv.registerItemInterface(builder -> {
 
                     builder.setItemStack(Adapter.getItemStack(itemConfig.getItemId()));
                     builder.addData(itemConfig);
@@ -81,8 +81,8 @@ public class DropItemsItemInterface extends ItemInterface {
                 }), itemConfig.getSlots());
 
 
+            } catch (Exception ignored) {
             }
-            catch (Exception ignored){}
 
         });
 
@@ -92,15 +92,12 @@ public class DropItemsItemInterface extends ItemInterface {
     }
 
 
-
-
-
-    public void byMaterial(Player player, StorageInventory storageInventory){
+    public void byMaterial(Player player, StorageInventory storageInventory) {
         NMSManager.getVersionWrapper().openSing(player, lines -> {
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            for(String line : lines){
+            for (String line : lines) {
                 stringBuilder.append(line);
             }
 
@@ -114,12 +111,12 @@ public class DropItemsItemInterface extends ItemInterface {
         });
     }
 
-    public void byItemAdapter(Player player, StorageInventory storageInventory){
+    public void byItemAdapter(Player player, StorageInventory storageInventory) {
         NMSManager.getVersionWrapper().openSing(player, lines -> {
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            for(String line : lines){
+            for (String line : lines) {
                 stringBuilder.append(line);
             }
 
@@ -133,12 +130,12 @@ public class DropItemsItemInterface extends ItemInterface {
         });
     }
 
-    public void byDisplayName(Player player, StorageInventory storageInventory){
+    public void byDisplayName(Player player, StorageInventory storageInventory) {
         NMSManager.getVersionWrapper().openSing(player, lines -> {
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            for(String line : lines){
+            for (String line : lines) {
                 stringBuilder.append(line);
             }
 
@@ -153,11 +150,11 @@ public class DropItemsItemInterface extends ItemInterface {
         });
     }
 
-    public void byActualPage(Player player, StorageInventory storageInventory){
+    public void byActualPage(Player player, StorageInventory storageInventory) {
         storageInventory.getStorage().dropItemsFromPage(player.getLocation(), storageInventory.getPage());
     }
 
-    public void allPages(Player player, StorageInventory storageInventory){
+    public void allPages(Player player, StorageInventory storageInventory) {
         storageInventory.getStorage().dropAllItems(player.getLocation());
     }
 

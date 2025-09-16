@@ -1,7 +1,6 @@
 package dev.wuason.storagemechanic.storages.config;
 
 import dev.wuason.libs.adapter.Adapter;
-import dev.wuason.mechanics.Mechanics;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -20,8 +19,8 @@ public class StorageItemConfig {
         this.chance = chance;
         this.pagesToSlots = new HashMap<>();
         HashSet<Integer> hashSet = new HashSet<>(slots);
-        for(Integer i : pages){
-            pagesToSlots.put(i,hashSet);
+        for (Integer i : pages) {
+            pagesToSlots.put(i, hashSet);
         }
     }
 

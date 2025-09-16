@@ -11,9 +11,9 @@ public class StorageMechanicAPI {
     private final StorageMechanic storageMechanic;
     private static final List<Plugin> PLUGINS_REGISTERED = new ArrayList<>();
 
-    public StorageMechanicAPI(Plugin plugin){
-        if(plugin != null){
-            if(PLUGINS_REGISTERED.contains(plugin)) throw new RuntimeException("Plugin already registered");
+    public StorageMechanicAPI(Plugin plugin) {
+        if (plugin != null) {
+            if (PLUGINS_REGISTERED.contains(plugin)) throw new RuntimeException("Plugin already registered");
             PLUGINS_REGISTERED.add(plugin);
         }
         this.storageMechanic = StorageMechanic.getInstance();

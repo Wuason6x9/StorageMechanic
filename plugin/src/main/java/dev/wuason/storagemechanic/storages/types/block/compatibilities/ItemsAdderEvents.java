@@ -20,14 +20,14 @@ public class ItemsAdderEvents implements Listener {
 
 
     @EventHandler
-    public void onPlaceIaBlock(CustomBlockPlaceEvent event){
+    public void onPlaceIaBlock(CustomBlockPlaceEvent event) {
 
-        blockStorageManager.onBlockPlace(event.getBlock(), event.getPlayer(),event.getItemInHand());
+        blockStorageManager.onBlockPlace(event.getBlock(), event.getPlayer(), event.getItemInHand());
 
     }
 
     @EventHandler
-    public void onBlockBreak(CustomBlockBreakEvent event){
+    public void onBlockBreak(CustomBlockBreakEvent event) {
         String adapterId = "ia:" + event.getNamespacedID();
         if (!blockStorageManager.isBlockStorageByBlock(event.getBlock())) {
             BlockStorageConfig blockStorageConfig = core.getManagers().getBlockStorageConfigManager().findBlockStorageConfigByItemID(adapterId);
