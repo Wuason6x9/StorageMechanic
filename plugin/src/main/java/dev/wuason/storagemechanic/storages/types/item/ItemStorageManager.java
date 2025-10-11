@@ -4,6 +4,7 @@ import dev.wuason.libs.adapter.Adapter;
 import dev.wuason.mechanics.utils.StorageUtils;
 import dev.wuason.storagemechanic.Debug;
 import dev.wuason.storagemechanic.StorageMechanic;
+import dev.wuason.storagemechanic.data.SaveCause;
 import dev.wuason.storagemechanic.data.player.PlayerData;
 import dev.wuason.storagemechanic.data.player.PlayerDataManager;
 import dev.wuason.storagemechanic.storages.Storage;
@@ -16,19 +17,24 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Item;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class ItemStorageManager implements Listener {
 
@@ -37,8 +43,17 @@ public class ItemStorageManager implements Listener {
 
     private StorageMechanic core;
 
+    public final static String CONFIG_KEY = "data.save_item_storages_on_leave";
+
     public ItemStorageManager(StorageMechanic core) {
         this.core = core;
+
+        Boolean saveOnLeave = core.getManagers().getConfigManager().getMainConfig().getBoolean(CONFIG_KEY, false);
+
+        if (saveOnLeave) {
+            Bukkit.getPluginManager().registerEvent(PlayerQuitEvent.class, this, EventPriority.HIGHEST, this::onPlayerLeave, core);
+        }
+
     }
 
     @EventHandler
@@ -113,7 +128,7 @@ public class ItemStorageManager implements Listener {
     }
 
     public boolean isItemStorage(ItemStack itemStack) {
-        if (itemStack == null) return false;
+        if (itemStack == null || !itemStack.hasItemMeta()) return false;
         return itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING);
     }
 
@@ -187,6 +202,19 @@ public class ItemStorageManager implements Listener {
             if (!itemStorageConfig.getItemStoragePropertiesConfig().isDamageable()) {
                 event.getItemDrop().setInvulnerable(true);
             }
+        }
+    }
+    public void onPlayerLeave(Listener listener, Event e) {
+        if (e instanceof PlayerQuitEvent event) {
+            Stream.of(event.getPlayer().getInventory().getContents())
+                    .filter(this::isItemStorage)
+                    .forEach(
+                            itemStack -> {
+                                String[] data = getDataFromItemStack(itemStack).split(":");
+                                Storage storage = core.getManagers().getStorageManager().getActiveStorage(data[1]);
+                                core.getManagers().getStorageManager().saveStorage(storage, SaveCause.NORMAL_SAVE);
+                            }
+                    );
         }
     }
 

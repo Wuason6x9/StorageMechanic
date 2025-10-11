@@ -162,6 +162,10 @@ public class StorageManager implements Listener {
         return null;
     }
 
+    public Storage getActiveStorage(String id) {
+        return storageMap.getOrDefault(id, null);
+    }
+
     /**
      * Removes the storage with the given ID from the waiting input data.
      *

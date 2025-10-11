@@ -15,7 +15,7 @@ public class PlayerData implements Serializable {
     }
 
     private UUID uuid;
-    private HashMap<String, String> storages = new HashMap<>(); //STORAGE ID & CONTEXT
+    private HashMap<String, String> storages = new HashMap<>();
     private Set<String> blockStorages = new HashSet<>();
     private Set<String> furnitureStorages = new HashSet<>();
 

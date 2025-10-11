@@ -53,10 +53,10 @@ public class PlayerDataManager implements Listener {
         if (players.containsKey(player.getUniqueId().toString())) {
             playerData = players.get(player.getUniqueId().toString());
         }
+
         if (playerData == null) {
             playerData = new PlayerData(player.getUniqueId());
         }
-
 
         Data data = null;
 
