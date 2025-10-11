@@ -23,6 +23,7 @@ allprojects {
         maven("https://repo.nexomc.com/releases/")
         maven("https://repo.momirealms.net/releases/")
         maven("https://maven.devs.beer/")
+        maven("https://repo.techmc.es/releases")
     }
 }
 
@@ -108,21 +109,21 @@ project(":plugin") {
         compileOnly("io.lumine:MythicCrucible-Dist:2.0.0-20240122.174338-17")
         compileOnly("io.th0rgal:oraxen:1.172.0")
         compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-        compileOnly("com.github.Wuason6x9:mechanics:1.0.3.8")
+        compileOnly("dev.wuason:mechanics:1.0.4.1")
         //compileOnly(fileTree("libs").include("*.jar"))
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
+            languageVersion.set(JavaLanguageVersion.of(21))
         }
     }
 
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
-        //options.release.set(17)
+        options.release.set(21)
     }
 
 }
