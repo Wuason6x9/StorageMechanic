@@ -29,9 +29,10 @@ public class StorageConfig {
     private final String whiteListMessage;
     private final String blackListMessage;
     private final int maxViewers;
+    private final String permission;
 
 
-    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, HashMap<Integer, HashMap<Integer, StorageItemInterfaceConfig>> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled, StorageProperties storageProperties, ArrayList<StageStorage> stagesOrder, long refreshTimeStages, HashMap<String, StageStorage> stagesHashMap, int maxViewers) {
+    public StorageConfig(String id, int rows, int pages, StorageInventoryTypeConfig inventoryType, String title, ArrayList<StorageSoundConfig> storageSounds, boolean storageSoundEnabled, ArrayList<StorageItemConfig> storageItemsDefaultConfig, boolean storageItemsDefaultEnabled, ArrayList<StorageItemConfig> storageItemsWhiteListConfig, boolean storageItemsWhiteListEnabled, ArrayList<StorageItemConfig> storageItemsBlackListConfig, boolean storageItemsBlackListEnabled, HashMap<Integer, HashMap<Integer, StorageItemInterfaceConfig>> storageItemsInterfaceConfig, boolean storageItemsInterfaceEnabled, String blackListMessage, String whiteListMessage, ArrayList<StorageBlockItemConfig> storageBlockedItemsConfig, boolean storageBlockItemEnabled, StorageProperties storageProperties, ArrayList<StageStorage> stagesOrder, long refreshTimeStages, HashMap<String, StageStorage> stagesHashMap, int maxViewers, String permission) {
         this.id = id;
         this.rows = rows;
         this.pages = pages;
@@ -56,6 +57,7 @@ public class StorageConfig {
         this.stagesHashMap = stagesHashMap;
         this.stagesOrder = stagesOrder;
         this.maxViewers = maxViewers;
+        this.permission = permission;
     }
 
     public String getId() {
@@ -152,5 +154,9 @@ public class StorageConfig {
 
     public int getMaxViewers() {
         return maxViewers;
+    }
+
+    public String getPermission() {
+         return this.permission;
     }
 }

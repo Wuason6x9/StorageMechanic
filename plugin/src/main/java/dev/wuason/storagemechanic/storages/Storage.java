@@ -148,6 +148,10 @@ public class Storage {
 
         StorageConfig storageConfig = getStorageConfig();
 
+        if (storageConfig.getPermission() != null && !player.hasPermission(storageConfig.getPermission())) {
+            return false;
+        }
+
         if (player.getOpenInventory() != null) {
             if (player.getOpenInventory().getTopInventory().getHolder() instanceof StorageInventory storageInventory) {
                 if (storageInventory.getStorage().equals(this) && storageInventory.getPage() == page) {
@@ -218,7 +222,7 @@ public class Storage {
 
         OpenStorageEvent openStorageEvent = new OpenStorageEvent(player, storageInventoryPage);
         Bukkit.getPluginManager().callEvent(openStorageEvent);
-
+        Debug.debugToPlayer("Opening storage page " + page, player);
         return true;
     }
 
@@ -231,7 +235,6 @@ public class Storage {
      */
     public boolean openStorageR(Player player, int page) {
         if (page < 0 || page >= getTotalPages()) return false;
-        Debug.debugToPlayer("Opening storage page " + page, player);
         return openStorage(player, page);
     }
 

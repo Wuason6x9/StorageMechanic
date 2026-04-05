@@ -246,8 +246,9 @@ public class StorageConfigManager {
                     }
 
                     int maxViewers = sectionStorage.getInt("config.max_views", -1);
+                    String permission = sectionStorage.getString("config.permission");
 
-                    StorageConfig storageConfig = new StorageConfig((String) key, rows, pages, storageInventoryType, title, storageSoundConfigs, soundsEnabled, storageDefaultItemsConfigs, defaultItemsEnabled, storageWhiteListItemsConfigs, whiteListItemsEnabled, storageBlackListItemsConfigs, blackListItemsEnabled, storageInterfacesConfigs, interfacesEnabled, blackListMessage, whiteListMessage, storageBlockItemConfigs, storageBlockedEnabled, storageProperties, stagesOrder, refreshTimeStages, stagesHashMap, maxViewers);
+                    StorageConfig storageConfig = new StorageConfig((String) key, rows, pages, storageInventoryType, title, storageSoundConfigs, soundsEnabled, storageDefaultItemsConfigs, defaultItemsEnabled, storageWhiteListItemsConfigs, whiteListItemsEnabled, storageBlackListItemsConfigs, blackListItemsEnabled, storageInterfacesConfigs, interfacesEnabled, blackListMessage, whiteListMessage, storageBlockItemConfigs, storageBlockedEnabled, storageProperties, stagesOrder, refreshTimeStages, stagesHashMap, maxViewers, permission);
                     storagesConfig.put(storageConfig.getId(), storageConfig);
                 }
             }
