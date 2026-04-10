@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
     group = "dev.wuason"
-    version = "1.0.6"
+    version = "1.0.7"
 
     repositories {
         mavenCentral()
@@ -45,7 +45,7 @@ subprojects {
 
 project(":oraxen-j21") {
     dependencies {
-        compileOnly("io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT")
+        compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
         compileOnly("io.th0rgal:oraxen:2.0-SNAPSHOT")
         compileOnly(project(":plugin"))
     }
@@ -65,7 +65,7 @@ project(":oraxen-j21") {
 
 project(":nexo-j21") {
     dependencies {
-        compileOnly("io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT")
+        compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
         compileOnly("com.nexomc:nexo:0.4.0:dev")
         compileOnly(project(":plugin"))
     }
@@ -85,7 +85,7 @@ project(":nexo-j21") {
 
 project(":ce-j21") {
     dependencies {
-        compileOnly("io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT") //Vanilla
+        compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT") //Vanilla
         compileOnly("net.momirealms:craft-engine-core:0.0.60")
         compileOnly("net.momirealms:craft-engine-bukkit:0.0.60")
         compileOnly(project(":plugin"))
@@ -108,7 +108,7 @@ project(":plugin") {
         compileOnly("io.lumine:Mythic-Dist:5.6.0-20240124.234541-47")
         compileOnly("io.lumine:MythicCrucible-Dist:2.0.0-20240122.174338-17")
         compileOnly("io.th0rgal:oraxen:1.172.0")
-        compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+        compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
         compileOnly("dev.wuason:mechanics:1.0.4.1")
         //compileOnly(fileTree("libs").include("*.jar"))
     }

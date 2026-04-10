@@ -43,7 +43,7 @@ public class SmCollectMythicMechanic implements ITargetedEntitySkill {
         }
         if (id == "") return SkillResult.SUCCESS;
         Entity entity = abstractEntity.getBukkitEntity();
-        if (!entity.getType().equals(EntityType.DROPPED_ITEM)) return SkillResult.SUCCESS;
+        if (!entity.getType().equals(EntityType.ITEM)) return SkillResult.SUCCESS;
 
         StorageManager storageManager = core.getManagers().getStorageManager();
 
